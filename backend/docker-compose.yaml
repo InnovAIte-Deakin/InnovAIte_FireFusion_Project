@@ -1,35 +1,61 @@
 services:
-
   firefusion-api:
     image: firefusion/firefusion-api
     build: ./firefusion-api/.
     ports: 
       - 80:80
-
+    depends_on:
+      firefusion-db:
+        condition: service_healthy 
+    environment:
+      FIREFUSION_DB: postgresql://postgres:postgres@firefusion-db:5432/postgres
   model-api:
     image: firefusion/model-api
     build: ./model-api/.
     ports: 
       - 81:80
-
+    depends_on:
+      firefusion-db:
+        condition: service_healthy 
+    environment:
+      FIREFUSION_DB: postgresql://postgres:postgres@firefusion-db:5432/postgres
+      MODEL_API: http://aggregator-api:80
   aggregator-api:
     image: firefusion/aggregator-api
     build: ./aggregator-api/.
     ports: 
       - 82:80
     depends_on:
-      - aggregator-db
+      aggregator-db:
+        condition: service_healthy 
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@aggregator-db:5432/firefusion_data_engineering
-
+      AGGREGATOR_DB: postgresql://postgres:postgres@aggregator-db:5432/postgres
+  firefusion-db:
+    image: postgres:18
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
   aggregator-db:
     image: postgres:18
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     environment:
-      POSTGRES_DB: firefusion_data_engineering
+      POSTGRES_DB: postgres
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
       - ./utilities/aggregator-init.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
