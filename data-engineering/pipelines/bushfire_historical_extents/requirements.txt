@@ -1,2 +1,5 @@
 geopandas
 fiona
+pandas
+numpy
+scipy
