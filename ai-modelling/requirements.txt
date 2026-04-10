@@ -1,0 +1,13 @@
+# Geospatial Engine
+earthengine-api>=1.0.0
+
+# Data Manipulation & Math
+pandas>=2.2.0
+numpy>=1.26.0
+
+# Visualization & Notebooks
+matplotlib>=3.8.0
+ipython>=8.20.0
+
+# Machine Learning Support
+scikit-learn>=1.4.0
