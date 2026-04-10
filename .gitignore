@@ -2,20 +2,46 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+dist/
+build/
+*.egg
 
-# Jupyter
+# Jupyter & IPython
 .ipynb_checkpoints/
 *.ipynb
+.ipython_history
+*.pyc
 
 # Virtual environments
 firefusion_env/
 venv/
+.venv
+env/
 .env
+*.pth
 
-# OS metadata
-.DS_Store
+# IDEs
+.vscode/
+.idea/
 *.swp
+*.swo
+*~
+.DS_Store
 
 # Data files (large)
 *.geojson
-*.csv
+*.gz
+*.zip
+
+# Outputs & cache
+
+*.pdf
+__pycache__/
+.cache/
+
+# Temporary files
+*.tmp
+.temp/
+temp/
+
