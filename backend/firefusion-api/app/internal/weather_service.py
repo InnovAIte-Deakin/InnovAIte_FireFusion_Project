@@ -1,7 +1,7 @@
 import os
 import httpx
 
-API_KEY = os.getenv("OPENMETEO_API_KEY")  # optional (Open-Meteo doesn't require one)
+API_KEY = os.getenv("OPENMETEO_API_KEY")
 
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
@@ -11,7 +11,7 @@ async def get_weather(location: str):
     Fetch weather data from Open-Meteo API
     """
 
-    # Simple location mapping (you can expand this later)
+ 
     locations = {
         "melbourne": (-37.8136, 144.9631),
         "geelong": (-38.1499, 144.3617),
