@@ -1,0 +1,16 @@
+{
+    "total_rows": 485510,
+    "duplicate_rows": 0,
+    "null_counts": {
+        "latitude": 0,
+        "longitude": 0,
+        "surface_soil_moisture": 0,
+        "rootzone_soil_moisture": 0,
+        "source_file": 0,
+        "timestamp": 0
+    },
+    "surface_soil_moisture_out_of_range": 0,
+    "rootzone_soil_moisture_out_of_range": 0,
+    "latitude_out_of_bounds": 0,
+    "longitude_out_of_bounds": 0
+}
