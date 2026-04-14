@@ -1,8 +1,8 @@
 from sklearn.linear_model import LinearRegression
 import numpy as np
 import joblib
+from pathlib import Path
 
-# dummy training data
 X = np.array([
     [1, 2, 3],
     [2, 3, 4],
@@ -12,11 +12,12 @@ X = np.array([
 
 y = np.array([10, 20, 30, 40])
 
-# train model
 model = LinearRegression()
 model.fit(X, y)
 
-# save model
-joblib.dump(model, "./app/internal/model/model.pkl")
+model_path = Path(__file__).resolve().parent / "models" / "model.pkl"
+model_path.parent.mkdir(parents=True, exist_ok=True)
 
-print("Model saved as model.pkl")
+joblib.dump(model, model_path)
+
+print(f"Model saved at: {model_path}")
