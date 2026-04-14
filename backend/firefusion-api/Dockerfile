@@ -1,12 +1,20 @@
-FROM python:3.14
+# Use official Python image
+FROM python:3.11-slim
 
-WORKDIR /code
+# Set working directory
+WORKDIR /app
 
-# this contains all the dependencies required for the application
-COPY ./requirements.txt /code/requirements.txt
+# Copy requirements
+COPY requirements.txt .
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./app /code/app
+# Copy the app code
+COPY ./app ./app
 
-CMD ["fastapi", "run", "app/main.py", "--port", "80"]
+# Expose port
+EXPOSE 8000
+
+# Start FastAPI with uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
