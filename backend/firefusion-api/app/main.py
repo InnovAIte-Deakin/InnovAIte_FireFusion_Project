@@ -1,6 +1,14 @@
 from fastapi import FastAPI
-from app.routers import hello
+import logging
+from app.routes.api import router   
 
-app = FastAPI()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("dashboard")
 
-app.include_router(hello.router)
+app = FastAPI(
+    title="FireFusion API",
+    description="Central API Gateway for bushfire prediction system",
+    version="1.0"
+)
+
+app.include_router(router)   
