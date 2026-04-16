@@ -1,4 +1,4 @@
-**Literature Review -- LSTM (RNN) Model**
+**Literature Review – LSTM (RNN) Model**
 
 **Introduction**
 
@@ -21,7 +21,7 @@ long-term dependencies in data. LSTM networks extend traditional RNNs by
 introducing memory cells and gating mechanisms, which regulate
 information flow:
 
-- Forget Gate --\> removes irrelevant past information
+- Forget Gate –\> removes irrelevant past information
 
 - Input Gate -\> updates memory with new information
 
@@ -31,6 +31,49 @@ This architecture allows LSTM to overcome the vanishing gradient
 problem, enabling learning over long sequences. Research shows that LSTM
 is highly effective in capturing nonlinear and non-stationary temporal
 patterns, which are common in environmental datasets. (Springer, 2025)
+
+**LSTM Model Architecture**
+
+Below is a simplified architecture flow for the proposed LSTM model in
+FireFusion:
+
+Input Layer (Multivariate Time-Series Data)
+
+↓
+
+Data Preprocessing
+
+(Normalisation, Feature Engineering, Windowing)
+
+↓
+
+LSTM Layer(s)
+
+(Hidden Units capturing temporal dependencies)
+
+↓
+
+Dropout Layer (Regularisation)
+
+↓
+
+Dense Layer (Fully Connected)
+
+↓
+
+Output Layer
+
+(Fire Risk Prediction / Forecast Value)
+
+Input Tensor Example:
+
+- Shape: (batch_size, time_steps, features)
+
+- Features: temperature, humidity, wind speed, fire history
+
+This diagram helps visualise how temporal data flows through the network
+and supports your **data fusion strategy (multiple features over
+time)**.
 
 **Performance of LSTM in Time-Series Forecasting**
 
@@ -85,9 +128,54 @@ LSTM has been widely applied in environmental modelling:
 - LSTM has been used to reconstruct long-term fire risk trajectories
   using climate and satellite data (ScienceDirect, 2025)
 
-These applications highlight LSTM's suitability for the FireFusion
+These applications highlight LSTM’s suitability for the FireFusion
 project, where both temporal dynamics and multiple data sources are
 involved.
+
+**Comparative Analysis: LSTM vs Baseline Models**
+
+| **Model** | **Strengths** | **Weaknesses** | **Why LSTM is Better** |
+|----|----|----|----|
+| **ARIMA** | Simple, interpretable | Cannot handle nonlinear/multivariate data | LSTM captures nonlinear temporal patterns |
+| **Linear Regression** | Fast, simple | Poor performance on sequential data | LSTM models time dependencies |
+| **Random Forest** | Good for tabular data | No temporal memory | LSTM retains sequence information |
+| **LSTM** | Handles sequence + nonlinear data | Computationally expensive | Best suited for time-series forecasting |
+| **Transformer** | Strong long-range modelling | High complexity, data heavy | LSTM more practical for MVP |
+
+LSTM outperforms baselines because it retains memory across time steps,
+which is essential for bushfire prediction.
+
+**Pros and Cons Summary Table (LSTM)**
+
+| **Aspect** | **Advantages** | **Limitations** |
+|----|----|----|
+| **Training Stability** | Handles long-term dependencies well | Sensitive to hyperparameters |
+| **Accuracy** | High accuracy for time-series data | Requires high-quality data |
+| **Computation** | Efficient for moderate datasets | High training cost |
+| **Inference Latency** | Moderate | Slower than simple models |
+| **Scalability** | Works with multivariate data | Needs optimisation for large-scale deployment |
+| **Interpretability** | Learns complex patterns | Black-box nature |
+
+**Relevant GitHub Implementations**
+
+These repositories provide practical implementations of LSTM and
+variants:
+
+- <https://github.com/jaungiers/LSTM-Neural-Network-for-Time-Series-Prediction>
+
+- <https://github.com/yasasmahima/Inferno-Forest_Fire_Prediction>
+
+- <https://github.com/NourozR/Stock-Price-Prediction-LSTM>
+
+- <https://github.com/TeaPearce/precipitation-prediction-convLSTM-keras>
+
+These can help:
+
+- Understand implementation structure
+
+- Reuse components for FireFusion
+
+- Accelerate Sprint 2 development
 
 **Advances and Hybrid Models**
 
@@ -103,6 +191,47 @@ Recent literature shows a shift toward hybrid and enhanced LSTM models:
 
 Hybrid models significantly improve performance by combining
 statistical, signal processing, and deep learning techniques
+
+**Advanced Variants: ConvLSTM (Spatial + Temporal Learning)**
+
+ConvLSTM extends LSTM by replacing matrix multiplication with
+**convolution operations**, making it suitable for **spatial-temporal
+data**.
+
+Why ConvLSTM is Important for FireFusion
+
+- Bushfires spread **geographically across regions (grid-based)**
+
+- Weather + satellite data have **spatial structure**
+
+- ConvLSTM captures:
+
+  - Temporal patterns (time-series)
+
+  - Spatial relationships (neighbouring regions)
+
+Architecture Insight
+
+Input: (time_steps, height, width, channels)
+
+↓
+
+ConvLSTM Layer
+
+↓
+
+Feature Maps (Spatial + Temporal)
+
+↓
+
+Dense Layer
+
+↓
+
+Prediction (Fire Spread / Risk)
+
+This is highly relevant for modelling fire spread direction and
+intensity across regions.
 
 **Limitations of LSTM Models**
 
@@ -153,6 +282,78 @@ Despite strong performance, LSTM has several limitations:
 
 - Performance depends heavily on tuning (learning rate, sequence length,
   hidden units) (Springer, 2025)
+
+**Case Study – LSTM for Forest Fire Prediction**
+
+A relevant study, “Forest Fire Prediction using LSTM” (Natekar, Patil,
+Nair, & Roychowdhury, 2021), demonstrates the practical application of
+LSTM models in wildfire prediction systems.
+
+Methodology
+
+The study uses:
+
+- Meteorological data (temperature, humidity, wind speed)
+
+- Historical fire occurrence data
+
+These inputs are processed as time-series sequences, allowing the LSTM
+model to learn temporal patterns and relationships between environmental
+variables.
+
+The model architecture follows a standard pipeline:
+
+- Input: Multivariate time-series data
+
+- Processing: LSTM layers capturing temporal dependencies
+
+- Output: Fire occurrence prediction (classification or risk level)
+
+Key Findings
+
+- LSTM achieved higher prediction accuracy compared to traditional
+  machine learning models due to its ability to retain temporal memory.
+
+- The model effectively captured relationships between weather variables
+  and fire occurrence, improving forecasting reliability.
+
+- Performance improved when multiple environmental features were
+  combined, highlighting the importance of multivariate data.
+
+Technical Insight
+
+The study reinforces that:
+
+- Forest fire prediction is inherently a time-series problem influenced
+  by multiple interacting variables.
+
+- LSTM models are well-suited because they can capture long-term
+  dependencies and nonlinear relationships.
+
+- Feature selection (e.g., wind + temperature interaction) plays a
+  critical role in improving model performance.
+
+Limitations Identified in the Study
+
+- Model performance depends heavily on data quality and availability
+
+- Requires careful tuning of hyperparameters
+
+- Limited interpretability for decision-making contexts
+
+Relevance to FireFusion
+
+This case study directly supports the design choices for FireFusion:
+
+- Confirms that LSTM is suitable as a baseline model for bushfire
+  forecasting
+
+- Validates the use of weather + historical fire data as key inputs
+
+- Supports the need for multivariate time-series modelling
+
+- Reinforces the importance of integrating predictions into a
+  decision-support system
 
 **Key Findings from Literature**
 
@@ -225,9 +426,14 @@ rather than a standalone solution.
 **Conclusion**
 
 The literature confirms that LSTM is a highly effective model for
-**time-series forecasting**, particularly in complex, nonlinear
-environments such as bushfire prediction. Its ability to capture
-long-term dependencies makes it well-suited for the FireFusion project.
+time-series forecasting, particularly in complex, nonlinear environments
+such as bushfire prediction. Its ability to capture long-term
+dependencies makes it well-suited for the FireFusion project. Based on
+the literature and comparative analysis, LSTM is selected as the
+baseline model for FireFusion due to its ability to capture temporal
+dependencies in multivariate data. However, for improved
+spatial-temporal modelling of bushfire spread, ConvLSTM is identified as
+a strong candidate for future iterations
 
 However, limitations such as computational cost, data requirements, and
 lack of interpretability highlight the importance of careful
@@ -241,6 +447,10 @@ implementation and potential integration with other models.
 
 *MDPI.* (2024). Retrieved from MDPI:
 https://www.mdpi.com/2072-4292/16/8/1467
+
+Natekar, S., Patil, S., Nair, A., & Roychowdhury, S. (2021). *IEEE.*
+Retrieved from IEEE Explore:
+https://ieeexplore.ieee.org/document/9456113
 
 Noble, J. (n.d.). *IBM.* Retrieved from IBM:
 https://www.ibm.com/think/topics/lstm
