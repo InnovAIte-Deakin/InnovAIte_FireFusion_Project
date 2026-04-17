@@ -1,6 +1,6 @@
 # Terrain Slope Pipeline
 
-Implements a topography data pipeline for the FireFusion project using SRTM elevation data.
+Implemented a topography data pipeline for the FireFusion project using SRTM elevation data.
 
 ---
 
