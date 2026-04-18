@@ -1,7 +1,62 @@
+# -------------------------------
+# Python
+# -------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
 venv/
+env/
+.venv/
+
+# -------------------------------
+# Jupyter Notebook
+# -------------------------------
+.ipynb_checkpoints/
+
+# -------------------------------
+# Environment variables (IMPORTANT)
+# -------------------------------
 .env
-data/raw/*
-data/processed/*
+
+# -------------------------------
+# Data files (VERY IMPORTANT)
+# -------------------------------
+data/raw/
+data/processed/
+
+# If needed, allow placeholder files
 !data/raw/.gitkeep
 !data/processed/.gitkeep
-.ipynb_checkpoints/
+
+# -------------------------------
+# Logs
+# -------------------------------
+*.log
+
+# -------------------------------
+# OS files
+# -------------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------------
+# IDE / Editor
+# -------------------------------
+.vscode/
+.idea/
+
+# -------------------------------
+# Build / cache
+# -------------------------------
+build/
+dist/
+*.egg-info/
+
+# -------------------------------
+# Temporary files
+# -------------------------------
+*.tmp
+*.swp
