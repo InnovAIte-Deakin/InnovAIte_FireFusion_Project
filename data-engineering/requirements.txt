@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+
+import rospy
+from geometry_msgs.msg import Twist
+from std_msgs.msg import Float64
+from turtlesim.msg import Pose
+import math
+
+class TurtlesimStraightsAndTurns:
+
+    def __init__(self):
+
+        # -------- State Variables --------
+        self.last_distance = 0
+        self.goal_distance = 0
+        self.dist_goal_active = False
+        self.forward_movement = True
+
+        self.goal_angle = 0
+        self.angle_goal_active = False
+
+        self.pose = Pose()
+
+        # -------- Initialize Node --------
+        rospy.init_node('turtlesim_straights_and_turns_node', anonymous=True)
+
+        # -------- Subscribers --------
+        rospy.Subscriber("/goal_angle", Float64, self.goal_angle_callback)
+        rospy.Subscriber("/goal_distance", Float64, self.goal_distance_callback)
+        rospy.Subscriber("/turtle1/pose", Pose, self.pose_callback)
+
+        # -------- Publisher --------
+        self.velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+
+        # -------- Timer (main loop) --------
+        rospy.Timer(rospy.Duration(0.01), self.timer_callback)
+
+        rospy.loginfo("Node initialized successfully!")
+        rospy.spin()
+
+    # -------- Callbacks --------
+
+    def pose_callback(self, msg):
+        self.pose = msg
+
+    def goal_angle_callback(self, msg):
+        self.goal_angle = msg.data
+        self.angle_goal_active = True
+
+    def goal_distance_callback(self, msg):
+        self.goal_distance = abs(msg.data)
+        self.forward_movement = msg.data > 0
+        self.dist_goal_active = True
+
+        # Reset distance tracking (important fix)
+        self.start_pose = self.pose
+
+    # -------- Control Loop --------
+
+    def timer_callback(self, event):
+
+        cmd = Twist()
+
+        # -------- DISTANCE CONTROL --------
+        if self.dist_goal_active:
+
+            dx = self.pose.x - self.start_pose.x
+            dy = self.pose.y - self.start_pose.y
+            self.last_distance = math.sqrt(dx**2 + dy**2)
+
+            if self.last_distance >= self.goal_distance:
+                self.dist_goal_active = False
+                cmd.linear.x = 0
+            else:
+                cmd.linear.x = 1.5 if self.forward_movement else -1.5
+
+        # -------- ANGLE CONTROL --------
+        elif self.angle_goal_active:
+
+            angle_diff = self.normalize_angle(self.goal_angle - self.pose.theta)
+
+            if abs(angle_diff) < 0.05:
+                self.angle_goal_active = False
+                cmd.angular.z = 0
+            else:
+                cmd.angular.z = 1.5 if angle_diff > 0 else -1.5
+
+        # -------- STOP IF NOTHING ACTIVE --------
+        else:
+            cmd.linear.x = 0
+            cmd.angular.z = 0
+
+        self.velocity_publisher.publish(cmd)
+
+    # -------- Helper --------
+
+    def normalize_angle(self, angle):
+        return math.atan2(math.sin(angle), math.cos(angle))
+
+
+if __name__ == '__main__':
+    try:
+        TurtlesimStraightsAndTurns()
+    except rospy.ROSInterruptException:
+        pass
