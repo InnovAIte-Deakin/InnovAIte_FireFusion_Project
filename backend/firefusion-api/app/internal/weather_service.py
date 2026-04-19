@@ -6,16 +6,12 @@ API_KEY = os.getenv("OPENMETEO_API_KEY")
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
 
-async def get_weather(location: str):
-    """
-    Fetch weather data from Open-Meteo API
-    """
+async def get_weather(latitude: float, longitude: float):
 
- 
-    locations = {
-        "melbourne": (-37.8136, 144.9631),
-        "geelong": (-38.1499, 144.3617),
-        "ballarat": (-37.5622, 143.8503),
+    params = {
+        "latitude": latitude,
+        "longitude": longitude,
+        "current_weather": True,
     }
 
     location = location.lower()
