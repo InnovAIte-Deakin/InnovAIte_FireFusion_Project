@@ -1,0 +1,30 @@
+=== FIRE EVENTS VALIDATION REPORT ===
+
+Missing values:
+weather_id          3276022
+topo_id             3276022
+fuel_id             3276022
+facility_id         3276022
+latitude                  0
+longitude                 0
+event_date                0
+confidence_score          0
+source_system             0
+dtype: int64
+
+Duplicate rows: 2
+
+Data types:
+weather_id          float64
+topo_id             float64
+fuel_id             float64
+facility_id         float64
+latitude            float64
+longitude           float64
+event_date              str
+confidence_score      int64
+source_system           str
+dtype: object
+
+Invalid latitude rows: 0
+Invalid longitude rows: 0
