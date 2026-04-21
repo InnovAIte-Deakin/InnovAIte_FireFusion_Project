@@ -88,3 +88,63 @@ An effective dataset configuration should include:
 - Latitude  
 - Longitude  
 - Time  
+
+## 6. Dataset Selection and Comparison for Land Surface Temperature (LST)
+
+## 1. Selected Dataset
+
+**Dataset Name:** MODIS Land Surface Temperature (Daily)  
+**Product ID:** MOD11A1  
+**Source:** NASA EarthData / Google Earth Engine  
+**URL:** https://developers.google.com/earth-engine/datasets/catalog/MODIS_061_MOD11A1  
+
+### Selected Variables (Raw Names)
+
+- LST_Day_1km – Daytime land surface temperature  
+- LST_Night_1km – Nighttime land surface temperature  
+- QC_Day – Quality control flag for daytime values  
+- QC_Night – Quality control flag for nighttime values  
+
+### Derived Variables (for modelling)
+
+- LST_C – Temperature converted to Celsius  
+- LST_lag_1 – Previous day temperature (lag feature)  
+- LST_change – Day-to-day temperature difference  
+
+---
+
+## 2. Comparison of MODIS LST Datasets
+
+| Dataset | Temporal Resolution | Spatial Resolution | Key Strengths | Limitations | Suitability for Fire Prediction |
+|--------|-------------------|-------------------|--------------|------------|-------------------------------|
+| MOD11A1 (Terra Daily) | Daily | 1 km | Captures day-to-day variation, supports time-series modelling | More noise | Highly suitable |
+| MOD11A2 (Terra 8-day) | 8-day average | 1 km | Reduced noise, fewer missing values | Loses daily variation, smooths spikes | Less suitable |
+| MYD11A1 (Aqua Daily) | Daily | 1 km | Additional observation improves coverage | Similar noise/cloud issues | Suitable (complementary data) |
+| MOD21A1D (Enhanced LST) | Daily | 1 km | Improved physical accuracy | Less widely used, limited compatibility | Potential but less practical |
+
+---
+
+## 3. Rationale for Dataset Selection
+
+The MOD11A1 dataset was selected as the primary LST source based on the following:
+
+- Daily temporal resolution allows capturing short-term temperature changes linked to fire ignition  
+- Supports time-series modelling approaches such as LSTM  
+- Enables feature engineering (lag values, temperature change, trends)  
+- Widely used in existing wildfire prediction research, ensuring consistency and comparability  
+
+In contrast, MOD11A2 (8-day composite) was not selected because:
+
+- It averages values over time, reducing sensitivity to sudden temperature increases  
+- It limits the ability to generate meaningful temporal features  
+- It is less effective for modelling dynamic environmental processes such as wildfire ignition  
+
+---
+
+## 4. Key Takeaways
+
+- MOD11A1 is the most suitable dataset due to its daily resolution and ability to capture short-term temperature dynamics  
+- MOD11A2 is less appropriate as it smooths critical variations needed for fire prediction  
+- Combining MOD11A1 with MYD11A1 can improve data availability and robustness  
+- LST should be treated as part of a multi-source feature set, not an independent predictor  
+- Proper spatial and temporal alignment is essential for integrating datasets into the modelling pipeline  
