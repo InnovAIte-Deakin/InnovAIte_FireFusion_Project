@@ -1,5 +1,18 @@
 # FireFusion Backend
 
+## How to use:
+
+1. Ensure [Docker](https://www.docker.com/) is installed and running.
+2. Run `docker compose --profile default -d` from with in `firefusion/backend/.`
+
+API calls should be made to `localhost:80/api`. Information on endpoints can be found in `/firefusion-api/README.md`.
+
+The postgres database can be accesed via `localhost:5432`. 
+
+To signal updates to the system ensure the command run: 
+`docker compose exec relational-db psql -U postgres "NOTIFY fire_events_channel, 'hello';"`
+This will signal the system to retrieve data from the database, send to the predictive AI model and then take the model output and send to frontend clients.
+
 ## Overview
 
 The FireFusion backend is designed as a microservice-based backend layer supporting the wider FireFusion platform. It currently contains three API services and supporting infrastructure for caching, messaging, and relational data storage.
