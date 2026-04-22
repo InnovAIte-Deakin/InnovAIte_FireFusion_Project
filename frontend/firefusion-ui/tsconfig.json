@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "jsx": "react-jsx",
     "target": "ES2023",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -24,3 +25,4 @@
   },
   "include": ["src"]
 }
+

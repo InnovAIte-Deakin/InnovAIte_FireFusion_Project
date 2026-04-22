@@ -17,19 +17,23 @@ html, body {
 
 .map-main {
   flex: 1;
-  position: relative;
-  height: 100vh;
-  overflow: hidden;
+  display: flex;
+  align-items: center;     /*put the map in the centre vertically*/
+  justify-content: center; /*put the map in the centre horizontally*/
   background: #e6e6e6;
 }
 
 .map-container {
-  position: absolute;
-  inset: 0;
+  width: 80%;  /*adjust this and height to resize the map borders*/
+  height: 80%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  position: relative;
 }
 
 #map {
-  width: 100%;
+  width: 100%; /*don't adjust this one to size the map container*/
   height: 100%;
 }
 
