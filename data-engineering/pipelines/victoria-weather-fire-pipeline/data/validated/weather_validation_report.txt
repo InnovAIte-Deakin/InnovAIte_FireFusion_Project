@@ -1,0 +1,25 @@
+=== WEATHER VALIDATION REPORT ===
+
+Missing values:
+latitude             0
+longitude            0
+record_date          0
+temperature_c        0
+wind_speed_kmh       0
+relative_humidity    0
+dtype: int64
+
+Duplicate rows: 0
+
+Data types:
+latitude             float64
+longitude            float64
+record_date              str
+temperature_c        float64
+wind_speed_kmh       float64
+relative_humidity    float64
+dtype: object
+
+Invalid humidity rows: 0
+Invalid wind rows: 0
+Unrealistic temperature rows: 0
