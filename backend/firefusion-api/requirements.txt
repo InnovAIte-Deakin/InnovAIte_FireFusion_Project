@@ -1,4 +1,7 @@
-fastapi[standard]
+fastapi
+uvicorn[standard]
+requests
+python-jose
 websockets
 aio_pika
 python-dotenv
