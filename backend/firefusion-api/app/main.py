@@ -1,6 +1,9 @@
 from fastapi import FastAPI
-from app.routers import hello
+from app.routes.api import router
 
-app = FastAPI()
+app = FastAPI(
+    title="FireFusion API",
+    version="1.0"
+)
 
-app.include_router(hello.router)
+app.include_router(router)
