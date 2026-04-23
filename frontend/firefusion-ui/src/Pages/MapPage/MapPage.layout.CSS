@@ -17,6 +17,7 @@ html, body {
 
 .map-main {
   flex: 1;
+  height: 100vh;
   display: flex;
   align-items: center;     /*put the map in the centre vertically*/
   justify-content: center; /*put the map in the centre horizontally*/

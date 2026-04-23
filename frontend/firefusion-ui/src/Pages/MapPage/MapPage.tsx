@@ -11,7 +11,7 @@ export default function MapPage() {
     //Create map
     const map = L.map('map', {
       zoomControl: false,
-    }).setView([-37.8136, 144.9631], 13) //coordinates set to Melb, can be changed later
+    }) 
 
     //Create tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -33,32 +33,45 @@ export default function MapPage() {
       }
     }
 
+    //help to render GeoJSON
+    const renderGeoJSON = (data: any) => {
+      if (geoJsonLayer) {
+        geoJsonLayer.remove()
+      }
+
+      geoJsonLayer = L.geoJSON(data, {
+        style: (feature: any) => ({
+          color: getColor(feature.properties?.risk_factor),
+          fillColor: getColor(feature.properties?.risk_factor),
+          fillOpacity: 0.4,
+          weight: 2,
+        }),
+        onEachFeature: (feature, layer) => {
+          if (feature.properties) {
+            const popupContent = `<b>Risk Level:</b> ${feature.properties.risk_factor}`
+            layer.bindPopup(popupContent)
+          }
+        },
+      }).addTo(map)
+
+      //centre map to wherever polygons are
+      const bounds = geoJsonLayer.getBounds()
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, {
+          padding: [20, 20],
+        })
+      }
+    }
+
     //Load initial data
     const loadGeoJSON = async () => {
       try {
         const response = await fetch(
-          '/api/bushfire-forecast' //Docker proxy mapping
+          'http://localhost/api/bushfire-forecast' //Docker proxy mapping
         )
         const data = await response.json()
 
-        if (geoJsonLayer) {
-          geoJsonLayer.remove()
-        }
-
-        geoJsonLayer = L.geoJSON(data, {
-          style: (feature: any) => ({
-            color: getColor(feature.properties?.risk_factor),
-            fillColor: getColor(feature.properties?.risk_factor),
-            fillOpacity: 0.4,
-            weight: 2,
-          }),
-          onEachFeature: (feature, layer) => {
-            if (feature.properties) {
-              const popupContent = `<b>Risk Level:</b> ${feature.properties.risk_factor}`
-              layer.bindPopup(popupContent)
-            }
-          },
-        }).addTo(map)
+        renderGeoJSON(data)
       } catch (error) {
         console.error('Error loading GeoJSON:', error)
       }
@@ -66,8 +79,8 @@ export default function MapPage() {
 
     loadGeoJSON()
 
-    //WebSocket set up for live updates
-    const ws = new WebSocket('ws://localhost/api/ws') //Docker mapping
+    //WebSocket set up for live updates - to do: debug
+    const ws = new WebSocket('ws://localhost:80/api/ws') //Docker mapping
 
     ws.onmessage = (event) => {
       try {
@@ -85,6 +98,14 @@ export default function MapPage() {
             weight: 2,
           }),
         }).addTo(map)
+
+        //when web socket updates, centre map on new polygons
+        const bounds = geoJsonLayer.getBounds()
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, {
+            padding: [20, 20],
+          })
+        }
       } catch (error) {
         console.error('WebSocket data error:', error)
       }
