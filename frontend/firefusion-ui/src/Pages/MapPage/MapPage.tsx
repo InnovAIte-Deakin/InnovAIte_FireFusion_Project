@@ -13,12 +13,12 @@ export default function MapPage() {
       zoomControl: false,
     }) 
 
-    //Create tiles
+    //Create tile
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map)
 
-    //Store current GeoJSON layer
+    //store current GeoJSON layer
     let geoJsonLayer: L.GeoJSON | null = null
 
     //map risk level to colour
@@ -39,6 +39,7 @@ export default function MapPage() {
         geoJsonLayer.remove()
       }
 
+      //style polygons with the risk level colours
       geoJsonLayer = L.geoJSON(data, {
         style: (feature: any) => ({
           color: getColor(feature.properties?.risk_factor),
@@ -48,7 +49,7 @@ export default function MapPage() {
         }),
         onEachFeature: (feature, layer) => {
           if (feature.properties) {
-            const popupContent = `<b>Risk Level:</b> ${feature.properties.risk_factor}`
+            const popupContent = `<b>Risk Level:</b> ${feature.properties.risk_factor}` //show the user the risk level (eventually to become an alert pop up)
             layer.bindPopup(popupContent)
           }
         },
@@ -67,7 +68,7 @@ export default function MapPage() {
     const loadGeoJSON = async () => {
       try {
         const response = await fetch(
-          'http://localhost/api/bushfire-forecast' //Docker proxy mapping
+          'http://localhost/api/bushfire-forecast' //Docker mapping - to do: set up Vite proxy
         )
         const data = await response.json()
 
@@ -79,7 +80,7 @@ export default function MapPage() {
 
     loadGeoJSON()
 
-    //WebSocket set up for live updates - to do: debug
+    //WebSocket set up for live updates - to do: debug console error
     const ws = new WebSocket('ws://localhost:80/api/ws') //Docker mapping
 
     ws.onmessage = (event) => {
