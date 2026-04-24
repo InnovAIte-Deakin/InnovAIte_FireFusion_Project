@@ -1,74 +1,36 @@
 {
   "type": "FeatureCollection",
+  "metadata": {
+    "model_version": "0.4.0",
+    "generated_at": "2024-01-17T06:00:00Z",
+    "forecast_horizon_h": 12,
+    "forecast_interval_h": 12,
+    "grid_resolution_m": 5000,
+    "total_cells": 2,
+    "bbox": [140.9, -37.5, 147.2, -34.1],
+    "crs": "EPSG:4326"
+  },
   "features": [
     {
       "type": "Feature",
-      "properties": { "risk_factor": 2 },
       "geometry": {
         "type": "Polygon",
-        "coordinates": [[
-          [144.9000, -37.6500],
-          [144.8500, -37.7200],
-          [144.9600, -37.7600],
-          [145.0200, -37.6900],
-          [144.9000, -37.6500]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "risk_factor": 4 },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [145.1000, -37.7500],
-          [145.0300, -37.8400],
-          [145.1800, -37.8900],
-          [145.2500, -37.8000],
-          [145.1000, -37.7500]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "risk_factor": 1 },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [145.3200, -37.8600],
-          [145.2700, -37.9300],
-          [145.4100, -37.9600],
-          [145.4500, -37.8900],
-          [145.3200, -37.8600]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "risk_factor": 3 },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [144.7200, -37.7800],
-          [144.6800, -37.8600],
-          [144.7900, -37.8900],
-          [144.8300, -37.8100],
-          [144.7200, -37.7800]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "risk_factor": 5 },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [145.0500, -37.6000],
-          [144.9800, -37.6600],
-          [145.0800, -37.7000],
-          [145.1300, -37.6300],
-          [145.0500, -37.6000]
-        ]]
+        "coordinates": [[[142.40,-37.70],[142.55,-37.85],[142.70,-37.75],[142.60,-37.65],[142.40,-37.70]]]
+      },
+      "properties": {
+        "cell_id": "grid_-37.15_145.60",
+        "timestamp": "2024-01-17T00:00:00Z",
+        "interval_h": 12,
+        "severity_class": 3,
+        "confidence": { "severity_class_prob": 0.72 },
+        "environment": {
+          "temperature_c": 31.5,
+          "relative_humidity_pct": 25,
+          "wind_speed_kmh": 40,
+          "wind_direction_deg": 260,
+          "ffdi": 55,
+          "fuel_moisture_pct": 6.2
+        }
       }
     }
   ]

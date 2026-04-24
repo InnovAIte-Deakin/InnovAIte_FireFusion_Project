@@ -1,60 +1,36 @@
 {
   "type": "FeatureCollection",
+  "metadata": {
+    "model_version": "0.4.0",
+    "generated_at": "2024-01-17T06:00:00Z",
+    "forecast_horizon_h": 12,
+    "forecast_interval_h": 12,
+    "grid_resolution_m": 5000,
+    "total_cells": 2,
+    "bbox": [140.9, -37.5, 147.2, -34.1],
+    "crs": "EPSG:4326"
+  },
   "features": [
     {
       "type": "Feature",
-      "properties": { "risk_factor": 1 },
       "geometry": {
         "type": "Polygon",
-        "coordinates": [[
-          [143.8500, -37.0500],
-          [143.7500, -37.1800],
-          [143.9500, -37.2500],
-          [144.0500, -37.1200],
-          [143.8500, -37.0500]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "risk_factor": 3 },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [144.2500, -36.7500],
-          [144.1500, -36.9000],
-          [144.3800, -36.9500],
-          [144.2500, -36.7500]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "risk_factor": 5 },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [143.5000, -36.9000],
-          [143.4000, -37.0500],
-          [143.6200, -37.1200],
-          [143.7200, -36.9800],
-          [143.6000, -36.8800],
-          [143.5000, -36.9000]
-        ]]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "risk_factor": 2 },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [[
-          [144.5800, -37.2000],
-          [144.5000, -37.3200],
-          [144.7000, -37.3800],
-          [144.7500, -37.2600],
-          [144.5800, -37.2000]
-        ]]
+        "coordinates": [[[142.40,-37.70],[142.55,-37.85],[142.70,-37.75],[142.60,-37.65],[142.40,-37.70]]]
+      },
+      "properties": {
+        "cell_id": "grid_-37.15_145.60",
+        "timestamp": "2024-01-17T00:00:00Z",
+        "interval_h": 12,
+        "severity_class": 3,
+        "confidence": { "severity_class_prob": 0.44 },
+        "environment": {
+          "temperature_c": 31.5,
+          "relative_humidity_pct": 25,
+          "wind_speed_kmh": 40,
+          "wind_direction_deg": 260,
+          "ffdi": 55,
+          "fuel_moisture_pct": 6.2
+        }
       }
     }
   ]

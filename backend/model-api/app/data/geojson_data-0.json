@@ -1,9 +1,18 @@
 {
   "type": "FeatureCollection",
+  "metadata": {
+    "model_version": "0.4.0",
+    "generated_at": "2024-01-15T14:05:00Z",
+    "forecast_horizon_h": 12,
+    "forecast_interval_h": 12,
+    "grid_resolution_m": 5000,
+    "total_cells": 2,
+    "bbox": [140.9, -37.5, 147.2, -34.1],
+    "crs": "EPSG:4326"
+  },
   "features": [
     {
       "type": "Feature",
-      "properties": { "risk_factor": 3 },
       "geometry": {
         "type": "Polygon",
         "coordinates": [[
@@ -13,11 +22,27 @@
           [142.3800, -37.5100],
           [142.1560, -37.5600]
         ]]
+      },
+      "properties": {
+        "cell_id": "grid_-37.10_145.40",
+        "timestamp": "2024-01-15T14:00:00Z",
+        "interval_h": 12,
+        "severity_class": 4,
+        "confidence": {
+          "severity_class_prob": 0.81
+        },
+        "environment": {
+          "temperature_c": 34.2,
+          "relative_humidity_pct": 11.0,
+          "wind_speed_kmh": 62.0,
+          "wind_direction_deg": 315,
+          "ffdi": 78.4,
+          "fuel_moisture_pct": 4.1
+        }
       }
     },
     {
       "type": "Feature",
-      "properties": { "risk_factor": 1 },
       "geometry": {
         "type": "Polygon",
         "coordinates": [[
@@ -27,6 +52,23 @@
           [143.0100, -37.8800],
           [142.7500, -37.8200]
         ]]
+      },
+      "properties": {
+        "cell_id": "grid_-37.20_145.60",
+        "timestamp": "2024-01-15T14:00:00Z",
+        "interval_h": 12,
+        "severity_class": 2,
+        "confidence": {
+          "severity_class_prob": 0.65
+        },
+        "environment": {
+          "temperature_c": 28.5,
+          "relative_humidity_pct": 35.0,
+          "wind_speed_kmh": 20.0,
+          "wind_direction_deg": 210,
+          "ffdi": 35.2,
+          "fuel_moisture_pct": 8.5
+        }
       }
     }
   ]
