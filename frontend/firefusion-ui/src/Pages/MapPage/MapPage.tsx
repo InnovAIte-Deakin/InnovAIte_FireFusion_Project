@@ -1,6 +1,9 @@
 //import the style sheet
 import './MapPage.layout.css'
 
+//import websocket connection dependency
+import ReconnectingWebSocket from 'reconnecting-websocket'
+
 //import Leaflet
 import { useEffect } from 'react'
 import L from 'leaflet'
@@ -80,8 +83,8 @@ export default function MapPage() {
 
     loadGeoJSON()
 
-    //WebSocket set up for live updates - to do: debug console error
-    const ws = new WebSocket('ws://localhost:80/api/ws') //Docker mapping
+    //WebSocket set up for live updates 
+    const ws = new ReconnectingWebSocket('ws://localhost:80/api/ws') 
 
     ws.onmessage = (event) => {
       try {
