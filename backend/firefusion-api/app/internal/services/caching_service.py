@@ -1,6 +1,7 @@
-from redis import asyncio
+from redis import asyncio as redis
 import os
 
-cache_url = os.environ["CACHE_URL"]
+cache_url = os.environ.get("CACHE_URL", "redis://cache:6379")
 
-cache_client = asyncio.Redis(host='cache', port=6379, db=0)
+# IMPORTANT: use Redis URL (Docker-safe)
+cache_client = redis.from_url(cache_url, decode_responses=True)
