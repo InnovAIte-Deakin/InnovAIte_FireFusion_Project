@@ -1,66 +1,141 @@
 -- Seed data for bushfire risk database
 
-INSERT INTO topography (topo_id, latitude, longitude, elevation_meters, slope_angle) VALUES
-(1, -37.81, 144.96, 31.0, 2.5),
-(2, -37.68, 145.73, 520.0, 18.3),
-(3, -37.75, 145.14, 120.0, 8.7),
-(4, -38.15, 146.43, 85.0, 5.1),
-(5, -36.76, 144.28, 225.0, 12.4),
-(6, -37.05, 145.95, 680.0, 22.6),
-(7, -38.34, 145.18, 45.0, 3.2),
-(8, -36.36, 146.32, 310.0, 15.8),
-(9, -37.56, 143.85, 440.0, 19.1),
-(10, -38.68, 146.05, 60.0, 4.6);
+INSERT INTO Location_Registry (
+    location_id, 
+    grid_latitude, 
+    grid_longitude, 
+    region_name
+    ) VALUES
+(1, -37.8136, 144.9631, 'Melbourne'),
+(2, -37.4713, 144.7857, 'Gisborne'),
+(3, -37.655, 145.517, 'Yarra Valley'),
+(4, -37.174, 145.9333, 'Mansfield'),
+(5, -36.759, 144.28, 'Bendigo'),
+(6, -37.5229, 145.9934, 'Healesville'),
+(7, -38.3818, 142.4854, 'Warrnambool'),
+(8, -36.364, 146.32, 'Wangaratta'),
+(9, -37.5622, 143.8503, 'Ballarat'),
+(10, -38.225, 145.041, 'Mornington Peninsula');
 
-INSERT INTO weather_conditions (weather_id, latitude, longitude, record_date, temperature_c, wind_speed_kmh, relative_humidity) VALUES
-(1, -37.68, 145.73, '2025-01-15 14:00:00', 42.3, 65.0, 8.0),
-(2, -37.75, 145.14, '2025-01-15 13:30:00', 39.8, 48.0, 12.5),
-(3, -36.76, 144.28, '2025-02-03 15:00:00', 44.1, 72.0, 6.0),
-(4, -37.05, 145.95, '2025-02-03 14:00:00', 38.5, 55.0, 10.2),
-(5, -38.34, 145.18, '2025-01-28 12:00:00', 36.2, 40.0, 18.0),
-(6, -36.36, 146.32, '2025-02-10 14:30:00', 41.0, 68.0, 7.5),
-(7, -37.56, 143.85, '2025-12-20 13:00:00', 40.7, 58.0, 9.8),
-(8, -38.68, 146.05, '2025-01-05 11:00:00', 33.0, 30.0, 22.0),
-(9, -37.68, 145.73, '2025-02-14 15:00:00', 43.6, 80.0, 5.5),
-(10, -37.81, 144.96, '2025-03-01 14:00:00', 37.0, 35.0, 15.0);
 
-INSERT INTO fuel_and_vegetation (fuel_id, latitude, longitude, record_date, vegetation_class, dryness_index, soil_moisture) VALUES
-(1, -37.68, 145.73, '2025-01-10', 'Wet Sclerophyll Forest', 8.5, 0.08),
-(2, -37.75, 145.14, '2025-01-10', 'Dry Sclerophyll Forest', 7.2, 0.12),
-(3, -36.76, 144.28, '2025-02-01', 'Grassland', 9.1, 0.05),
-(4, -37.05, 145.95, '2025-02-01', 'Alpine Ash Forest', 6.8, 0.15),
-(5, -38.34, 145.18, '2025-01-25', 'Heathland', 7.9, 0.10),
-(6, -36.36, 146.32, '2025-02-08', 'Dry Sclerophyll Forest', 8.8, 0.06),
-(7, -37.56, 143.85, '2025-12-18', 'Grassy Woodland', 8.0, 0.09),
-(8, -38.68, 146.05, '2025-01-03', 'Wet Sclerophyll Forest', 5.5, 0.20),
-(9, -37.68, 145.73, '2025-02-12', 'Wet Sclerophyll Forest', 9.0, 0.06),
-(10, -37.81, 144.96, '2025-02-28', 'Urban Grassland', 6.0, 0.14);
+INSERT INTO Time_Registry (
+    time_id, 
+    datetime_record, 
+    season
+    ) VALUES
+(101, '2025-01-15 14:00:00', 'Summer'),
+(102, '2025-01-15 13:30:00', 'Summer'),
+(103, '2025-02-03 15:00:00', 'Summer'),
+(104, '2025-02-03 14:00:00', 'Summer'),
+(105, '2025-01-28 12:00:00', 'Summer'),
+(106, '2025-02-10 14:30:00', 'Summer'),
+(107, '2025-12-20 13:00:00', 'Summer'),
+(108, '2025-01-05 11:00:00', 'Summer'),
+(109, '2025-02-14 15:00:00', 'Summer'),
+(110, '2025-03-01 14:00:00', 'Autumn');
 
-INSERT INTO at_risk_infrastructure (facility_id, facility_name, category, latitude, longitude, lga) VALUES
-(1, 'Healesville Primary School', 'School', -37.65, 145.52, 'Yarra Ranges'),
-(2, 'Upper Yarra Reservoir', 'Water Supply', -37.68, 145.92, 'Yarra Ranges'),
-(3, 'Bendigo Hospital', 'Hospital', -36.76, 144.28, 'Greater Bendigo'),
-(4, 'Mt Buller Alpine Village', 'Tourism', -37.15, 146.44, 'Mansfield'),
-(5, 'Mornington Community Centre', 'Community Facility', -38.22, 145.04, 'Mornington Peninsula'),
-(6, 'Wangaratta Substation', 'Power Infrastructure', -36.36, 146.31, 'Wangaratta'),
-(7, 'Ballarat Aged Care Home', 'Aged Care', -37.56, 143.86, 'Ballarat'),
-(8, 'Warragul CFA Station', 'Emergency Services', -38.16, 145.93, 'Baw Baw'),
-(9, 'Yarra Glen Kindergarten', 'Childcare', -37.66, 145.37, 'Yarra Ranges'),
-(10, 'Lilydale Rail Hub', 'Transport', -37.76, 145.35, 'Yarra Ranges');
 
-INSERT INTO fire_events (event_id, weather_id, topo_id, fuel_id, facility_id, latitude, longitude, event_date, confidence_score, source_system) VALUES
-(1, 1, 2, 1, 1, -37.67, 145.70, '2025-01-15', 92, 'MODIS'),
-(2, 2, 3, 2, NULL, -37.74, 145.12, '2025-01-15', 78, 'VIIRS'),
-(3, 3, 5, 3, 3, -36.77, 144.30, '2025-02-03', 95, 'MODIS'),
-(4, 4, 6, 4, 4, -37.06, 145.96, '2025-02-03', 85, 'VIIRS'),
-(5, 5, 7, 5, 5, -38.33, 145.17, '2025-01-28', 60, 'Sentinel-2'),
-(6, 6, 8, 6, 6, -36.35, 146.33, '2025-02-10', 91, 'MODIS'),
-(7, 7, 9, 7, 7, -37.55, 143.84, '2025-12-20', 88, 'VIIRS'),
-(8, 8, 10, 8, NULL, -38.67, 146.04, '2025-01-05', 55, 'Sentinel-2'),
-(9, 9, 2, 9, 2, -37.69, 145.74, '2025-02-14', 97, 'MODIS'),
-(10, 10, 1, 10, 10, -37.80, 144.95, '2025-03-01', 45, 'CFA Report'),
-(11, 1, 2, 1, 9, -37.66, 145.40, '2025-01-15', 70, 'VIIRS'),
-(12, 3, 5, 3, NULL, -36.78, 144.25, '2025-02-03', 82, 'MODIS'),
-(13, 6, 8, 6, NULL, -36.34, 146.30, '2025-02-10', 76, 'Sentinel-2'),
-(14, 9, 2, 9, 1, -37.66, 145.55, '2025-02-14', 93, 'MODIS'),
-(15, 7, 9, 7, NULL, -37.58, 143.88, '2025-12-20', 65, 'CFA Report');
+INSERT INTO Topography_Profile (
+    topo_id, 
+    location_id, 
+    original_latitude, 
+    original_longitude, 
+    elevation_meters, 
+    slope_angle
+    ) VALUES
+(1, 1, -37.8136, 144.9631, 31.0, 2.5),
+(2, 2, -37.4713, 144.7857, 520.0, 18.3),
+(3, 3, -37.655, 145.517, 120.0, 8.7),
+(4, 4, -37.174, 145.9333, 85.0, 5.1),
+(5, 5, -36.759, 144.28, 225.0, 12.4),
+(6, 6, -37.5229, 145.9934, 680.0, 22.6),
+(7, 7, -38.3818, 142.4854, 45.0, 3.2),
+(8, 8, -36.364, 146.32, 310.0, 15.8),
+(9, 9, -37.5622, 143.8503, 440.0, 19.1),
+(10, 10, -38.225, 145.041, 60.0, 4.6);
+
+
+INSERT INTO Weather_Observation (
+    weather_id, 
+    location_id, 
+    time_id, 
+    original_latitude, 
+    original_longitude, 
+    temperature_c, 
+    wind_speed_kmh, 
+    relative_humidity, 
+    source_system
+    ) VALUES
+(1, 1, 101, -37.8136, 144.9631, 34.2, 28.0, 18.5, 'BOM'),
+(2, 2, 102, -37.4713, 144.7857, 39.8, 24.0, 14.2, 'BOM'),
+(3, 3, 103, -37.655, 145.517, 41.1, 31.0, 12.8, 'BOM'),
+(4, 4, 104, -37.174, 145.9333, 29.7, 19.0, 24.1, 'BOM'),
+(5, 5, 105, -36.759, 144.28, 43.5, 36.0, 9.6, 'BOM'),
+(6, 6, 106, -37.5229, 145.9934, 37.9, 22.0, 13.4, 'BOM'),
+(7, 7, 107, -38.3818, 142.4854, 33.8, 27.0, 20.2, 'BOM'),
+(8, 8, 108, -36.364, 146.32, 42.6, 34.0, 8.1, 'BOM'),
+(9, 9, 109, -37.5622, 143.8503, 40.4, 26.0, 11.7, 'BOM'),
+(10, 10, 110, -38.225, 145.041, 30.5, 17.0, 22.9, 'BOM');
+
+
+INSERT INTO Vegetation_Condition (
+    veg_condition_id, 
+    location_id, 
+    time_id, 
+    original_latitude, 
+    original_longitude, 
+    vegetation_class, 
+    dryness_index, 
+    soil_moisture, 
+    source_system
+    ) VALUES
+(1, 1, 101, -37.8136, 144.9631, 'Urban parkland', 6.8, 0.18, 'Satellite composite'),
+(2, 2, 102, -37.4713, 144.7857, 'Dry sclerophyll forest', 8.4, 0.09, 'Satellite composite'),
+(3, 3, 103, -37.655, 145.517, 'Wet sclerophyll forest', 5.9, 0.22, 'Satellite composite'),
+(4, 4, 104, -37.174, 145.9333, 'Alpine ash forest', 7.3, 0.14, 'Satellite composite'),
+(5, 5, 105, -36.759, 144.28, 'Grassland', 9.1, 0.06, 'Satellite composite'),
+(6, 6, 106, -37.5229, 145.9934, 'Forest regrowth', 6.2, 0.17, 'Satellite composite'),
+(7, 7, 107, -38.3818, 142.4854, 'Coastal heathland', 7.8, 0.11, 'Satellite composite'),
+(8, 8, 108, -36.364, 146.32, 'Dry sclerophyll forest', 8.7, 0.07, 'Satellite composite'),
+(9, 9, 109, -37.5622, 143.8503, 'Grassy woodland', 7.0, 0.13, 'Satellite composite'),
+(10, 10, 110, -38.225, 145.041, 'Urban grassland', 6.5, 0.16, 'Satellite composite');
+
+
+INSERT INTO Infrastructure_Asset (
+    asset_id, 
+    location_id, 
+    original_latitude, 
+    original_longitude, 
+    facility_name, 
+    risk_category
+    ) VALUES
+(1, 1, -37.8136, 144.9631, 'Melbourne General Hospital', 'Hospital'),
+(2, 2, -37.4713, 144.7857, 'Gisborne Primary School', 'School'),
+(3, 3, -37.655, 145.517, 'Yarra Valley Water Pump Station', 'Water Supply'),
+(4, 4, -37.174, 145.9333, 'Mt Buller Alpine Village', 'Tourism'),
+(5, 5, -36.759, 144.28, 'Bendigo Base Hospital', 'Hospital'),
+(6, 6, -37.5229, 145.9934, 'Healesville CFA Station', 'Emergency Services'),
+(7, 7, -38.3818, 142.4854, 'Warrnambool Rail Hub', 'Transport'),
+(8, 8, -36.364, 146.32, 'Wangaratta Substation', 'Power Infrastructure'),
+(9, 9, -37.5622, 143.8503, 'Ballarat Aged Care Home', 'Aged Care'),
+(10, 10, -38.225, 145.041, 'Mornington Community Centre', 'Community Facility');
+
+
+INSERT INTO Fire_Incident_Record (
+    incident_id, 
+    location_id, 
+    time_id, 
+    original_latitude, 
+    original_longitude, 
+    confidence_score, 
+    source_system) VALUES
+(1, 1, 1, -37.8128, 144.962, 'MODIS hotspot'),
+(2, 2, 2, -37.4705, 144.7868, 'VIIRS hotspot'),
+(3, 3, 3, -37.6542, 145.5162, 'CFA report'),
+(4, 4, 4, -37.1732, 145.934, 'Sentinel-2'),
+(5, 5, 5, -36.7581, 144.281, 'MODIS hotspot'),
+(6, 6, 6, -37.5236, 145.9928, 'VIIRS hotspot'),
+(7, 7, 7, -38.3809, 142.4861, 'CFA report'),
+(8, 8, 8, -36.3632, 146.3192, 'Sentinel-2'),
+(9, 9, 9, -37.5614, 143.851, 'MODIS hotspot'),
+(10, 10, 10, -38.2242, 145.0417, 'VIIRS hotspot');
