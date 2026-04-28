@@ -15,3 +15,9 @@ pandas>=2.0.0
 numpy>=1.24.0
 
 pytest>=8.0.0
+
+# API / Model Serving
+fastapi>=0.115.0
+uvicorn>=0.34.0
+pydantic>=2.0.0
+joblib>=1.4.0
