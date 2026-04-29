@@ -5,7 +5,7 @@ services:
     image: firefusion/firefusion-api
     build: ./firefusion-api/.
     ports: 
-      - 80:80
+      - 8080:8080
     depends_on:
       broker:
         condition: service_healthy 
@@ -21,7 +21,7 @@ services:
     image: firefusion/model-api
     build: ./model-api/.
     ports: 
-      - 81:80
+      - 8081:8080
     depends_on:
       broker:
         condition: service_healthy 
@@ -34,7 +34,7 @@ services:
     image: firefusion/aggregator-api
     build: ./aggregator-api/.
     ports: 
-      - 82:80
+      - 8082:8080
     depends_on:
       relational-db:
         condition: service_healthy 
