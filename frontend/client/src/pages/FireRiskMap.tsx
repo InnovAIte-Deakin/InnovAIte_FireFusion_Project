@@ -1,7 +1,7 @@
 //import the style sheet
 import './MapPage.layout.css'
 
-//import websocket connection dependency
+//import websocket connection dependency 
 import ReconnectingWebSocket from 'reconnecting-websocket'
 
 //import Leaflet
@@ -52,7 +52,7 @@ export default function MapPage() {
         }),
         onEachFeature: (feature, layer) => {
           if (feature.properties) {
-            const popupContent = `<b>Risk Level:</b> ${feature.properties.risk_factor}` //show the user the risk level (eventually to become an alert pop up)
+            const popupContent = `<b>Risk Level:</b> ${feature.properties.risk_factor}`
             layer.bindPopup(popupContent)
           }
         },
@@ -71,7 +71,7 @@ export default function MapPage() {
     const loadGeoJSON = async () => {
       try {
         const response = await fetch(
-          'http://localhost:8080/api/bushfire-forecast' //to do: set up Vite proxy
+          'http://localhost:8080/api/bushfire-forecast'
         )
         const data = await response.json()
 
@@ -103,7 +103,6 @@ export default function MapPage() {
           }),
         }).addTo(map)
 
-        //when web socket updates, centre map on new polygons
         const bounds = geoJsonLayer.getBounds()
         if (bounds.isValid()) {
           map.fitBounds(bounds, {
@@ -119,7 +118,6 @@ export default function MapPage() {
       console.error('WebSocket error:', err)
     }
 
-    //Cleanup
     return () => {
       ws.close()
       map.remove()
@@ -128,24 +126,16 @@ export default function MapPage() {
 
   return (
     <div className="map-page">
-      <aside className="sidebar">
+      <div className="sidebar">
         <h2>Menu</h2>
         <ul>
           <li>Map</li>
           <li>Settings</li>
         </ul>
-      </aside>
+      </div>
 
       <main className="map-main">
-        <div className="map-container">
-          <div id="map"></div>
-
-          {/*
-          <div className="overlay search">Search Bar</div> can edit these back in later, temp removing UI components
-          <div className="overlay zoom">Zoom Controls</div>
-          <div className="overlay legend">Legend</div>
-          */}
-        </div>
+        <div id="map"></div>
       </main>
     </div>
   )
