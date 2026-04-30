@@ -9,6 +9,9 @@ import { useEffect } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+//import Layout
+import Layout from "../components/Layout"
+
 export default function MapPage() {
   useEffect(() => {
     //Create map
@@ -124,19 +127,12 @@ export default function MapPage() {
     }
   }, [])
 
+  //remove topbar for now, change showTopbar to true to show
   return (
-    <div className="map-page">
-      <div className="sidebar">
-        <h2>Menu</h2>
-        <ul>
-          <li>Map</li>
-          <li>Settings</li>
-        </ul>
-      </div>
-
-      <main className="map-main">
+    <Layout title="Fire Map" showTopbar={false}>
+      <div className="map-page">
         <div id="map"></div>
-      </main>
-    </div>
+      </div>
+    </Layout>
   )
 }
