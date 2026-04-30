@@ -79,6 +79,11 @@ export default function Dashboard() {
               <button
                 key={item.label}
                 className={`nav-item ${item.active ? "active" : ""}`}
+                onClick={
+                  item.label === "Fire Map"
+                    ? () => (window.location.href = "/fire-map")
+                    : undefined
+                }
               >
                 <span>
                   <Icon size={17} />
