@@ -4,7 +4,7 @@ import FireRiskMap from "./pages/FireRiskMap.tsx";
 export default function App() {
   const path = window.location.pathname;
 
-  if (path.includes("fire-map")) {
+  if (path === "/fire-map") {
     return <FireRiskMap />;
   }
 

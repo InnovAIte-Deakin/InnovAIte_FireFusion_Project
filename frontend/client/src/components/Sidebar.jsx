@@ -48,12 +48,24 @@ export default function Sidebar() {
       <nav className="nav-list">
         {menuItems.map((item) => {
           const Icon = item.icon;
+
           return (
-            <button key={item.label} className={`nav-item ${item.active ? "active" : ""}`}>
+            <button
+              key={item.label}
+              className={`nav-item ${item.active ? "active" : ""}`}
+              onClick={
+                item.label === "Fire Map"
+                  ? () => (window.location.href = "/fire-map")
+                  : item.label === "Dashboard"
+                  ? () => (window.location.href = "/")
+                  : undefined
+              }
+            >
               <span>
                 <Icon size={17} />
                 {item.label}
               </span>
+
               {item.badge && <b>{item.badge}</b>}
               {item.active && <ChevronRight size={16} />}
             </button>
