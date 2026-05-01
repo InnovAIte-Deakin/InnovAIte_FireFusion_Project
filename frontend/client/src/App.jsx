@@ -1,5 +1,5 @@
-import Dashboard from "./pages/Dashboard.jsx";
+import MisinformationReview from "./pages/MisinformationReview.jsx";
 
 export default function App() {
-  return <Dashboard />;
+  return <MisinformationReview />;
 }
