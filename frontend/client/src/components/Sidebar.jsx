@@ -17,7 +17,6 @@ import {
 const menuItems = [
   { label: "Dashboard", icon: Home, badge: null, active: true },
   { label: "Fire Map", icon: Map, badge: "7" },
-  { label: "Alerts", icon: TriangleAlert, badge: "31" },
   { label: "Misinformation Review", icon: Shield, badge: "14" },
   { label: "Reports", icon: FileText, badge: null },
 ];
@@ -48,12 +47,27 @@ export default function Sidebar() {
       <nav className="nav-list">
         {menuItems.map((item) => {
           const Icon = item.icon;
+
           return (
-            <button key={item.label} className={`nav-item ${item.active ? "active" : ""}`}>
+            <button
+              key={item.label}
+              className={`nav-item ${item.active ? "active" : ""}`}
+              onClick={
+                item.label === "Fire Map"
+                  ? () => (window.location.href = "/fire-map")
+                  : item.label === "Dashboard"
+                  ? () => (window.location.href = "/")
+                  : item.label ==="Misinformation Review"
+                  ? () => (window.location.href = "/misinfo-review")
+
+                  : undefined
+              }
+            >
               <span>
                 <Icon size={17} />
                 {item.label}
               </span>
+
               {item.badge && <b>{item.badge}</b>}
               {item.active && <ChevronRight size={16} />}
             </button>
