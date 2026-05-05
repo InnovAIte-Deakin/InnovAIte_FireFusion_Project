@@ -1,87 +1,137 @@
-# FireFusion Database Architecture
+# FireFusion Data Pipeline Architecture
 
 ## Overview
 
-This document outlines the database architecture for the FireFusion bushfire forecasting model. To ensure all data pipelines connect seamlessly, we are using a Star Schema design. This approach places the main event we are predicting (the bushfire) in the center, surrounded by the tables containing the environmental and human factors.
+This repository contains the data extraction pipelines and database architecture for the FireFusion bushfire prediction system.
 
-This schema serves as the single source of truth for our data engineering phase. All extraction and transformation scripts should aim to format their final outputs to match these table structures and column names.
+We utilize a **Spatial-Temporal Database Architecture (Hub and Spoke model)**. Instead of a rigid schema tied to specific fire events, all environmental observations (weather, soil, fire) act as independent events connected by a universal map and calendar. This ensures high scalability and allows the Machine Learning team to easily query the exact conditions for any location at any given time.
 
-## The Star Schema Design
+---
 
-![Star Schema ERD](Star_Schema_ERD.png)
+## System Architecture
 
-## 1. The Central Fact Table
+### Central Hub Tables
 
-This is the core of our database, recording the actual occurrences of fires. This acts as the target variable for our machine learning model.
+#### Location_Registry
 
-### Table: Fire_Events
+| Column | Type | Key |
+|---|---|---|
+| location_id | int | PK |
+| grid_latitude | float | |
+| grid_longitude | float | |
+| region_name | string | |
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `event_id` | Integer (PK) | Primary Key |
-| `weather_id` | Integer (FK) | Foreign Key |
-| `topo_id` | Integer (FK) | Foreign Key |
-| `fuel_id` | Integer (FK) | Foreign Key |
-| `facility_id` | Integer (FK) | Foreign Key |
-| `latitude` | Float | |
-| `longitude` | Float | |
-| `event_date` | Date | |
-| `confidence_score` | Integer | Detection certainty from satellite data |
-| `source_system` | String | The origin of the record (e.g., NASA FIRMS, DEA) |
+#### Time_Registry
 
-## 2. The Dimension Tables (The Predictors)
+| Column | Type | Key |
+|---|---|---|
+| time_id | int | PK |
+| datetime_record | datetime | |
+| season | string | |
 
-These tables surround the Fact Table and contain the features our AI will use to learn fire behavior.
+---
 
-### Table: Weather_Conditions
+### Observation Tables (Daily Batching)
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `weather_id` | Integer (PK) | Primary Key |
-| `latitude` | Float | |
-| `longitude` | Float | |
-| `record_date` | Datetime | |
-| `temperature_c` | Float | |
-| `wind_speed_kmh` | Float | |
-| `relative_humidity` | Float | |
+#### Weather_Observation
 
-### Table: Topography
+| Column | Type | Key |
+|---|---|---|
+| weather_id | int | PK |
+| location_id | int | FK → Location_Registry |
+| time_id | int | FK → Time_Registry |
+| original_latitude | float | |
+| original_longitude | float | |
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `topo_id` | Integer (PK) | Primary Key |
-| `latitude` | Float | |
-| `longitude` | Float | |
-| `elevation_meters` | Float | Land height from ELVIS data |
-| `slope_angle` | Float | Steepness of the terrain |
+#### Fire_Incident_Record
 
-### Table: Fuel_and_Vegetation
+| Column | Type | Key |
+|---|---|---|
+| incident_id | int | PK |
+| location_id | int | FK → Location_Registry |
+| time_id | int | FK → Time_Registry |
+| original_latitude | float | |
+| original_longitude | float | |
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `fuel_id` | Integer (PK) | Primary Key |
-| `latitude` | Float | |
-| `longitude` | Float | |
-| `record_date` | Date | |
-| `vegetation_class` | String | Type of vegetation from NVIS data |
-| `dryness_index` | Float | Vegetation health/dryness |
-| `soil_moisture` | Float | Ground wetness |
+#### Vegetation_Condition
 
-## 3. The Impact Table
+| Column | Type | Key |
+|---|---|---|
+| veg_condition_id | int | PK |
+| location_id | int | FK → Location_Registry |
+| time_id | int | FK → Time_Registry |
+| original_latitude | float | |
+| original_longitude | float | |
 
-This table maps the human infrastructure at risk, specifically focusing on the educational facilities pipeline.
+---
 
-### Table: At_Risk_Infrastructure
+### Static Tables (Historical One-Time)
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `facility_id` | Integer (PK) | Primary Key |
-| `facility_name` | String | |
-| `category` | String | Risk category (e.g., CAT 3, CAT 4) |
-| `latitude` | Float | |
-| `longitude` | Float | |
-| `lga` | String | Local Government Area |
+#### Topography_Profile
 
-## Notes for the Data Team
+| Column | Type | Key |
+|---|---|---|
+| topo_id | int | PK |
+| location_id | int | FK → Location_Registry |
+| original_latitude | float | |
+| original_longitude | float | |
 
-When writing your Python extraction scripts, please ensure your final output columns match the names and data types listed above. This will allow us to join all the datasets easily using the Foreign Keys when it is time to train the forecasting model.
+#### Infrastructure_Asset
+
+| Column | Type | Key |
+|---|---|---|
+| asset_id | int | PK |
+| location_id | int | FK → Location_Registry |
+| original_latitude | float | |
+| original_longitude | float | |
+
+---
+
+## Core Principles
+
+### 1. Data Alignment (The Universal Grid)
+
+Data from different sources (NASA, Open-Meteo, ELVIS) use different coordinate systems and time formats.
+
+- All extraction scripts must "snap" or round their raw latitude, longitude, and timestamps to match our universal `Location_Registry` and `Time_Registry`.
+- This ensures that weather, soil, and fire data stack perfectly on top of each other for the AI model to process.
+
+### 2. Data Lineage (Preserving Raw Data)
+
+Because we are modifying the data to fit our grid, we must keep a permanent record of the truth.
+
+> **Strict Rule:** Every observation table must include `original_latitude` and `original_longitude` columns. Do not discard the exact, untouched coordinates provided by the original API or satellite.
+
+---
+
+## Data Extraction Pipelines
+
+Our pipeline system is divided into two distinct workflows:
+
+### A. Historical Data (One-Time Bulk Load)
+
+Static data that builds the permanent foundation of our map. These scripts are run **once**.
+
+- **Topography Profile:** ELVIS Elevation and Depth.
+- **Infrastructure Asset:** At-Risk Registers and Fire Management Zones.
+- **Static Vegetation:** National Vegetation Information System (NVIS).
+- **Historical Fire Records:** GeoScience Australia and CFA logs *(used exclusively for initial AI model training)*.
+
+### B. Batching Data (Daily Scheduled Updates)
+
+Dynamic data that updates continuously. These scripts run on a scheduled batch process to provide the live prediction system with current numbers.
+
+- **Weather Observation:** Open-Meteo API (current temperature, wind, humidity).
+- **Vegetation Condition:** SMAP Satellite (current soil moisture and dryness).
+- **Active Fire Records:** NASA FIRMS (newly detected satellite hotspots).
+
+---
+
+## Developer Instructions
+
+When creating a new Python extraction script or submitting a Pull Request, please ensure you meet the following criteria:
+
+1. **Source Documentation:** Clearly list the API endpoint or download URL in your code comments.
+2. **Implement Grid Snapping:** Convert raw coordinates to our standard `location_id` and `time_id`.
+3. **Save Raw Data:** Map the untouched coordinates to the `original_latitude` and `original_longitude` columns.
+4. **Data Typing:** Ensure your pandas DataFrame outputs match the exact PostgreSQL column types defined in the schema before loading.

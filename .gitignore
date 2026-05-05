@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
 
 # Jupyter
 .ipynb_checkpoints/
@@ -19,3 +20,5 @@ venv/
 # Data files (large)
 *.geojson
 *.csv
+
+.vscode/
