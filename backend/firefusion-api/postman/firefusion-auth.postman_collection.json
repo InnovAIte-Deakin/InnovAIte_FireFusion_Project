@@ -1,0 +1,161 @@
+{
+  "info": {
+    "name": "FireFusion Auth0 Demo",
+    "description": "End-to-end demo of FireFusionAPI's Auth0 JWT integration. Five requests demonstrate the four-case authorization matrix: public, missing-token, valid-token, role-protected. Use the collection-level OAuth 2.0 + PKCE auth to log in interactively and exercise the role-based admin route.\n\nQuick start:\n1. Make sure the API is running locally (fastapi dev app/main.py).\n2. Click the collection name → Authorization tab → Get New Access Token. A browser will open Auth0 Universal Login. Log in as your admin test user.\n3. Run the requests in order.\n\nSee the README in this folder for a full demo script.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "oauth2",
+    "oauth2": [
+      { "key": "tokenName", "value": "FireFusion User Token", "type": "string" },
+      { "key": "grant_type", "value": "authorization_code_with_pkce", "type": "string" },
+      { "key": "challengeAlgorithm", "value": "S256", "type": "string" },
+      { "key": "callBackUrl", "value": "https://oauth.pstmn.io/v1/callback", "type": "string" },
+      { "key": "authUrl", "value": "https://{{auth0_domain}}/authorize?audience={{auth0_audience}}", "type": "string" },
+      { "key": "accessTokenUrl", "value": "https://{{auth0_domain}}/oauth/token", "type": "string" },
+      { "key": "clientId", "value": "{{client_id}}", "type": "string" },
+      { "key": "scope", "value": "openid profile email", "type": "string" },
+      { "key": "client_authentication", "value": "header", "type": "string" },
+      { "key": "addTokenTo", "value": "header", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "auth0_domain", "value": "firefusion-dev.au.auth0.com", "type": "string" },
+    { "key": "auth0_audience", "value": "https://api.firefusion.com", "type": "string" },
+    { "key": "client_id", "value": "FJGZMb7YyeZAZzfb0hp8GgZZK9PAY0O7", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "1. Public — GET /hello/",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/hello/",
+          "host": ["{{base_url}}"],
+          "path": ["hello", ""]
+        },
+        "description": "Public sanity check. Always returns 200 + \"Hello, World!\". Proves the server is alive."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Body says Hello World', function () {",
+              "    pm.expect(pm.response.text()).to.include('Hello');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Auth-required, no token (expect 401)",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/hello/me",
+          "host": ["{{base_url}}"],
+          "path": ["hello", "me"]
+        },
+        "description": "Calls /hello/me with no Authorization header. Expected to return 401 — proves authentication is enforced."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 401', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "pm.test('WWW-Authenticate header present (RFC 6750)', function () {",
+              "    pm.expect(pm.response.headers.get('www-authenticate')).to.include('Bearer');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Auth-required, valid token (expect 200)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/hello/me",
+          "host": ["{{base_url}}"],
+          "path": ["hello", "me"]
+        },
+        "description": "Calls /hello/me with the OAuth-acquired user token. Expected to return 200 with the decoded JWT claims dict — proves authentication works end-to-end."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response includes sub claim', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.have.property('sub');",
+              "});",
+              "pm.test('Response includes claims dict', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body).to.have.property('claims');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Admin route, valid token (expect 200 for admin user, 403 otherwise)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/hello/admin",
+          "host": ["{{base_url}}"],
+          "path": ["hello", "admin"]
+        },
+        "description": "Calls /hello/admin with the OAuth-acquired user token.\n\n• If you logged in as a user assigned the 'admin' role → returns 200 + 'Hello, admin!'. Proves role-based access control is working.\n• If your user has no admin role → returns 403. Proves the role check enforces correctly.\n\nThe role list is in the JWT custom claim https://firefusion.com/roles, written by the Auth0 Post-Login Action."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200 or 403', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 403]);",
+              "});",
+              "if (pm.response.code === 200) {",
+              "    pm.test('200 response says Hello, admin', function () {",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.message).to.include('admin');",
+              "    });",
+              "} else {",
+              "    pm.test('403 response cites missing role', function () {",
+              "        const body = pm.response.json();",
+              "        pm.expect(body.detail).to.include('admin');",
+              "    });",
+              "}"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
