@@ -12,4 +12,4 @@ COPY ./app /code/app
 # TODO: update hardcoded value
 ENV API_KEY=secret_key 
 
-CMD ["fastapi", "run", "app/main.py", "--port", "80"]
+CMD ["fastapi", "run", "app/main.py", "--port", "8080"]

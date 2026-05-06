@@ -1,11 +1,11 @@
 services:
 
   firefusion-api: # api
-    profiles: ["default"]
+    profiles: ["default", "firefusion"]
     image: firefusion/firefusion-api
     build: ./firefusion-api/.
     ports: 
-      - 80:80
+      - 8080:8080
     depends_on:
       broker:
         condition: service_healthy 
@@ -14,25 +14,27 @@ services:
     environment:
       BROKER_URL: amqp://guest:guest@broker:5672
       CACHE_URL: redis://cache:6379
+      PYTHONUNBUFFERED: 1
 
   model-api: # api
     profiles: ["default"]
     image: firefusion/model-api
     build: ./model-api/.
     ports: 
-      - 81:80
+      - 8081:8080
     depends_on:
       broker:
         condition: service_healthy 
     environment:
       BROKER_URL: amqp://guest:guest@broker:5672
+      PYTHONUNBUFFERED: 1
 
   aggregator-api: # api
     profiles: ["default", "aggregator"]
     image: firefusion/aggregator-api
     build: ./aggregator-api/.
     ports: 
-      - 82:80
+      - 8082:8080
     depends_on:
       relational-db:
         condition: service_healthy 
@@ -41,6 +43,7 @@ services:
     environment:
       RELATIONAL_DB_URL: postgresql://postgres:postgres@relational-db:5432/postgres
       BROKER_URL: amqp://guest:guest@broker:5672
+      PYTHONUNBUFFERED: 1
 
   relational-db: # relational database
     profiles: ["default", "aggregator"]
@@ -63,7 +66,7 @@ services:
       - "5432:5432"
 
   broker: # message broker
-    profiles: ["default", "aggregator"]
+    profiles: ["default", "aggregator", "firefusion"]
     image: rabbitmq:4.3-rc-management # image has mangement ui
     ports:
       - 5672:5672
@@ -75,7 +78,7 @@ services:
       retries: 5
 
   cache:
-    profiles: ["default"]
+    profiles: ["default", "firefusion"]
     image: redis:8.6.2
     ports:
       - 6379:6379
