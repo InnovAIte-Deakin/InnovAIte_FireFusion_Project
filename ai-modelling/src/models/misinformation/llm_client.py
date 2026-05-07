@@ -155,31 +155,6 @@ def _ensure_dir(path: str | Path) -> Path:
     return path_obj
 
 
-def cluster_narratives(
-    client: LLMClient,
-    posts: Sequence[dict[str, Any]],
-    prompt_template: str,
-    *,
-    strict_json: bool = True,
-) -> dict[str, Any]:
-    """
-    Cluster a batch of posts into misinformation narratives.
-
-    Expected post item format (flexible): {"id": "...", "text": "...", ...}
-    Prompt template should reference:
-      - {posts_json}
-      - optional other variables you include
-    """
-    prompt = render_prompt(
-        prompt_template,
-        {
-            "posts_json": posts,
-            "task": "narrative_clustering",
-        },
-    )
-    return client.generate_json(prompt) if strict_json else {"raw_output": client.generate_text(prompt)}
-
-
 def generate_augmented_samples(
     client: LLMClient,
     records: Sequence[dict[str, Any]],
