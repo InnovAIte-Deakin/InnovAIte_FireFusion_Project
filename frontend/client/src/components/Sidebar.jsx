@@ -1,3 +1,4 @@
+import { NavLink } from "react-router-dom";
 import {
   Home,
   Map,
@@ -84,9 +85,9 @@ export default function Sidebar() {
           <b>3</b>
         </button>
 
-        <button className="nav-item">
+        <NavLink to="/settings" className="nav-item">
           <span><Settings size={17} /> Settings</span>
-        </button>
+        </NavLink>
 
         <div className="profile-card">
           <div>JD</div>
