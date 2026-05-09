@@ -188,7 +188,7 @@
 
 .main {
   margin-left: 305px;
-  padding: 18px;
+ /* padding: 18px; I took out the padding because it look weird, but we can add it back in if needed */ 
   width: calc(100% - 305px);
 }
 
