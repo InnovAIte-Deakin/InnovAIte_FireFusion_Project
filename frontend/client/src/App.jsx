@@ -1,6 +1,8 @@
 import MisinformationReview from "./pages/MisinformationReview.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import FireRiskMap from "./pages/FireRiskMap.tsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
 
 export default function App() {
   const path = window.location.pathname;
@@ -11,6 +13,14 @@ export default function App() {
 
   if (path === '/misinfo-review') {
     return <MisinformationReview />;
+  }
+
+  if (path === "/login") {
+    return <Login />;
+  }
+
+  if (path === "/signup") {
+    return <Signup />;
   }
 
   return <Dashboard />;
