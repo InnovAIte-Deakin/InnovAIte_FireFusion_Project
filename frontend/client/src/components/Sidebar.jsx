@@ -110,9 +110,11 @@ export default function Sidebar() {
           </span>
         </div>
 
-        <button className="signout">
+        <button className="signout" 
+        onClick={() => (window.location.href = "/login")}
+        >
           <LogOut size={16} />
-          Sign Out
+          Logout
         </button>
 
         <small className="version">
