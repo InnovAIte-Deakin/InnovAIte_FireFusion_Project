@@ -74,7 +74,7 @@ export default function MapPage() {
     const loadGeoJSON = async () => {
       try {
         const response = await fetch(
-          'http://localhost:8080/api/bushfire-forecast'
+          '/api/bushfire-forecast' //api call uses vite proxy configured in vite.config.js
         )
         const data = await response.json()
 
@@ -86,8 +86,8 @@ export default function MapPage() {
 
     loadGeoJSON()
 
-    //WebSocket set up for live updates 
-    const ws = new ReconnectingWebSocket('ws://localhost:8080/api/ws') 
+    //WebSocket set up for live updates - uses vite proxy configured in vite.config.js
+    const ws = new ReconnectingWebSocket('/api/ws')
 
     ws.onmessage = (event) => {
       try {
