@@ -1,5 +1,5 @@
 //import the style sheet
-import './MapPage.layout.css'
+import '../components/MapPage/MapPage.layout.css'
 
 //import websocket connection dependency 
 import ReconnectingWebSocket from 'reconnecting-websocket'
