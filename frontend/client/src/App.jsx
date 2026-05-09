@@ -1,3 +1,4 @@
+import MisinformationReview from "./pages/MisinformationReview.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import FireRiskMap from "./pages/FireRiskMap.tsx";
 import Login from "./pages/Login.jsx";
@@ -8,6 +9,10 @@ export default function App() {
 
   if (path === "/fire-map") {
     return <FireRiskMap />;
+  }
+
+  if (path === '/misinfo-review') {
+    return <MisinformationReview />;
   }
 
   if (path === "/login") {

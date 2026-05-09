@@ -565,7 +565,7 @@ body.fusion-login-page a {
   grid-template-columns: 260px 1fr;
 }
 
-.sidebar {
+.auth-sidebar {
   background: rgba(23, 13, 10, 0.95);
   border-right: 1px solid var(--border);
   padding: 1.3rem 1rem;
@@ -610,7 +610,7 @@ body.fusion-login-page a {
   padding: 1.2rem 1.4rem 2rem;
 }
 
-.topbar {
+.auth-topbar {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
@@ -818,7 +818,7 @@ body.fusion-login-page a {
   gap: 0.6rem;
 }
 
-.legend {
+.auth-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;

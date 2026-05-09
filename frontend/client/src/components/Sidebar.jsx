@@ -17,7 +17,6 @@ import {
 const menuItems = [
   { label: "Dashboard", icon: Home, badge: null, active: true },
   { label: "Fire Map", icon: Map, badge: "7" },
-  { label: "Alerts", icon: TriangleAlert, badge: "31" },
   { label: "Misinformation Review", icon: Shield, badge: "14" },
   { label: "Reports", icon: FileText, badge: null },
 ];
@@ -58,6 +57,9 @@ export default function Sidebar() {
                   ? () => (window.location.href = "/fire-map")
                   : item.label === "Dashboard"
                   ? () => (window.location.href = "/")
+                  : item.label ==="Misinformation Review"
+                  ? () => (window.location.href = "/misinfo-review")
+
                   : undefined
               }
             >
