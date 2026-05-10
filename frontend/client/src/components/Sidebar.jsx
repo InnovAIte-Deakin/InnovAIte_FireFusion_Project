@@ -15,10 +15,11 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  { label: "Dashboard", icon: Home, badge: null, active: true },
-  { label: "Fire Map", icon: Map, badge: "7" },
-  { label: "Misinformation Review", icon: Shield, badge: "14" },
-  { label: "Reports", icon: FileText, badge: null },
+  { label: "Dashboard", icon: Home, badge: null, path: "/" },
+  { label: "Fire Map", icon: Map, badge: "7", path: "/fire-map" },
+  { label: "Misinformation Review", icon: Shield, badge: "14", path: "/misinfo-review" },
+  { label: "Alerts", icon: TriangleAlert, badge: null, path: "/alerts" },
+  { label: "Reports", icon: FileText, badge: null, path: null },
 ];
 
 function InfoBox({ icon: Icon, title, value }) {
@@ -32,6 +33,9 @@ function InfoBox({ icon: Icon, title, value }) {
 }
 
 export default function Sidebar() {
+  const currentPath =
+    typeof window !== "undefined" ? window.location.pathname : "/";
+
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -47,19 +51,15 @@ export default function Sidebar() {
       <nav className="nav-list">
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const isActive = item.path && currentPath === item.path;
 
           return (
             <button
               key={item.label}
-              className={`nav-item ${item.active ? "active" : ""}`}
+              className={`nav-item ${isActive ? "active" : ""}`}
               onClick={
-                item.label === "Fire Map"
-                  ? () => (window.location.href = "/fire-map")
-                  : item.label === "Dashboard"
-                  ? () => (window.location.href = "/")
-                  : item.label ==="Misinformation Review"
-                  ? () => (window.location.href = "/misinfo-review")
-
+                item.path
+                  ? () => (window.location.href = item.path)
                   : undefined
               }
             >
@@ -69,7 +69,7 @@ export default function Sidebar() {
               </span>
 
               {item.badge && <b>{item.badge}</b>}
-              {item.active && <ChevronRight size={16} />}
+              {isActive && <ChevronRight size={16} />}
             </button>
           );
         })}

@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import FireRiskMap from "./pages/FireRiskMap.tsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import Alerts from "./pages/Alerts.jsx";
 
 export default function App() {
   const path = window.location.pathname;
@@ -11,7 +12,7 @@ export default function App() {
     return <FireRiskMap />;
   }
 
-  if (path === '/misinfo-review') {
+  if (path === "/misinfo-review") {
     return <MisinformationReview />;
   }
 
@@ -21,6 +22,10 @@ export default function App() {
 
   if (path === "/signup") {
     return <Signup />;
+  }
+
+  if (path === "/alerts") {
+    return <Alerts />;
   }
 
   return <Dashboard />;

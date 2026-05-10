@@ -1,4 +1,11 @@
-html, body {
+/*
+  Scoped to the map page only. Previously these rules were applied to
+  html, body globally, which leaked overflow:hidden to every other page
+  in the app (e.g. /alerts, /), making them un-scrollable.
+  :has() lets us apply them ONLY when the .map-page element is in the DOM.
+*/
+html:has(.map-page),
+body:has(.map-page) {
   height: 100%;
   margin: 0;
   overflow: hidden;
