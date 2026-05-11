@@ -8,6 +8,10 @@
   box-sizing: border-box;
 }
 
+.feed-bg-card.selected {
+  outline: 2px solid var(--color-accent, #f97316);
+}
+
 .misinfo-content-area {
   --bg-page: #F8FAFC;
   --bg-card: #FFFFFF;
@@ -37,11 +41,12 @@
 
 /* Feed placeholder */
 .feed-placeholder {
-  width: 440px;
-  flex-shrink: 0;
+  flex: 0 0 30%;
+  min-width: 0;
   background: var(--bg-page);
   padding: 20px;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   transition: opacity 0.2s ease;
 }
 
@@ -51,7 +56,7 @@
 }
 
 .feed-placeholder-header {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-tertiary);
   margin-bottom: 12px;
@@ -61,9 +66,15 @@
   background: var(--bg-card);
   border: 1px solid var(--border-light);
   border-radius: 8px;
-  padding: 12px;
+  padding: 14px;
   margin-bottom: 8px;
   border-left: 3px solid var(--red-accent);
+  font-family: inherit;
+  display: block;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
 .feed-bg-card.high {
@@ -75,14 +86,14 @@
 }
 
 .feed-bg-card-title {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
 .feed-bg-card-text {
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-tertiary);
   line-height: 1.4;
 }
@@ -120,7 +131,7 @@
 }
 
 .panel-title {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -152,9 +163,9 @@
 
 /* Severity pill */
 .sev-pill {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
-  padding: 2px 10px;
+  padding: 3px 10px;
   border-radius: 9999px;
 }
 
@@ -168,7 +179,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--purple-text);
   background: var(--purple-bg);
@@ -179,7 +190,7 @@
 
 /* Section titles */
 .panel-section-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
@@ -200,7 +211,7 @@
 }
 
 .narrative-summary-title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
   line-height: 1.4;
@@ -212,7 +223,7 @@
 }
 
 .narrative-summary-incident {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
@@ -220,7 +231,7 @@
 .narrative-summary-meta {
   display: flex;
   gap: 12px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--red-text);
   font-weight: 500;
 }
@@ -241,7 +252,7 @@
 }
 
 .claim-number {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-tertiary);
   min-width: 20px;
@@ -249,7 +260,7 @@
 }
 
 .claim-text {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
   line-height: 1.5;
 }
@@ -270,14 +281,14 @@
 }
 
 .fact-source {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--green-text);
   margin-bottom: 4px;
 }
 
 .fact-text {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
   line-height: 1.5;
 }
@@ -302,25 +313,25 @@
 }
 
 .evidence-post-author {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-secondary);
 }
 
 .evidence-post-platform {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
 
 .evidence-post-text {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
   line-height: 1.5;
   margin-bottom: 6px;
 }
 
 .evidence-post-meta {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
 
@@ -336,9 +347,9 @@
 
 .action-btn {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 10px 20px;
+  padding: 11px 20px;
   border-radius: 8px;
   cursor: pointer;
   border: none;
@@ -374,19 +385,19 @@
 }
 
 .collapsed-review-title {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .collapsed-review-meta {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-tertiary);
   white-space: nowrap;
 }
 
 .confirmed-badge {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 9999px;
@@ -401,7 +412,7 @@
 }
 
 .composer-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-tertiary);
   text-transform: uppercase;
@@ -419,7 +430,7 @@
   border-radius: 10px;
   padding: 14px 16px;
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
   line-height: 1.6;
   resize: vertical;
@@ -471,13 +482,13 @@
 }
 
 .channel-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
 }
 
 .channel-desc {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-tertiary);
 }
 
@@ -493,9 +504,9 @@
 
 .publish-btn {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  padding: 10px 24px;
+  padding: 11px 24px;
   border-radius: 8px;
   cursor: pointer;
   border: none;
@@ -507,9 +518,9 @@
 
 .save-draft-btn {
   font-family: inherit;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
-  padding: 10px 20px;
+  padding: 11px 20px;
   border-radius: 8px;
   cursor: pointer;
   border: 1px solid var(--border-light);
