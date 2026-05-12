@@ -103,39 +103,6 @@ export default function Settings() {
               </div>
               <SaveBtn saved={saved} onClick={handleSave} />
             </div>
-            <div className="settings-two-col">
-              <div className="panel settings-panel settings-panel-highlight">
-                <h3>Notification Preferences</h3>
-                <NotifRow label="Emergency Alerts" desc="Critical fire & evacuation notifications" enabled={notifs.emergencyAlerts} onChange={v => setNotifs(p => ({ ...p, emergencyAlerts: v }))} />
-                <NotifRow label="Misinformation Alerts" desc="New claims flagged for review" enabled={notifs.misinfoAlerts} onChange={v => setNotifs(p => ({ ...p, misinfoAlerts: v }))} />
-                <NotifRow label="Weather Updates" desc="Wind, temperature & humidity changes" enabled={notifs.weatherUpdates} onChange={v => setNotifs(p => ({ ...p, weatherUpdates: v }))} />
-                <NotifRow label="System Notifications" desc="Sync status & app updates" enabled={notifs.systemNotifs} onChange={v => setNotifs(p => ({ ...p, systemNotifs: v }))} />
-              </div>
-              <div className="panel settings-panel">
-                <h3>Display & Region</h3>
-                <div className="settings-fields-grid2">
-                  <Field label="Region" value={region} onChange={setRegion} />
-                  <Field label="Timezone" value={timezone} onChange={setTimezone} />
-                  <div className="settings-full-col"><Field label="Map Default View" value={mapView} onChange={setMapView} /></div>
-                  <Field label="Date Format" value={dateFormat} onChange={setDateFormat} />
-                  <Field label="Units" value={units} onChange={setUnits} />
-                </div>
-              </div>
-            </div>
-            <div className="settings-two-col">
-              <div className="panel settings-panel">
-                <h3>Security</h3>
-                <NotifRow label="Two-Factor Authentication" desc="Add extra security to your account" enabled={twoFactor} onChange={setTwoFactor} />
-                <NotifRow label="Login Alerts" desc="Get notified of new sign-ins" enabled={loginAlerts} onChange={setLoginAlerts} />
-                <div className="settings-field-single"><SelectField label="Session Timeout" value={sessionTimeout} onChange={setSessionTimeout} options={["15 minutes", "30 minutes", "1 hour", "Never"]} /></div>
-              </div>
-              <div className="panel settings-panel">
-                <h3>Data & Sync</h3>
-                <NotifRow label="Auto-Sync" desc="Sync data every 2 minutes" enabled={autoSync} onChange={setAutoSync} />
-                <NotifRow label="Offline Mode" desc="Cache data for offline access" enabled={offlineMode} onChange={setOfflineMode} />
-                <div className="settings-field-single"><SelectField label="Data Retention" value={dataRetention} onChange={setDataRetention} options={["30 days", "60 days", "90 days", "1 year"]} /></div>
-              </div>
-            </div>
           </>
         )}
 
