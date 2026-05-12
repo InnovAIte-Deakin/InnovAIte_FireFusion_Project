@@ -1,27 +1,35 @@
-import axios, { AxiosError } from 'axios';
+import axios from "axios";
 
+const baseURL = (
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_API_BASE_URL) ||
+  "http://localhost:8080/api"
+).replace(/\/+$/, "");
+
+/**
+ * Shared HTTP client for FireFusion API (Screen 1 misinfo + other features).
+ */
 const axiosClient = axios.create({
-  baseURL: "http://localhost:8080/api/",
+  baseURL,
+  timeout: 30_000,
   headers: {
-    'Content-Type': 'application/json',
+    Accept: "application/json",
+    "Content-Type": "application/json",
   },
 });
 
-// Add a response interceptor
 axiosClient.interceptors.response.use(
-  function (response) {
-    // Any status code that lie within the range of 2xx cause this function to trigger
-    // Do something with response data
-    return response.data;
-  },
-  function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    if (error.response?.status === 401) {
-        console.log(error)
-    }
-    return Promise.reject(error);
-  },
+  (response) => response.data,
+  (error) => {
+    const message =
+      error.response?.data?.message ||
+      error.response?.data?.detail ||
+      error.message ||
+      "Request failed";
+    const wrapped = new Error(message);
+    wrapped.cause = error;
+    wrapped.status = error.response?.status;
+    return Promise.reject(wrapped);
+  }
 );
 
 export default axiosClient;
