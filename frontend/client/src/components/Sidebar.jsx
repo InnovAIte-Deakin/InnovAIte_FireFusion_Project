@@ -98,7 +98,7 @@ export default function Sidebar() {
           <b>3</b>
         </button>
 
-        <button className="nav-item">
+        <button className="nav-item" onClick={() => (window.location.href = "/settings")}>
           <span><Settings size={17} /> Settings</span>
         </button>
 
