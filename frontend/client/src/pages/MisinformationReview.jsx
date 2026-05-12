@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useQuery } from '@tanstack/react-query';
 import Layout from "../components/Layout";
 import ReviewPanel from "../components/misinfo/ReviewPanel";
 import "../components/misinfo/misinfo.css";
+import narrativesApi, { postsApi } from "../apis/misinfo-api";
 
 const sampleNarrative = {
   cluster_id: "nar_001",
@@ -102,6 +104,29 @@ export default function MisinformationReview() {
   const [panelState, setPanelState] = useState("review");
   const [correctionText, setCorrectionText] = useState(draftCorrection);
   const [selectedChannels, setSelectedChannels] = useState(["social", "nms"]);
+  const [selectedNarrativeId, setSelectedNarrativeId] = useState("nar_001");
+
+  // Fetch all narratives
+  const { data: narratives, error, isLoading, isError, isFetching, refetch, status } = useQuery({
+    queryKey: ['narratives'],
+    queryFn: narrativesApi.getAll,
+    keepPreviousData: true}
+  );
+
+  // Fetch narrative by id
+  const { data: narrative } = useQuery({
+    queryKey: ['narrative', selectedNarrativeId],
+    queryFn: () => narrativesApi.getOne(selectedNarrativeId),
+    enabled: !!selectedNarrativeId,
+  });
+
+  console.log(narrative);
+
+  // fetch all posts
+  const { data: posts } = useQuery({
+    queryKey: ['posts'],
+    queryFn: postsApi.getAll,
+  }); 
 
   function handleChannelToggle(id) {
     setSelectedChannels((prev) =>
@@ -110,27 +135,33 @@ export default function MisinformationReview() {
   }
 
   return (
-    <Layout title="Misinformation Review">
+    <Layout title="Misinformation Review" showTopbar={false} showFooter={false}>
       <div className="misinfo-content-area">
-        <div className={`feed-placeholder${panelState ? " dimmed" : ""}`}>
+        <div className={`feed-placeholder${panelState === "compose" ? " dimmed" : ""}`}>
           <div className="feed-placeholder-header">Misinformation feed</div>
-          {FEED_CARDS.map((card) => (
-            <div
-              key={card.label}
-              className={`feed-bg-card${card.severity === "high" ? " high" : card.severity === "med" ? " med" : ""}`}
-            >
-              <div className="feed-bg-card-title">{card.label}</div>
-              <div className="feed-bg-card-text">{card.text}</div>
-            </div>
-          ))}
+          {narratives?.map((card) => {
+            const label = `${card.severity} - ${card.incident_name}`
+            const text = `${card.narrative_summary} - ${card.post_count} posts, ${card.combined_shares} shares`
+            return (
+              <button
+                key={card.narrative_id}
+                type="button"
+                className={`feed-bg-card${card.severity.toLowerCase() === "high" ? " high" : card.severity.toLowerCase() === "medium" ? " med" : ""}${selectedNarrativeId === card.narrative_id ? " selected" : ""}`}
+                onClick={() => setSelectedNarrativeId(card.narrative_id)}
+              >
+                <div className="feed-bg-card-title">{label}</div>
+                <div className="feed-bg-card-text">{text}</div>
+              </button>
+            );
+          })}
         </div>
 
         <div className="panel-divider" />
 
-        <ReviewPanel
-          narrative={sampleNarrative}
-          posts={samplePosts}
-          officialFacts={officialFacts}
+        {narrative && <ReviewPanel
+          narrative={narrative ?? null}
+          posts={posts ?? []}
+          officialFacts={narrative?.matched_facts}
           panelState={panelState}
           onConfirm={() => setPanelState("compose")}
           onClose={() => setPanelState("review")}
@@ -140,7 +171,7 @@ export default function MisinformationReview() {
           onChannelToggle={handleChannelToggle}
           onSaveDraft={() => alert("Draft saved.")}
           onPublish={() => alert("Correction published.")}
-        />
+        />}
       </div>
     </Layout>
   );
