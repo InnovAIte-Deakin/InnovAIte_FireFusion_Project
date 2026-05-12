@@ -8,7 +8,7 @@ const baseURL = (
 /**
  * Shared HTTP client for FireFusion API (Screen 1 misinfo + other features).
  */
-export const apiClient = axios.create({
+const axiosClient = axios.create({
   baseURL,
   timeout: 30_000,
   headers: {
@@ -17,8 +17,8 @@ export const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.response.use(
-  (response) => response,
+axiosClient.interceptors.response.use(
+  (response) => response.data,
   (error) => {
     const message =
       error.response?.data?.message ||
@@ -31,3 +31,5 @@ apiClient.interceptors.response.use(
     return Promise.reject(wrapped);
   }
 );
+
+export default axiosClient;

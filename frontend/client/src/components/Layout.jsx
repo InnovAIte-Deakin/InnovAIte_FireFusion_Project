@@ -1,21 +1,16 @@
+import { useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import Footer from "./Footer";
-import {
-  SidebarCollapseProvider,
-  useSidebarCollapse,
-} from "./SidebarCollapseContext";
 
-function LayoutShell({ children, title, showTopbar, showFooter }) {
-  const { collapsed } = useSidebarCollapse();
+export default function Layout({ children, title = "Dashboard", showTopbar = true, showFooter = true }) {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
-    <div
-      className={`dashboard-shell${collapsed ? " dashboard-shell--sidebar-collapsed" : ""}`}
-    >
-      <Sidebar />
+    <div className="dashboard-shell">
+      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed((v) => !v)} />
 
-      <main className="main">
+      <main className={`main${sidebarCollapsed ? " sidebar-collapsed" : ""}`}>
         {showTopbar && <Topbar title={title} />}
 
         {children}
@@ -23,20 +18,5 @@ function LayoutShell({ children, title, showTopbar, showFooter }) {
         {showFooter && <Footer />}
       </main>
     </div>
-  );
-}
-
-export default function Layout({
-  children,
-  title = "Dashboard",
-  showTopbar = true,
-  showFooter = true,
-}) {
-  return (
-    <SidebarCollapseProvider>
-      <LayoutShell title={title} showTopbar={showTopbar} showFooter={showFooter}>
-        {children}
-      </LayoutShell>
-    </SidebarCollapseProvider>
   );
 }

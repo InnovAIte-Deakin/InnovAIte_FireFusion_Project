@@ -11,8 +11,9 @@ import {
   Droplets,
   Eye,
   ChevronRight,
+  ChevronLeft,
   PanelLeftClose,
-  PanelLeft,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useSidebarCollapse } from "./SidebarCollapseContext";
 
@@ -35,126 +36,108 @@ function InfoBox({ icon: Icon, title, value }) {
   );
 }
 
-export default function Sidebar() {
-  const { collapsed, toggle } = useSidebarCollapse();
-
+export default function Sidebar({ collapsed, onToggle }) {
   return (
-    <aside className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`}>
-      <div className="sidebar-toolbar">
-        <button
-          type="button"
-          className="sidebar-collapse-btn"
-          onClick={toggle}
-          aria-expanded={!collapsed}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+    <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
+      <div className="sidebar-header">
+        <div className="brand">
+          <div className="brand-logo">FF</div>
+          {!collapsed && (
+            <div>
+              <h1>FireFusion</h1>
+              <p>Emergency Operations</p>
+            </div>
+          )}
+        </div>
+        <button className="sidebar-toggle" onClick={onToggle} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
         </button>
       </div>
 
-      <div className="brand">
-        <div className="brand-logo">FF</div>
-        <div className="brand-text">
-          <h1>FireFusion</h1>
-          <p>Emergency Operations</p>
-        </div>
-      </div>
+      {!collapsed && <p className="section-title">Main Menu</p>}
 
-      <p className="section-title">Main Menu</p>
-
-      <nav className="nav-list">
+      <nav className={`nav-list${collapsed ? " nav-list--collapsed" : ""}`}>
         {menuItems.map((item) => {
           const Icon = item.icon;
 
           return (
             <button
               key={item.label}
-              type="button"
-              className={`nav-item ${item.active ? "active" : ""}`}
+              className={`nav-item ${item.active ? "active" : ""}${collapsed ? " nav-item--icon-only" : ""}`}
+              title={collapsed ? item.label : undefined}
               onClick={
                 item.label === "Fire Map"
                   ? () => {
                       window.location.href = "/fire-map";
                     }
                   : item.label === "Dashboard"
-                    ? () => {
-                        window.location.href = "/";
-                      }
-                    : item.label === "Misinformation Review"
-                      ? () => {
-                          window.location.href = "/alerts";
-                        }
-                      : undefined
+                  ? () => (window.location.href = "/")
+                  : item.label === "Misinformation Review"
+                  ? () => (window.location.href = "/misinfo")
+                  : undefined
               }
             >
               <span>
                 <Icon size={17} />
-                <span className="nav-item-label">{item.label}</span>
+                {!collapsed && item.label}
               </span>
 
-              {item.badge ? (
-                <b className="nav-item-badge">{item.badge}</b>
-              ) : null}
-              {item.active ? <ChevronRight size={16} className="nav-item-chevron" /> : null}
+              {!collapsed && item.badge && <b>{item.badge}</b>}
+              {!collapsed && item.active && <ChevronRight size={16} />}
             </button>
           );
         })}
       </nav>
 
-      <div className="ban-card">
-        <h3>
-          <span></span>Total Fire Ban
-        </h3>
-        <p>No fires permitted</p>
-        <small>Catastrophic conditions.</small>
-      </div>
+      {!collapsed && (
+        <>
+          <div className="ban-card">
+            <h3><span></span>Total Fire Ban</h3>
+            <p>No fires permitted</p>
+            <small>Catastrophic conditions.</small>
+          </div>
 
-      <div className="weather-grid">
-        <InfoBox icon={Thermometer} title="Temperature" value="42°C" />
-        <InfoBox icon={Wind} title="Wind Speed" value="45 km/h" />
-        <InfoBox icon={Droplets} title="Humidity" value="18%" />
-        <InfoBox icon={Eye} title="Visibility" value="3 km" />
-      </div>
+          <div className="weather-grid">
+            <InfoBox icon={Thermometer} title="Temperature" value="42°C" />
+            <InfoBox icon={Wind} title="Wind Speed" value="45 km/h" />
+            <InfoBox icon={Droplets} title="Humidity" value="18%" />
+            <InfoBox icon={Eye} title="Visibility" value="3 km" />
+          </div>
 
-      <p className="last-update">Last updated: 14:30</p>
+          <p className="last-update">Last updated: 14:30</p>
 
-      <div className="sidebar-bottom">
-        <p className="section-title">System</p>
+          <div className="sidebar-bottom">
+            <p className="section-title">System</p>
 
-        <button type="button" className="nav-item">
-          <span>
-            <Bell size={17} />
-            <span className="nav-item-label">Notifications</span>
-          </span>
-          <b className="nav-item-badge">3</b>
-        </button>
+            <button className="nav-item">
+              <span><Bell size={17} /> Notifications</span>
+              <b>3</b>
+            </button>
 
-        <button type="button" className="nav-item">
-          <span>
-            <Settings size={17} />
-            <span className="nav-item-label">Settings</span>
-          </span>
-        </button>
+            <button className="nav-item">
+              <span><Settings size={17} /> Settings</span>
+            </button>
 
-        <div className="profile-card">
-          <div>JD</div>
-          <span className="profile-card-text">
-            <strong>Gaveesha Nuwansara</strong>
-            <small>Emergency Manager</small>
-          </span>
-        </div>
+            <div className="profile-card">
+              <div>JD</div>
+              <span>
+                <strong>Gaveesha Nuwansara</strong>
+                <small>Emergency Manager</small>
+              </span>
+            </div>
 
-        <button type="button" className="signout">
-          <LogOut size={16} />
-          <span className="nav-item-label">Sign Out</span>
-        </button>
+            <button className="signout">
+              <LogOut size={16} />
+              Sign Out
+            </button>
 
-        <small className="version">
-          Version 2.4.1<br />
-          Last sync: 2 min ago
-        </small>
-      </div>
+            <small className="version">
+              Version 2.4.1<br />
+              Last sync: 2 min ago
+            </small>
+          </div>
+        </>
+      )}
     </aside>
   );
 }

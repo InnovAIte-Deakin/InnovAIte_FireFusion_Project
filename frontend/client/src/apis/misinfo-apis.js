@@ -1,4 +1,4 @@
-import { apiClient } from "./axios-client.js";
+import axiosClient from "./axios-client.js";
 
 function unwrapList(payload, keys = []) {
   if (Array.isArray(payload)) return payload;
