@@ -4,7 +4,7 @@ import "../../App.css";
 import "../auth/styles.css";
 import "./misinfo.css";
 import "./misinfo-monitor.css";
-import { getIncidents, getNarratives, getPosts } from "../../apis/misinfo-apis";
+import narrativesApi, { incidentsApi } from "../../apis/misinfo-api";
 import {
   FALLBACK_INCIDENTS,
   FALLBACK_NARRATIVES,
@@ -61,14 +61,13 @@ export default function MisinfoLanding() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [nRes, , iRes] = await Promise.all([
-        getNarratives(),
-        getPosts(),
-        getIncidents(),
+      const [nData, iData] = await Promise.all([
+        narrativesApi.getAll(),
+        incidentsApi.getAll(),
       ]);
 
-      let nextNarratives = normalizeList(normalizeNarrative, nRes.data);
-      let nextIncidents = normalizeList(normalizeIncident, iRes.data);
+      let nextNarratives = normalizeList(normalizeNarrative, Array.isArray(nData) ? nData : []);
+      let nextIncidents = normalizeList(normalizeIncident, Array.isArray(iData) ? iData : []);
 
       if (nextNarratives.length === 0) {
         nextNarratives = FALLBACK_NARRATIVES.map((n) => normalizeNarrative(n));
