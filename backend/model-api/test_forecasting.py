@@ -20,7 +20,10 @@ csv_path = Path("app/data/forecaster_test_data.csv")
 
 df = pd.read_csv(csv_path)
 
-df["datetime"] = pd.to_datetime(df["datetime"])
+df["datetime"] = pd.to_datetime(
+    df["datetime"],
+    dayfirst=True
+)
 df = df.sort_values("datetime").reset_index(drop=True)
 
 data = df[FEATURES].tail(60).values.astype(np.float32)
