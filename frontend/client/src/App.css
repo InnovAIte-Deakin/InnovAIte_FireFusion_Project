@@ -246,17 +246,12 @@
 .main {
   margin-left: 305px;
   width: calc(100% - 305px);
-<<<<<<< Updated upstream
   transition: margin-left 0.2s ease, width 0.2s ease;
 }
 
 .main.sidebar-collapsed {
   margin-left: 64px;
   width: calc(100% - 64px);
-=======
-  display: flex;
-  flex-direction: column;
->>>>>>> Stashed changes
 }
 
 .topbar {
