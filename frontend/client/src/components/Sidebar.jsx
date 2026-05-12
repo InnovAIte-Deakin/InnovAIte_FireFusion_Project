@@ -1,7 +1,6 @@
 import {
   Home,
   Map,
-  TriangleAlert,
   Shield,
   FileText,
   Bell,
@@ -12,7 +11,10 @@ import {
   Droplets,
   Eye,
   ChevronRight,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
+import { useSidebarCollapse } from "./SidebarCollapseContext";
 
 const menuItems = [
   { label: "Dashboard", icon: Home, badge: null, active: true },
@@ -25,18 +27,35 @@ function InfoBox({ icon: Icon, title, value }) {
   return (
     <div className="info-box">
       <Icon size={16} />
-      <span>{title}</span>
-      <b>{value}</b>
+      <div className="info-box-copy">
+        <span className="info-box-title">{title}</span>
+        <b className="info-box-value">{value}</b>
+      </div>
     </div>
   );
 }
 
 export default function Sidebar() {
+  const { collapsed, toggle } = useSidebarCollapse();
+
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${collapsed ? " sidebar--collapsed" : ""}`}>
+      <div className="sidebar-toolbar">
+        <button
+          type="button"
+          className="sidebar-collapse-btn"
+          onClick={toggle}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <PanelLeft size={20} /> : <PanelLeftClose size={20} />}
+        </button>
+      </div>
+
       <div className="brand">
         <div className="brand-logo">FF</div>
-        <div>
+        <div className="brand-text">
           <h1>FireFusion</h1>
           <p>Emergency Operations</p>
         </div>
@@ -51,32 +70,42 @@ export default function Sidebar() {
           return (
             <button
               key={item.label}
+              type="button"
               className={`nav-item ${item.active ? "active" : ""}`}
               onClick={
                 item.label === "Fire Map"
-                  ? () => (window.location.href = "/fire-map")
+                  ? () => {
+                      window.location.href = "/fire-map";
+                    }
                   : item.label === "Dashboard"
-                  ? () => (window.location.href = "/")
-                  : item.label ==="Misinformation Review"
-                  ? () => (window.location.href = "/misinfo-review")
-
-                  : undefined
+                    ? () => {
+                        window.location.href = "/";
+                      }
+                    : item.label === "Misinformation Review"
+                      ? () => {
+                          window.location.href = "/alerts";
+                        }
+                      : undefined
               }
             >
               <span>
                 <Icon size={17} />
-                {item.label}
+                <span className="nav-item-label">{item.label}</span>
               </span>
 
-              {item.badge && <b>{item.badge}</b>}
-              {item.active && <ChevronRight size={16} />}
+              {item.badge ? (
+                <b className="nav-item-badge">{item.badge}</b>
+              ) : null}
+              {item.active ? <ChevronRight size={16} className="nav-item-chevron" /> : null}
             </button>
           );
         })}
       </nav>
 
       <div className="ban-card">
-        <h3><span></span>Total Fire Ban</h3>
+        <h3>
+          <span></span>Total Fire Ban
+        </h3>
         <p>No fires permitted</p>
         <small>Catastrophic conditions.</small>
       </div>
@@ -93,26 +122,32 @@ export default function Sidebar() {
       <div className="sidebar-bottom">
         <p className="section-title">System</p>
 
-        <button className="nav-item">
-          <span><Bell size={17} /> Notifications</span>
-          <b>3</b>
+        <button type="button" className="nav-item">
+          <span>
+            <Bell size={17} />
+            <span className="nav-item-label">Notifications</span>
+          </span>
+          <b className="nav-item-badge">3</b>
         </button>
 
-        <button className="nav-item">
-          <span><Settings size={17} /> Settings</span>
+        <button type="button" className="nav-item">
+          <span>
+            <Settings size={17} />
+            <span className="nav-item-label">Settings</span>
+          </span>
         </button>
 
         <div className="profile-card">
           <div>JD</div>
-          <span>
+          <span className="profile-card-text">
             <strong>Gaveesha Nuwansara</strong>
             <small>Emergency Manager</small>
           </span>
         </div>
 
-        <button className="signout">
+        <button type="button" className="signout">
           <LogOut size={16} />
-          Sign Out
+          <span className="nav-item-label">Sign Out</span>
         </button>
 
         <small className="version">

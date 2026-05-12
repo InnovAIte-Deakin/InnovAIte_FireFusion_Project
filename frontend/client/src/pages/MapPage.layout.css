@@ -1,17 +1,25 @@
-html, body {
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-}
+/**
+ * Fire map layout — scoped to .map-page only.
+ * Do NOT set html/body overflow here: FireRiskMap is imported from App.jsx,
+ * so this file is bundled for all routes and would break scrolling (e.g. Misinformation monitor).
+ */
 
-/* full screen wrapper */
 .map-page {
-  position: absolute;
+  position: fixed;
   top: 0;
-  left: 305px; /* matches sidebar width in App.css */
-  width: calc(100vw - 305px); /*must change this too if changing sidebar width*/
+  left: var(--sidebar-width, 305px);
+  width: calc(100vw - var(--sidebar-width, 305px));
   height: 100vh;
   overflow: hidden;
+  z-index: 0;
+  transition: left 0.2s ease, width 0.2s ease;
+}
+
+@media (max-width: 1100px) {
+  .map-page {
+    left: 0;
+    width: 100vw;
+  }
 }
 
 /* full screen map container */
@@ -22,7 +30,7 @@ html, body {
   overflow: hidden;
 }
 
-/* override leaflet rendering so it doesn't go over page */
+/* override leaflet rendering so it does not go over page */
 .leaflet-container {
   width: 100% !important;
   height: 100% !important;

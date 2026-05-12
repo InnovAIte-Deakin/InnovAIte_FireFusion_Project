@@ -1,16 +1,125 @@
+:root {
+  --sidebar-width: 305px;
+}
+
 .dashboard-shell {
   display: flex;
   min-height: 100vh;
 }
 
 .sidebar {
-  width: 305px;
+  width: var(--sidebar-width);
+  max-width: 305px;
   background: #061b45;
   color: white;
   padding: 22px 20px;
   position: fixed;
   inset: 0 auto 0 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.2s ease, padding 0.2s ease;
+  z-index: 20;
+}
+
+.sidebar-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: -6px -4px 10px 0;
+}
+
+.sidebar-collapse-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.sidebar-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.brand-text {
+  min-width: 0;
+}
+
+.nav-item-label {
+  text-align: left;
+}
+
+.nav-item-chevron {
+  flex-shrink: 0;
+}
+
+.profile-card-text {
+  min-width: 0;
+}
+
+.dashboard-shell--sidebar-collapsed .sidebar {
+  width: 72px;
+  max-width: 72px;
+  padding: 16px 10px;
+}
+
+.dashboard-shell--sidebar-collapsed .sidebar-toolbar {
+  justify-content: center;
+  margin: -4px 0 8px;
+}
+
+.dashboard-shell--sidebar-collapsed .brand-text,
+.dashboard-shell--sidebar-collapsed .section-title,
+.dashboard-shell--sidebar-collapsed .nav-item-label,
+.dashboard-shell--sidebar-collapsed .nav-item-badge,
+.dashboard-shell--sidebar-collapsed .nav-item-chevron,
+.dashboard-shell--sidebar-collapsed .ban-card,
+.dashboard-shell--sidebar-collapsed .weather-grid,
+.dashboard-shell--sidebar-collapsed .last-update,
+.dashboard-shell--sidebar-collapsed .profile-card-text,
+.dashboard-shell--sidebar-collapsed .version,
+.dashboard-shell--sidebar-collapsed .info-box-copy {
+  display: none !important;
+}
+
+.dashboard-shell--sidebar-collapsed .brand {
+  justify-content: center;
+}
+
+.dashboard-shell--sidebar-collapsed .nav-item {
+  justify-content: center;
+  padding: 12px 8px;
+}
+
+.dashboard-shell--sidebar-collapsed .nav-item span {
+  gap: 0;
+}
+
+.dashboard-shell--sidebar-collapsed .info-box {
+  align-items: center;
+  padding: 10px 6px;
+}
+
+.dashboard-shell--sidebar-collapsed .profile-card {
+  justify-content: center;
+  padding: 10px;
+}
+
+.dashboard-shell--sidebar-collapsed .signout {
+  justify-content: center;
+}
+
+.dashboard-shell--sidebar-collapsed .signout .nav-item-label {
+  display: none !important;
+}
+
+.main {
+  margin-left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  transition: margin-left 0.2s ease, width 0.2s ease;
 }
 
 .brand {
@@ -29,12 +138,17 @@
   font-weight: 800;
 }
 
-.brand h1 {
+.brand-text h1 {
   font-size: 22px;
   margin: 0;
 }
 
-.brand p,
+.brand-text p {
+  color: #9db0d2;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
 .section-title,
 .last-update,
 .version {
@@ -132,6 +246,30 @@
   color: #071833;
   border-radius: 12px;
   padding: 13px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.info-box-title {
+  display: block;
+  color: #9aa9bd;
+  font-size: 12px;
+  margin: 0 0 7px;
+}
+
+.info-box-value {
+  display: block;
+  color: #ff5722;
+  font-weight: 700;
+}
+
+.info-box-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
 }
 
 .info-box p {
@@ -186,12 +324,6 @@
   cursor: pointer;
 }
 
-.main {
-  margin-left: 305px;
- /* padding: 18px; I took out the padding because it look weird, but we can add it back in if needed */ 
-  width: calc(100% - 305px);
-}
-
 .topbar {
   background: white;
   border: 1px solid #e1e8f3;
@@ -200,6 +332,24 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.topbar-sidebar-toggle {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid #d9e2f1;
+  background: #f9fbff;
+  color: #526178;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.topbar-sidebar-toggle:hover {
+  background: #eef3fc;
+  color: #111827;
 }
 
 .topbar h2 {
