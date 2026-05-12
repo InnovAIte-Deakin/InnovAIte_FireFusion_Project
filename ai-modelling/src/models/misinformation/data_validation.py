@@ -1,3 +1,0 @@
-"""
-Synthetic data validation module.
-"""
