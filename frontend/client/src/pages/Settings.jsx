@@ -200,15 +200,79 @@ export default function Settings() {
         )}
 
         {tab === "About" && (
-          <div className="panel settings-panel settings-panel-narrow">
-            <h3>About FireFusion</h3>
-            <p className="settings-sub">System information and version details</p>
-            {[["Application","FireFusion Emergency Operations Dashboard"],["Version","2.4.1"],["Last Sync","2 min ago"],["Environment","Production"],["Organisation","Emergency Management Victoria"],["Support","support@firefusion.gov.au"]].map(([k,v]) => (
-              <div key={k} className="settings-about-row">
-                <span className="settings-about-key">{k}</span>
-                <span className="settings-about-val">{v}</span>
+          <div className="panel settings-panel settings-panel-about">
+            <div className="about-hero">
+              <div className="about-hero-text">
+                <span className="about-label">About FireFusion</span>
+                <h3>AI-driven bushfire forecasting and misinformation defence system</h3>
+                <p>FireFusion is an AI-powered bushfire management platform designed for Victoria, Australia. It provides real-time fire risk forecasting, emergency alerts, and misinformation detection to support authorities and communities in making informed decisions during bushfire events.</p>
+                <div className="about-summary-grid">
+                  <div>
+                    <span>Application Name</span>
+                    <strong>FireFusion – AI-Driven Bushfire Forecasting System</strong>
+                  </div>
+                  <div>
+                    <span>Version</span>
+                    <strong>v1.0.0 (Beta)</strong>
+                  </div>
+                  <div>
+                    <span>Developed By</span>
+                    <strong>FireFusion Team / InnovAIte</strong>
+                  </div>
+                </div>
               </div>
-            ))}
+
+              <div className="about-hero-side">
+                <div className="about-brand-card">
+                  <div className="about-brand-logo">FF</div>
+                  <div>
+                    <h4>FireFusion</h4>
+                    <p>Emergency Operations</p>
+                  </div>
+                </div>
+                <div className="about-stat-grid">
+                  <div className="about-stat-card">
+                    <span>Vision</span>
+                    <strong>Smart, safe and resilient communities.</strong>
+                  </div>
+                  <div className="about-stat-card">
+                    <span>Mission</span>
+                    <strong>Deliver trusted risk insights for fast action.</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="about-feature-grid">
+              <div className="about-card">
+                <h4>Vision</h4>
+                <p>Enable early and accurate bushfire prediction using advanced AI models that analyze environmental, weather, and historical data to identify high-risk zones and support timely preventive actions.</p>
+              </div>
+              <div className="about-card">
+                <h4>Mission</h4>
+                <p>Provide real-time bushfire risk forecasts and alerts by continuously analyzing environmental, weather, and sensor data to support proactive decision-making and improve community preparedness.</p>
+              </div>
+            </div>
+
+            <div className="about-contact-grid">
+              <div className="about-contact-card">
+                <span>Email</span>
+                <strong>support@firefusion.ai</strong>
+              </div>
+              <div className="about-contact-card">
+                <span>Emergency Contact</span>
+                <strong>Victoria Fire Services</strong>
+                <p>00 61 2 1234 5678</p>
+              </div>
+              <div className="about-contact-card">
+                <span>Website</span>
+                <strong>www.innovalte.ai</strong>
+              </div>
+              <div className="about-contact-card">
+                <span>Location</span>
+                <strong>Victoria, Australia</strong>
+              </div>
+            </div>
           </div>
         )}
       </div>
