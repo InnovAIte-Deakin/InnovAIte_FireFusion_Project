@@ -3,8 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 const Dashboard = lazy(() => import("./pages/Dashboard.jsx"));
 const Analytics = lazy(() => import("./pages/Analytics.jsx"));
-const FireRiskMap = lazy(() => import("./pages/FireRiskMap.jsx"));
-const Alerts = lazy(() => import("./pages/Alerts.jsx"));
+const FireRiskMap = lazy(() => import("./pages/FireRiskMap.tsx"));
+//const Alerts = lazy(() => import("./pages/Alerts.jsx")); add back in once Chaitanya's has been merged
 const MisinformationReview = lazy(() => import("./pages/MisinformationReview.jsx"));
 const BushfireForecastDetails = lazy(() => import("./pages/BushfireForecastDetails.jsx"));
 const DataSourcesMethod = lazy(() => import("./pages/DataSourcesMethod.jsx"));
