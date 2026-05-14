@@ -12,16 +12,18 @@ import {
   Droplets,
   Eye,
   ChevronRight,
-  ChevronLeft,
-  PanelLeftClose,
-  PanelLeftOpen,
+  BarChart3,
 } from "lucide-react";
 
+import { useNavigate, useLocation } from "react-router-dom";
+
 const menuItems = [
-  { label: "Dashboard", icon: Home, badge: null, active: true },
+  { label: "Dashboard", icon: Home, badge: null, path: "/dashboard" },
   { label: "Fire Map", icon: Map, badge: "7" },
+  { label: "Alerts", icon: TriangleAlert, badge: "31" },
   { label: "Misinformation Review", icon: Shield, badge: "14" },
   { label: "Reports", icon: FileText, badge: null },
+  { label: "Analytics", icon: BarChart3, badge: null, path: "/analytics" },
 ];
 
 function InfoBox({ icon: Icon, title, value }) {
@@ -34,106 +36,91 @@ function InfoBox({ icon: Icon, title, value }) {
   );
 }
 
-export default function Sidebar({ collapsed, onToggle }) {
+export default function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   return (
-    <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
-      <div className="sidebar-header">
-        <div className="brand">
-          <div className="brand-logo">FF</div>
-          {!collapsed && (
-            <div>
-              <h1>FireFusion</h1>
-              <p>Emergency Operations</p>
-            </div>
-          )}
+    <aside className="sidebar">
+      <div className="brand">
+        <div className="brand-logo">FF</div>
+        <div>
+          <h1>FireFusion</h1>
+          <p>Emergency Operations</p>
         </div>
-        <button className="sidebar-toggle" onClick={onToggle} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
-          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-        </button>
       </div>
 
-      {!collapsed && <p className="section-title">Main Menu</p>}
+      <p className="section-title">Main Menu</p>
 
-      <nav className={`nav-list${collapsed ? " nav-list--collapsed" : ""}`}>
+      <nav className="nav-list">
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const active =
+            location.pathname === item.path ||
+            (location.pathname === "/" && item.path === "/dashboard");
 
           return (
             <button
               key={item.label}
-              className={`nav-item ${item.active ? "active" : ""}${collapsed ? " nav-item--icon-only" : ""}`}
-              title={collapsed ? item.label : undefined}
-              onClick={
-                item.label === "Fire Map"
-                  ? () => (window.location.href = "/fire-map")
-                  : item.label === "Dashboard"
-                  ? () => (window.location.href = "/")
-                  : item.label === "Misinformation Review"
-                  ? () => (window.location.href = "/misinfo-review")
-                  : undefined
-              }
+              className={`nav-item ${active ? "active" : ""}`}
+              onClick={() => item.path && navigate(item.path)}
             >
               <span>
                 <Icon size={17} />
-                {!collapsed && item.label}
+                {item.label}
               </span>
-
-              {!collapsed && item.badge && <b>{item.badge}</b>}
-              {!collapsed && item.active && <ChevronRight size={16} />}
+              {item.badge && <b>{item.badge}</b>}
+              {active && <ChevronRight size={16} />}
             </button>
           );
         })}
       </nav>
 
-      {!collapsed && (
-        <>
-          <div className="ban-card">
-            <h3><span></span>Total Fire Ban</h3>
-            <p>No fires permitted</p>
-            <small>Catastrophic conditions.</small>
-          </div>
+      <div className="ban-card">
+        <h3><span></span>Total Fire Ban</h3>
+        <p>No fires permitted</p>
+        <small>Catastrophic conditions.</small>
+      </div>
 
-          <div className="weather-grid">
-            <InfoBox icon={Thermometer} title="Temperature" value="42°C" />
-            <InfoBox icon={Wind} title="Wind Speed" value="45 km/h" />
-            <InfoBox icon={Droplets} title="Humidity" value="18%" />
-            <InfoBox icon={Eye} title="Visibility" value="3 km" />
-          </div>
+      <div className="weather-grid">
+        <InfoBox icon={Thermometer} title="Temperature" value="42°C" />
+        <InfoBox icon={Wind} title="Wind Speed" value="45 km/h" />
+        <InfoBox icon={Droplets} title="Humidity" value="18%" />
+        <InfoBox icon={Eye} title="Visibility" value="3 km" />
+      </div>
 
-          <p className="last-update">Last updated: 14:30</p>
+      <p className="last-update">Last updated: 14:30</p>
 
-          <div className="sidebar-bottom">
-            <p className="section-title">System</p>
+      <div className="sidebar-bottom">
+        <p className="section-title">System</p>
 
-            <button className="nav-item">
-              <span><Bell size={17} /> Notifications</span>
-              <b>3</b>
-            </button>
+        <button className="nav-item">
+          <span><Bell size={17} /> Notifications</span>
+          <b>3</b>
+        </button>
 
-            <button className="nav-item">
-              <span><Settings size={17} /> Settings</span>
-            </button>
+        <button className="nav-item">
+          <span><Settings size={17} /> Settings</span>
+        </button>
 
-            <div className="profile-card">
-              <div>JD</div>
-              <span>
-                <strong>Gaveesha Nuwansara</strong>
-                <small>Emergency Manager</small>
-              </span>
-            </div>
+        <div className="profile-card">
+          <div>JD</div>
+          <span>
+            <strong>Gaveesha Nuwansara</strong>
+            <small>Emergency Manager</small>
+          </span>
+        </div>
 
-            <button className="signout">
-              <LogOut size={16} />
-              Sign Out
-            </button>
+        <button className="signout">
+          <LogOut size={16} />
+          Sign Out
+        </button>
 
-            <small className="version">
-              Version 2.4.1<br />
-              Last sync: 2 min ago
-            </small>
-          </div>
-        </>
-      )}
+        <small className="version">
+          Version 2.4.1<br />
+          Last sync: 2 min ago
+        </small>
+      </div>
     </aside>
   );
 }
