@@ -1,23 +1,45 @@
 //import the style sheet
-import './MapPage.layout.css'
+import '../components/MapPage/MapPage.layout.css'
+
+//import UI components
+import FullscreenMap from '../components/MapPage/FullscreenMap'
+import MapLegend from '../components/MapPage/MapLegend'
+import SearchLocation from '../components/MapPage/SearchLocation'
+
+//import Layout
+import Layout from "../components/Layout"
 
 //import websocket connection dependency 
 import ReconnectingWebSocket from 'reconnecting-websocket'
 
 //import Leaflet
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-//import Layout
-import Layout from "../components/Layout"
-
 export default function MapPage() {
+
+  //store map
+  const mapRef = useRef<L.Map | null>(null)
+
+  //centre map from search bar
+  const centerMap = (lat: number, lon: number) => {
+    if (!mapRef.current) return
+
+    mapRef.current.flyTo([lat, lon], 11, {
+      duration: 1.2,
+    })
+  }
+
   useEffect(() => {
+
     //Create map
     const map = L.map('map', {
       zoomControl: false,
-    }) 
+    })
+
+    //store map so SearchLocation.jsx can use it)
+    mapRef.current = map
 
     //Create tile
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -34,7 +56,7 @@ export default function MapPage() {
         case 2: return '#cd5c00' //high
         case 3: return '#ffd043' //medium
         case 4: return '#37d90f' //low
-        case 5: return '#95a5a6' //less than low
+        case 5: return '#95a5a6' //very low
         default: return '#09a2ad' //unknown
       }
     }
@@ -73,9 +95,7 @@ export default function MapPage() {
     //Load initial data
     const loadGeoJSON = async () => {
       try {
-        const response = await fetch(
-          'http://localhost:8080/api/bushfire-forecast'
-        )
+        const response = await fetch('/api/bushfire-forecast')
         const data = await response.json()
 
         renderGeoJSON(data)
@@ -86,8 +106,8 @@ export default function MapPage() {
 
     loadGeoJSON()
 
-    //WebSocket set up for live updates 
-    const ws = new ReconnectingWebSocket('ws://localhost:8080/api/ws') 
+    //WebSocket set up for live updates
+    const ws = new ReconnectingWebSocket('/api/ws')
 
     ws.onmessage = (event) => {
       try {
@@ -131,7 +151,24 @@ export default function MapPage() {
   return (
     <Layout title="Fire Map" showTopbar={false}>
       <div className="map-page">
-        <div id="map"></div>
+
+        <SearchLocation
+          onSelect={(location) => {
+            console.log(location)
+
+            //validate location and recentre map
+            if (location?.lat && location?.lon) {
+              centerMap(location.lat, location.lon)
+            }
+          }}
+        />
+
+        <MapLegend />
+
+        <div className="map-main">
+          <div id="map"></div>
+        </div>
+
       </div>
     </Layout>
   )
