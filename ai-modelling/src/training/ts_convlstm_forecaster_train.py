@@ -24,7 +24,7 @@ SCALER_SAVE_PATH = "src/models/bushfire/checkpoints/convlstm_scaler.pkl"
 # Model hyperparameters
 INPUT_STEPS = 60
 HORIZON = 2
-BATCH_SIZE = 8
+BATCH_SIZE = 4
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
@@ -96,6 +96,9 @@ class GriddedTimeSeriesDataset(Dataset):
     def __getitem__(self, idx):
         X = self.data[idx : idx + self.input_steps]
         y = self.data[idx + self.input_steps : idx + self.input_steps + self.horizon]
+
+        # Remove mask channel
+        y = y[..., :-1]
         return X, y
 
 def create_grid_sequences(data_grid, input_steps, horizon):
@@ -271,12 +274,13 @@ def load_and_format_gridded_data(csv_path, feature_cols=None):
     coords_data = []
     for idx, geojson_str in enumerate(df['.geo']):
         if idx % 100000 == 0 and idx > 0:
-            print(f"Extracted {idx} coordinates...")
+            print(f"  Extracted {idx} coordinates...")
         
         try:
             lon, lat = extract_coords(geojson_str)
             coords_data.append({'lon': lon, 'lat': lat})
         except Exception as e:
+            print(f"Error on row {idx}: {e}")
             coords_data.append({'lon': 0.0, 'lat': 0.0})
     
     # Create DataFrame from extracted coords, merge
@@ -352,7 +356,7 @@ def main():
     
     print("STEP 1: Load Gridded Data")
     
-    GRID_CACHE_PATH = "src/data/bushfire/data_grid_cache.npy"
+    GRID_CACHE_PATH = "data_grid_cache.npy"
 
     if os.path.exists(GRID_CACHE_PATH):
         print("Found cached grid, loading...")
@@ -388,15 +392,14 @@ def main():
  
     # Flatten to [N, F] for sklearn on valid cells
     train_val_flat = train_val_grid.reshape(-1, n_features)
-
-    # Keep only rows where at least one feature is not NaN - Used for evaluation
+    # Keep only rows where at least one feature is not NaN
     valid_rows = ~np.all(np.isnan(train_val_flat), axis=1)
  
     scaler = StandardScaler()
     scaler.fit(train_val_flat[valid_rows])
  
     print(f"Scaler fitted on {valid_rows.sum()} valid cell-timesteps")
-    print(f"Feature means: {scaler.mean_}")
+    print(f"Feature means:  {scaler.mean_}")
     print(f"Feature scales: {scaler.scale_}")
  
     def scale_and_fill(grid: np.ndarray) -> np.ndarray:
@@ -409,17 +412,37 @@ def main():
  
     train_val_scaled = scale_and_fill(train_val_grid)
     test_scaled = scale_and_fill(test_grid)
+ 
+    print("STEP 4: Append Land Mask Channel")
+ 
+    land_mask_float = valid_mask.astype(np.float32)
+ 
+    def append_mask(grid: np.ndarray) -> np.ndarray:
+        """Append [T, H, W, 1] land mask to a [T, H, W, F] grid."""
+        T = grid.shape[0]
+        mask_broadcast = np.broadcast_to(
+            land_mask_float[np.newaxis, :, :, np.newaxis],
+            (T, grid_height, grid_width, 1)
+        ).copy()
+        return np.concatenate([grid, mask_broadcast], axis=-1)
+ 
+    train_val_with_mask = append_mask(train_val_scaled)
+    test_with_mask = append_mask(test_scaled)
+ 
+    n_input_channels = n_features + 1
+    print(f"Input channels: {n_input_channels} (7 climate + 1 land mask)")
+    print(f"Output channels: {n_features} (climate features only)")
 
-    print("STEP 4: Create Datasets with Sliding Window")
+    print("STEP 5: Create Datasets with Sliding Window")
 
     # Split train_val into train/val
-    val_split_idx = int(len(train_val_scaled) * 0.85)
-    train_grid = train_val_scaled[:val_split_idx]
-    val_grid   = train_val_scaled[val_split_idx:]
+    val_split_idx = int(len(train_val_with_mask) * 0.85)
+    train_grid = train_val_with_mask[:val_split_idx]
+    val_grid   = train_val_with_mask[val_split_idx:]
 
     train_dataset = GriddedTimeSeriesDataset(train_grid, INPUT_STEPS, HORIZON)
     val_dataset   = GriddedTimeSeriesDataset(val_grid, INPUT_STEPS, HORIZON)
-    test_dataset  = GriddedTimeSeriesDataset(test_scaled, INPUT_STEPS, HORIZON)
+    test_dataset  = GriddedTimeSeriesDataset(test_with_mask, INPUT_STEPS, HORIZON)
 
     print(f"train_val timesteps: {len(train_val_scaled)}")
     print(f"train timesteps: {val_split_idx}")
@@ -430,7 +453,7 @@ def main():
     print(f"Val sequences: {len(val_dataset)}")
     print(f"Test sequences: {len(test_dataset)}")
 
-    print("STEP 5: Create DataLoaders")
+    print("STEP 6: Create DataLoaders")
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0)
     val_loader = DataLoader(val_dataset,   batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
@@ -440,10 +463,10 @@ def main():
     print(f"Val batches: {len(val_loader)} batches of {BATCH_SIZE}")
     print(f"Test batches: {len(test_loader)} batches of {BATCH_SIZE}")
     
-    print("STEP 6: Initialise ConvLSTM Model")
+    print("STEP 7: Initialise ConvLSTM Model")
     
     config = ForecasterConfig(
-        input_channels=n_features,
+        input_channels=n_input_channels,
         horizon=HORIZON,
         output_channels=n_features,
         hidden_size_1=32,
@@ -461,7 +484,7 @@ def main():
     print(f"Total parameters: {total_params:,}")
     print(f"Trainable parameters: {trainable_params:,}")
     
-    print("STEP 7: Train Model")
+    print("STEP 8: Train Model")
     
     valid_mask_tensor = torch.tensor(valid_mask, dtype=torch.bool)
     criterion = MaskedMSELoss(valid_mask_tensor).to(DEVICE)
@@ -499,7 +522,7 @@ def main():
             print(f"\nEarly stopping triggered at epoch {epoch}")
             break
     
-    print("STEP 8: Load Best Model")
+    print("STEP 9: Load Best Model")
     
     if best_state is not None:
         model.load_state_dict(best_state)
@@ -507,7 +530,7 @@ def main():
     else:
         print(f"Using final model")
     
-    print("STEP 9: Evaluate on Test Set")
+    print("STEP 10: Evaluate on Test Set")
     
     y_pred_scaled, y_true_scaled = predict(model, test_loader, DEVICE)
     
@@ -540,7 +563,7 @@ def main():
     
     print("STEP 11: Save Model and Scaler")
     
-    model.save(MODEL_SAVE_PATH)
+    model.save("MODEL_SAVE_PATH")
     
     joblib.dump(
         {
