@@ -1,10 +1,15 @@
+:root {
+  --sidebar-width: 305px;
+}
+
 .dashboard-shell {
   display: flex;
   min-height: 100vh;
 }
 
 .sidebar {
-  width: 305px;
+  width: var(--sidebar-width);
+  max-width: 305px;
   background: #061b45;
   color: white;
   padding: 22px 20px;
@@ -31,12 +36,17 @@
   font-weight: 800;
 }
 
-.brand h1 {
+.brand-text h1 {
   font-size: 22px;
   margin: 0;
 }
 
-.brand p,
+.brand-text p {
+  color: #9db0d2;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
 .section-title,
 .last-update,
 .version {
@@ -134,6 +144,30 @@
   color: #071833;
   border-radius: 12px;
   padding: 13px;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.info-box-title {
+  display: block;
+  color: #9aa9bd;
+  font-size: 12px;
+  margin: 0 0 7px;
+}
+
+.info-box-value {
+  display: block;
+  color: #ff5722;
+  font-weight: 700;
+}
+
+.info-box-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
 }
 
 .info-box p {
@@ -262,6 +296,24 @@
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.topbar-sidebar-toggle {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid #d9e2f1;
+  background: #f9fbff;
+  color: #526178;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.topbar-sidebar-toggle:hover {
+  background: #eef3fc;
+  color: #111827;
 }
 
 .topbar h2 {

@@ -1,7 +1,6 @@
 import {
   Home,
   Map,
-  TriangleAlert,
   Shield,
   FileText,
   Bell,
@@ -16,6 +15,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
+import { useSidebarCollapse } from "./SidebarCollapseContext";
 
 const menuItems = [
   { label: "Dashboard", icon: Home, badge: null, active: true },
@@ -28,8 +28,10 @@ function InfoBox({ icon: Icon, title, value }) {
   return (
     <div className="info-box">
       <Icon size={16} />
-      <span>{title}</span>
-      <b>{value}</b>
+      <div className="info-box-copy">
+        <span className="info-box-title">{title}</span>
+        <b className="info-box-value">{value}</b>
+      </div>
     </div>
   );
 }
@@ -65,11 +67,13 @@ export default function Sidebar({ collapsed, onToggle }) {
               title={collapsed ? item.label : undefined}
               onClick={
                 item.label === "Fire Map"
-                  ? () => (window.location.href = "/fire-map")
+                  ? () => {
+                      window.location.href = "/fire-map";
+                    }
                   : item.label === "Dashboard"
                   ? () => (window.location.href = "/")
                   : item.label === "Misinformation Review"
-                  ? () => (window.location.href = "/misinfo-review")
+                  ? () => (window.location.href = "/misinfo")
                   : undefined
               }
             >

@@ -107,7 +107,7 @@ export default function MisinformationReview() {
   const [selectedNarrativeId, setSelectedNarrativeId] = useState("nar_001");
 
   // Fetch all narratives
-  const { data: narratives, error, isLoading, isError, isFetching, refetch, status } = useQuery({
+  const { data: narratives } = useQuery({
     queryKey: ['narratives'],
     queryFn: narrativesApi.getAll,
     keepPreviousData: true}
