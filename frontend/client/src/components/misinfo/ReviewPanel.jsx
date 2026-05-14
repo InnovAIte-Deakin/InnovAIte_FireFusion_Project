@@ -48,7 +48,7 @@ export default function ReviewPanel({
             <FactsBox facts={officialFacts} />
 
             <div className="panel-section-title">Evidence posts ({posts.length})</div>
-            {posts.map((post) => (
+            {posts?.map((post) => (
               <EvidencePost key={post.post_id} post={post} />
             ))}
           </>
