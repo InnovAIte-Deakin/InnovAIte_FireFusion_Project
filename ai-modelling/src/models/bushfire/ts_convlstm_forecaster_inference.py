@@ -152,7 +152,7 @@ if __name__ == "__main__":
     )
 
     # Load cached grid and grab last 60 timesteps
-    data_grid = np.load("data_grid_cache.npy") # [n_timesteps, H, W, F]
+    data_grid = np.load("src/data/bushfire/data_grid_cache.npy") # [n_timesteps, H, W, F]
     last_seq = data_grid[-SEQ_LEN:] # [60, H, W, F]
 
     _, height, width, n_features = data_grid.shape
@@ -163,25 +163,17 @@ if __name__ == "__main__":
     x_scaled = np.nan_to_num(x_scaled, nan=0.0)
 
     valid_mask = ~np.all(np.isnan(data_grid), axis=(0, -1))  # [H, W]
-    land_mask = valid_mask.astype(np.float32)
 
-    # Append mask as 8th channel [60, H, W, 1]
-    mask_broadcast = np.broadcast_to(
-        land_mask[np.newaxis, :, :, np.newaxis],
-        (SEQ_LEN, height, width, 1)
-    ).copy()
-
-    x_scaled_with_mask = np.concatenate([x_scaled, mask_broadcast], axis=-1)
 
     # Add batch dimension
-    x_input = x_scaled_with_mask[np.newaxis, ...]
+    x_input = x_scaled[np.newaxis, ...]
 
     # Predict
     forecasts = predictor.predict(x_input, return_original_scale=True)
 
     print(f"Forecasts shape: {forecasts.shape}  [batch, horizon, height, width, features]")
     
-    # Print twenty cell's results for evaluation
+    # Print ten cell's results for evaluation
     cells_printed = 0
     for cy in range(height):
         for cx in range(width):
@@ -193,7 +185,7 @@ if __name__ == "__main__":
                 feat_str = {feat: f"{v:.4f}" for feat, v in zip(FEATURES, vals)}
                 print(f"  Timestep +{t+1}: {feat_str}")
             cells_printed += 1
-            if cells_printed >= 20:
+            if cells_printed >= 10:
                 break
-        if cells_printed >= 20:
+        if cells_printed >= 10:
             break

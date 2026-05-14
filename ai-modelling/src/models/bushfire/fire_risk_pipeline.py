@@ -16,7 +16,7 @@ import torch
 from torch import Tensor, nn
 
 from .risk_classifier import BushfireRiskClassifier, RiskClassifierConfig
-from .ts_forecaster import ForecasterConfig, MultivariateTSForecaster
+from .ts_convlstm_forecaster import ForecasterConfig, MultivariateTSForecaster
 
 
 @dataclass
