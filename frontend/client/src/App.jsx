@@ -3,6 +3,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import FireRiskMap from "./pages/FireRiskMap.tsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import Settings from "./pages/Settings.jsx";
 import MisinfoLandingPage from "./pages/MisinformationLanding.jsx";
 
 export default function App() {
@@ -27,6 +28,6 @@ export default function App() {
   if (path === "/signup") {
     return <Signup />;
   }
-
+  if (path === "/settings") return <Settings />;
   return <Dashboard />;
 }
