@@ -122,13 +122,14 @@ function normalizeSeverity(value) {
 
 export function normalizeIncident(raw) {
   if (!raw || typeof raw !== "object") return null;
+  const breakdown = raw.severity_breakdown ?? {};
   return {
     id: String(raw.id ?? raw.incident_id ?? raw.incidentId ?? ""),
     title: raw.title ?? raw.name ?? raw.incident_name ?? raw.incidentName ?? "Incident",
-    flagCount: Number(raw.flagCount ?? raw.flag_count ?? 0) || 0,
-    criticalCount: Number(raw.criticalCount ?? raw.critical_count ?? 0) || 0,
-    highCount: Number(raw.highCount ?? raw.high_count ?? 0) || 0,
-    mediumCount: Number(raw.mediumCount ?? raw.medium_count ?? 0) || 0,
+    flagCount: Number(raw.flagCount ?? raw.flag_count ?? raw.total_flags ?? 0) || 0,
+    criticalCount: Number(raw.criticalCount ?? raw.critical_count ?? breakdown.critical ?? 0) || 0,
+    highCount: Number(raw.highCount ?? raw.high_count ?? breakdown.high ?? 0) || 0,
+    mediumCount: Number(raw.mediumCount ?? raw.medium_count ?? breakdown.medium ?? 0) || 0,
     topThreat: raw.topThreat ?? raw.top_threat ?? "",
   };
 }
