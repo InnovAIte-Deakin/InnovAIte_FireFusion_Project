@@ -1,504 +1,370 @@
-# VicEmergency Real-Time Bushfire Incidents Pipeline
+# Vic Emergency Realtime Bushfire Incident Pipeline
 
-Contributor: **Thai Ha NGUYEN** (DE Lead)
+Document contributor: Thai Ha NGUYEN
 
-Planner Task: [Link to MS Planner](https://planner.cloud.microsoft/webui/v1/plan/H6UJiW7Qd0-pqy0lPXGgZ8gADBxI/view/board/task/Lt_U_d_iiEKugOZeMH8v5cgACeq6?tid=d02378ec-1688-46d5-8540-1c28b5f470f6)
+## 1. Overview
 
-## Pipeline Name
+This task implements a realtime data pipeline for collecting bushfire and fire-related incident data from the Vic Emergency public feed, assigning each incident to an existing FireFusion grid location, checking for duplicates, and inserting only new records into the Supabase PostgreSQL database.
 
-VicEmergency Real-Time Bushfire Incidents Pipeline
-
-## Pipeline Script
-
-```text
-get_realtime_incidents_CFA.py
-```
-
-## Purpose
-
-This pipeline extracts real-time incident data from the VicEmergency public GeoJSON feed and prepares a filtered CSV containing bushfire, fire, and planned burn incidents.
-
-The output can support the FireFusion project by providing current fire-related incident information for risk visualisation, dashboard updates, and future integration with the common FireFusion location and time structure.
-
-This pipeline is designed for dynamic / frequently updated data because the VicEmergency feed changes over time.
+The pipeline supports the FireFusion Data Engineering stream by preparing realtime incident data for downstream visualisation, risk analysis, and integration with other streams.
 
 ---
 
-## Source Information
+## 2. Pipeline Objective
 
-* Source: VicEmergency public events GeoJSON feed
-* Provider: VicEmergency
-* API URL: `https://emergency.vic.gov.au/public/events-geojson.json`
-* Collection method: HTTP GET request using Python `requests`
-* Data format from source: GeoJSON
-* Output format: CSV
-* Refresh frequency: Real-time / frequently updated
-* Pipeline owner: Data Engineering stream
+The objective of this pipeline is to:
+
+1. Extract realtime incident data from Vic Emergency.
+2. Filter bushfire/fire-related incidents.
+3. Match each incident latitude and longitude to an existing `location_id`.
+4. Prevent duplicate incident records.
+5. Insert only new incident records into the Supabase table:
+
+```sql
+public.vic_emercency_bushfire_incident_realtime
+````
 
 ---
 
-## Input Data
+## 3. Data Source
 
-The script does not require a local input file.
+### Source Name
 
-It fetches data directly from the VicEmergency public API endpoint:
+Vic Emergency Realtime Incident Feed
+
+### Source URL
 
 ```text
 https://emergency.vic.gov.au/public/events-geojson.json
 ```
 
-The API response is expected to contain a GeoJSON structure with a `features` list.
+### Data Format
 
-Each feature contains:
+The source returns data in GeoJSON format. Each record may contain:
 
-* `properties`
-* `geometry`
+* Incident ID
+* Incident category
+* Incident status
+* Location text
+* Latitude and longitude
+* Updated timestamp
+* Geometry information
 
-The pipeline reads both sections to create the final incident records.
-
----
-
-## Output File
-
-```text
-vic_emergency_bushfire_incidents.csv
-```
-
-The sample output file contains:
-
-* Number of rows: 5
-* Number of columns: 16
-
-Because this is a real-time feed, the number of rows will change depending on when the pipeline is executed.
+The pipeline extracts usable incident records from the GeoJSON response and converts them into a structured format suitable for Supabase insertion.
 
 ---
 
-## Pipeline Flow
+## 4. Target Database Table
+
+The processed data is inserted into:
+
+```sql
+public.vic_emercency_bushfire_incident_realtime
+```
+
+This table stores realtime bushfire/fire incident records from Vic Emergency.
+
+The key fields include:
+
+| Column        | Description                                    |
+| ------------- | ---------------------------------------------- |
+| `id`          | Unique incident identifier from Vic Emergency  |
+| `location_id` | Matched grid location from `location_registry` |
+| `latitude`    | Original latitude from Vic Emergency           |
+| `longitude`   | Original longitude from Vic Emergency          |
+| `category1`   | Main incident category                         |
+| `category2`   | Sub-category, such as Fire or Bushfire         |
+| `status`      | Current incident status                        |
+| `location`    | Human-readable location description            |
+| `updated`     | Last updated timestamp from Vic Emergency      |
+| `created_at`  | Database insertion timestamp                   |
+
+---
+
+## 5. Pipeline Workflow
+
+The final pipeline follows this workflow:
 
 ```text
-Fetch VicEmergency GeoJSON API
-        ↓
-Read feature properties and geometry
-        ↓
-Extract latitude and longitude
-        ↓
-Create incident records
-        ↓
-Convert records to Pandas DataFrame
-        ↓
-Filter feed_type = incident
-        ↓
-Filter fire-related categories
-        ↓
-Sort by created date
-        ↓
-Save output CSV
+Step 1: Fetch data from Vic Emergency
+Step 2: Extract and filter bushfire/fire incidents
+Step 3: Check existing incident IDs in Supabase
+Step 4: Keep only new records
+Step 5: Match latitude/longitude to existing location_registry rows
+Step 6: Insert new records into Supabase
 ```
 
 ---
 
-# 1. Extraction Stage
+## 6. Step 1: Get and Extract Data from Vic Emergency
 
-## API Request
+The pipeline sends a request to the Vic Emergency GeoJSON endpoint.
 
-The script sends a GET request to the VicEmergency public API.
+It then extracts incident records and filters only relevant fire-related events.
 
-The request includes:
-
-```python
-headers={"User-Agent": "Mozilla/5.0"}
-timeout=20
-```
-
-The script uses:
-
-```python
-response.raise_for_status()
-```
-
-This means the pipeline will fail clearly if the API request returns an HTTP error.
-
-## Extracted Source Structure
-
-The script loops through:
+Relevant categories include:
 
 ```text
-data["features"]
+Fire
+Bushfire
+Planned Burn
 ```
 
-For each feature, it extracts:
+The pipeline also extracts coordinates from the GeoJSON geometry field.
 
-```text
-feature["properties"]
-feature["geometry"]
-```
-
-The `properties` section provides incident metadata, while the `geometry` section provides the incident coordinate.
+Only records with valid latitude and longitude are prepared for the next step.
 
 ---
 
-# 2. Coordinate Extraction
+## 7. Step 2: Add `location_id` Using Existing `location_registry`
 
-## Function
+The pipeline does **not** use the old `GridSnapper.get_location_id()` function because that function may create new rows in `location_registry`.
 
-```text
-extract_point(geometry)
+For this task, the requirement is:
+
+> Do not add anything to `location_registry`.
+
+Therefore, the pipeline only uses existing rows in `location_registry`.
+
+The approved registry range is:
+
+```sql
+location_id BETWEEN 1 AND 463807
 ```
 
-## Purpose
+This ensures the pipeline only uses the original approved grid registry rows and does not use any accidentally created or polluted records.
 
-The `extract_point()` function extracts latitude and longitude from the GeoJSON geometry.
+---
 
-The script supports two geometry types:
+## 8. Grid Snapping Logic
 
-1. `Point`
-2. `GeometryCollection`
-
-## Logic
-
-If the geometry type is `Point`, the script extracts:
-
-```text
-longitude, latitude
-```
-
-from the coordinate list.
-
-If the geometry type is `GeometryCollection`, the script searches inside the collection and uses the first geometry with type `Point`.
-
-If no valid point is found, the script returns:
-
-```text
-None, None
-```
-
-## Notes
-
-GeoJSON coordinates are usually stored as:
-
-```text
-longitude, latitude
-```
-
-The pipeline correctly converts this into:
+For each Vic Emergency incident, the pipeline takes:
 
 ```text
 latitude, longitude
 ```
 
-for the output CSV.
-
----
-
-# 3. Transformation Stage
-
-## Record Creation
-
-For each feature, the script creates a structured record with selected fields from the VicEmergency API.
-
-The output record includes:
-
-| Output Column  | Source Field             | Description                            |
-| -------------- | ------------------------ | -------------------------------------- |
-| `id`           | `properties.id`          | Unique incident ID from the source     |
-| `feed_type`    | `properties.feedType`    | Feed type, such as `incident`          |
-| `category1`    | `properties.category1`   | Main incident category                 |
-| `category2`    | `properties.category2`   | Secondary incident category            |
-| `status`       | `properties.status`      | Current incident status                |
-| `name`         | `properties.name`        | Incident name if available             |
-| `action`       | `properties.action`      | Recommended action if available        |
-| `location`     | `properties.location`    | Incident location description          |
-| `created`      | `properties.created`     | Created timestamp                      |
-| `updated`      | `properties.updated`     | Updated timestamp                      |
-| `size`         | `properties.sizeFmt`     | Incident size in source display format |
-| `source_org`   | `properties.sourceOrg`   | Source organisation                    |
-| `source_title` | `properties.sourceTitle` | Source incident title                  |
-| `latitude`     | `geometry.coordinates`   | Extracted latitude                     |
-| `longitude`    | `geometry.coordinates`   | Extracted longitude                    |
-| `text`         | `properties.text`        | Additional incident text if available  |
-
----
-
-# 4. Filtering Stage
-
-## Feed Type Filter
-
-The script first filters the dataset to keep only records where:
-
-```text
-feed_type = incident
-```
-
-This removes non-incident records from the broader VicEmergency feed.
-
-## Category Filter
-
-The script then keeps records where either `category1` or `category2` is one of:
-
-```text
-Fire
-Planned Burn
-Bushfire
-```
-
-The filtering logic is:
-
-```text
-category1 in ["Fire", "Planned Burn", "Bushfire"]
-OR
-category2 in ["Fire", "Planned Burn", "Bushfire"]
-```
-
-This means the output can include active fire incidents, bushfires, and planned burns.
-
----
-
-# 5. Sorting Stage
-
-The filtered records are sorted by:
-
-```text
-created
-```
-
-in descending order.
-
-This places the most recently created incidents at the top of the CSV output.
-
----
-
-# 6. Loading / Output Stage
-
-The final filtered DataFrame is saved as:
-
-```text
-vic_emergency_bushfire_incidents.csv
-```
-
-The CSV is saved with:
-
-```text
-index = False
-encoding = utf-8
-```
-
-This makes the file easier to use in downstream scripts, dashboards, and database loading steps.
-
----
-
-# Sample Output Structure
-
-The uploaded sample CSV contains the following columns:
-
-| Column Name    | Example Value                | Notes                               |
-| -------------- | ---------------------------- | ----------------------------------- |
-| `id`           | `ESTA:260504752`             | Source incident ID                  |
-| `feed_type`    | `incident`                   | All sample records are incidents    |
-| `category1`    | `Fire`                       | Main category                       |
-| `category2`    | `Bushfire`                   | Secondary category                  |
-| `status`       | `Under Control`              | Current incident status             |
-| `name`         | Empty / incident name        | Often missing in sample             |
-| `action`       | Empty                        | Missing in sample                   |
-| `location`     | `Baileys Rocks Rd, Dergholm` | Human-readable location             |
-| `created`      | `2026-05-03T01:56:00.000Z`   | Source timestamp                    |
-| `updated`      | `2026-05-03T04:59:00.000Z`   | Source timestamp                    |
-| `size`         | `Small` / `0.5 Ha.`          | Source display format               |
-| `source_org`   | `VIC/CFA`                    | Source agency                       |
-| `source_title` | `Baileys Rocks Rd`           | Incident title                      |
-| `latitude`     | `-37.2943809190038`          | Extracted from geometry             |
-| `longitude`    | `141.2075324352281`          | Extracted from geometry             |
-| `text`         | Empty                        | Additional source text if available |
-
----
-
-# Data Quality Notes
-
-* The VicEmergency feed is real-time, so row counts will change each time the script runs.
-* Some fields may be missing, especially:
-
-  * `name`
-  * `action`
-  * `text`
-* The sample CSV contains incident records from multiple source organisations, such as:
-
-  * `VIC/CFA`
-  * `VIC/DEECA`
-  * `NSW/RFS`
-* Some incidents may be near or outside the Victorian border, depending on the source feed coverage.
-* The `size` field is stored as formatted text, for example:
-
-  * `Small`
-  * `0.5 Ha.`
-  * `2724.29 Ha.`
-* The `created` and `updated` fields may use different timestamp formats depending on the source record.
-* Latitude and longitude are required for map visualisation and future matching to `location_registry`.
-* Records without valid geometry will have missing latitude and longitude.
-
----
-
-# Validation Rules
-
-Before using or loading the output, validate that:
-
-* The API request succeeds.
-* The response contains a `features` list.
-* Required columns exist in the output:
-
-  * `id`
-  * `feed_type`
-  * `category1`
-  * `category2`
-  * `status`
-  * `location`
-  * `created`
-  * `updated`
-  * `latitude`
-  * `longitude`
-* All output records have `feed_type = incident`.
-* All output records have `category1` or `category2` matching:
-
-  * `Fire`
-  * `Planned Burn`
-  * `Bushfire`
-* `latitude` and `longitude` values are numeric where present.
-* Coordinates fall within the expected Australian or Victorian range.
-* Duplicate `id` values are checked.
-* `created` and `updated` values can be parsed as timestamps.
-* Missing coordinates are counted and documented.
-* Row count is logged after extraction and filtering.
-
----
-
-# Recommended Target Mapping
-
-## Target Table
-
-Recommended target table:
-
-```text
-realtime_fire_incident
-```
-
-or staging table:
-
-```text
-stg_vic_emergency_fire_incident
-```
-
-## Target Mapping Table
-
-| CSV Column     | Target Column          | Data Type        | Notes                      |
-| -------------- | ---------------------- | ---------------- | -------------------------- |
-| `id`           | `source_incident_id`   | VARCHAR          | Source incident ID         |
-| `feed_type`    | `feed_type`            | VARCHAR          | Expected value: `incident` |
-| `category1`    | `category_primary`     | VARCHAR          | Main category              |
-| `category2`    | `category_secondary`   | VARCHAR          | Secondary category         |
-| `status`       | `incident_status`      | VARCHAR          | Example: `Under Control`   |
-| `name`         | `incident_name`        | VARCHAR          | Nullable                   |
-| `action`       | `recommended_action`   | TEXT             | Nullable                   |
-| `location`     | `location_description` | TEXT             | Human-readable location    |
-| `created`      | `created_at_source`    | TIMESTAMP        | Source created time        |
-| `updated`      | `updated_at_source`    | TIMESTAMP        | Source updated time        |
-| `size`         | `incident_size_text`   | VARCHAR          | Raw formatted size         |
-| `source_org`   | `source_org`           | VARCHAR          | Example: `VIC/CFA`         |
-| `source_title` | `source_title`         | VARCHAR          | Source incident title      |
-| `latitude`     | `incident_latitude`    | DOUBLE PRECISION | Extracted latitude         |
-| `longitude`    | `incident_longitude`   | DOUBLE PRECISION | Extracted longitude        |
-| `text`         | `incident_text`        | TEXT             | Nullable                   |
-| Derived        | `location_id`          | INTEGER          | Future nearest-grid match  |
-| Derived        | `ingested_at`          | TIMESTAMP        | Pipeline run timestamp     |
-
----
-
-# Suggested PostgreSQL Schema
+Then it searches for the nearest existing grid point in:
 
 ```sql
-CREATE TABLE realtime_fire_incident (
-    realtime_fire_incident_id SERIAL PRIMARY KEY,
-    source_incident_id VARCHAR(100) NOT NULL,
-    feed_type VARCHAR(50),
-    category_primary VARCHAR(100),
-    category_secondary VARCHAR(100),
-    incident_status VARCHAR(100),
-    incident_name VARCHAR(255),
-    recommended_action TEXT,
-    location_description TEXT,
-    created_at_source TIMESTAMP,
-    updated_at_source TIMESTAMP,
-    incident_size_text VARCHAR(100),
-    source_org VARCHAR(100),
-    source_title VARCHAR(255),
-    incident_latitude DOUBLE PRECISION,
-    incident_longitude DOUBLE PRECISION,
-    incident_text TEXT,
-    location_id INTEGER,
-    ingested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_realtime_fire_incident_source_id UNIQUE (source_incident_id),
-    CONSTRAINT fk_realtime_fire_incident_location
-        FOREIGN KEY (location_id)
-        REFERENCES location_registry(location_id)
-);
+public.location_registry
 ```
 
----
+Only rows within this range are considered:
 
-# Primary Key / Unique Row Logic
+```sql
+WHERE location_id BETWEEN 1 AND 463807
+```
 
-Recommended unique source key:
+The nearest grid point is selected by comparing the incident coordinate against `grid_latitude` and `grid_longitude`.
+
+The selected row provides the final:
 
 ```text
-source_incident_id
+location_id
 ```
 
-However, because real-time incident records may be updated, the pipeline should also compare:
+This `location_id` is then inserted into the realtime incident table.
+
+---
+
+## 9. Important Design Decision
+
+### Old Approach
 
 ```text
-source_incident_id + updated_at_source
+latitude/longitude
+→ GridSnapper
+→ snap to grid
+→ create new location if not found
+→ return location_id
 ```
 
-This can help decide whether to update an existing row or store a new incident snapshot.
-
----
-
-# FireFusion Usage
-
-This pipeline can support:
-
-* real-time bushfire incident monitoring
-* dashboard visualisation
-* fire incident map layers
-* joining active incidents with suburb or grid locations
-* future matching to `location_registry`
-* AI model features related to active fire presence
-* backend API endpoints for current incident data
-
----
-
-# Recommended Improvements
-
-## Add scheduled execution
-
-Because the dataset is real-time, this script can be scheduled to run periodically.
-
-Possible schedule:
+### Final Approach
 
 ```text
-Every 15 minutes or every 1 hour
+latitude/longitude
+→ search existing location_registry only
+→ use nearest approved location_id
+→ insert incident record
 ```
 
-The best schedule depends on backend and dashboard requirements.
+The final approach is safer because it protects the integrity of the shared FireFusion grid system.
+
+No new rows are inserted into `location_registry`.
 
 ---
 
-# Known Issues and Limitations
+## 10. Step 3: Duplicate Checking
 
-* The feed is dynamic, so results will vary between runs.
-* The pipeline currently does not save the raw GeoJSON response.
-* The output CSV only represents the feed state at the time of execution.
-* The script does not currently load data into PostgreSQL.
-* The script does not currently match incident coordinates to `location_registry`.
-* The script does not currently create a validation report.
-* Timestamp formats may vary between records.
-* Some incidents may have missing optional fields.
-* Some source organisations may report incidents outside Victoria but still appear in the feed.
+Before inserting new incident records, the pipeline checks whether the Vic Emergency incident ID already exists in:
 
+```sql
+public.vic_emercency_bushfire_incident_realtime
+```
+
+The duplicate check uses the incident `id`.
+
+If the `id` already exists, the record is skipped.
+
+This prevents repeated runs of the pipeline from inserting the same incident multiple times.
+
+---
+
+## 11. Step 4: Insert New Records
+
+After duplicate filtering and location matching, only new records are inserted into Supabase.
+
+The insert operation includes conflict protection using the incident ID, so even if duplicate records are found during concurrent runs, the database will not insert duplicates.
+
+The pipeline inserts:
+
+* Vic Emergency incident ID
+* Matched `location_id`
+* Original latitude
+* Original longitude
+* Category information
+* Status
+* Location description
+* Updated timestamp
+* Other available incident metadata
+
+---
+
+## 12. Environment Variables
+
+The pipeline uses a `.env` file for database credentials.
+
+Example:
+
+```env
+DB_HOST=your-supabase-host
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+```
+
+Optional setting:
+
+```env
+MAX_SNAP_DISTANCE_KM=20
+DEBUG_LOCATION_MATCHES=false
+```
+
+Set this to `true` if debugging location matching:
+
+```env
+DEBUG_LOCATION_MATCHES=true
+```
+
+---
+
+## 13. Required Python Packages
+
+Install the required packages:
+
+```bash
+pip install requests psycopg2-binary python-dotenv
+```
+
+---
+
+## 14. How to Run the Pipeline
+
+Run the final pipeline script:
+
+```bash
+python vic_emergency_realtime_pipeline_v4_registry_only.py
+```
+
+Expected output example:
+
+```text
+Step 1: Fetching data from Vic Emergency...
+Extracted bushfire/fire incident records: 73
+
+Step 2: Validating Supabase schema...
+
+Step 3: Checking duplicates in Supabase...
+Existing records: 10
+New records: 63
+
+Step 4: Matching location_id from approved location_registry rows...
+
+Step 5: Inserting new records into Supabase...
+Inserted records: 63
+
+Pipeline completed successfully.
+```
+
+---
+
+## 15. Optional Database Index
+
+To improve grid snapping performance, create an index on the approved grid fields:
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_location_registry_approved_grid
+ON public.location_registry (location_id, grid_latitude, grid_longitude)
+WHERE location_id BETWEEN 1 AND 463807;
+```
+
+This helps the pipeline search existing grid points faster.
+
+---
+
+## 16. Data Quality Rules
+
+The pipeline applies the following data quality checks:
+
+| Check                                     | Action                         |
+| ----------------------------------------- | ------------------------------ |
+| Missing latitude/longitude                | Skip record                    |
+| Coordinate outside usable range           | Skip or fail location match    |
+| Duplicate incident ID                     | Skip record                    |
+| No matching location in approved registry | Skip record                    |
+| Invalid database schema                   | Stop pipeline before inserting |
+
+---
+
+## 17. Key Constraints
+
+The final version follows these constraints:
+
+* Do not insert into `location_registry`.
+* Do not use polluted or newly created registry rows.
+* Only use `location_id` from `1` to `463807`.
+* Preserve original latitude and longitude from Vic Emergency.
+* Use `location_id` only for grid-based integration.
+* Insert only new records into the realtime incident table.
+
+---
+
+## 18. Why This Pipeline Matters
+
+This pipeline provides a reliable realtime incident ingestion process for FireFusion.
+
+It allows the Data Engineering stream to continuously collect current fire-related incidents and align them with the project’s shared grid system. This makes the data ready for dashboard visualisation, spatial analysis, and future integration with weather, vegetation, topography, and AI modelling outputs.
+
+---
+
+## 19. Future Improvements
+
+Possible future improvements include:
+
+1. Schedule the pipeline to run automatically every 5–15 minutes.
+2. Add logging to a separate pipeline execution table.
+3. Store failed records for later review.
+4. Add a more accurate spatial matching method using PostGIS.
+5. Add alerting if the Vic Emergency API is unavailable.
+6. Add automated tests for duplicate checking and location matching.
+7. Compare realtime incidents with historical bushfire datasets for validation.
+
+---
+
+## 20. Summary
+
+This task created a realtime Vic Emergency bushfire incident pipeline that extracts fire-related incident data, matches each incident to the approved FireFusion grid, checks for duplicates, and inserts only new records into Supabase.
+
+The final version is safe for the shared database because it only reads from `location_registry` and does not create or modify grid registry rows.
