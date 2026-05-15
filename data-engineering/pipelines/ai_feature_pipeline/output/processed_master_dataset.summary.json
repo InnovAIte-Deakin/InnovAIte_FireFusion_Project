@@ -1,0 +1,83 @@
+{
+  "basic_stats": {
+    "total_records": 2,
+    "total_columns": 12,
+    "memory_usage_mb": 0.000446319580078125
+  },
+  "feature_statistics": {
+    "temperature_2m_c": {
+      "count": 2,
+      "mean": 21.85,
+      "std": 9.404520189781083,
+      "min": 15.2,
+      "max": 28.5,
+      "null_count": 0
+    },
+    "skin_temperature_c": {
+      "count": 2,
+      "mean": 30.650000000000002,
+      "std": 20.576807332528535,
+      "min": 16.1,
+      "max": 45.2,
+      "null_count": 0
+    },
+    "soil_temperature_level_1_c": {
+      "count": 2,
+      "mean": 20.05,
+      "std": 7.424621202458749,
+      "min": 14.8,
+      "max": 25.3,
+      "null_count": 0
+    },
+    "surface_solar_radiation_downwards": {
+      "count": 2,
+      "mean": 550.35,
+      "std": 424.05193667757254,
+      "min": 250.5,
+      "max": 850.2,
+      "null_count": 0
+    },
+    "surface_thermal_radiation_downwards": {
+      "count": 2,
+      "mean": 370.45000000000005,
+      "std": 71.20565286548533,
+      "min": 320.1,
+      "max": 420.8,
+      "null_count": 0
+    },
+    "u_component_of_wind_10m": {
+      "count": 2,
+      "mean": 0.30000000000000004,
+      "std": 2.545584412271571,
+      "min": -1.5,
+      "max": 2.1,
+      "null_count": 0
+    },
+    "v_component_of_wind_10m": {
+      "count": 2,
+      "mean": 2.5,
+      "std": 0.9899494936611667,
+      "min": 1.8,
+      "max": 3.2,
+      "null_count": 0
+    }
+  },
+  "temporal_coverage": {
+    "start_date": "2019-01-01T00:00:00",
+    "end_date": "2019-01-01T12:00:00",
+    "total_days": 0,
+    "records_with_timestamp": 2
+  },
+  "spatial_coverage": {
+    "lat_min": -39.1,
+    "lat_max": -39.1,
+    "lon_min": 146.4,
+    "lon_max": 146.4,
+    "records_with_coordinates": 2
+  },
+  "fire_label_distribution": {
+    "no_fire": 1,
+    "fire": 1,
+    "fire_percentage": 50.0
+  }
+}

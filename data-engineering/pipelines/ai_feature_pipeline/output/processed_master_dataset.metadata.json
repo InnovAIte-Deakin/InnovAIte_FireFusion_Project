@@ -1,0 +1,122 @@
+{
+  "export_info": {
+    "timestamp": "2026-05-15T18:38:03.740304",
+    "pipeline_version": "1.0.0",
+    "processing_config": {
+      "chunksize": 100000,
+      "max_workers": 4,
+      "validation_strict": true,
+      "feature_mapping": {
+        "temp_2m_c": "temperature_2m_c",
+        "skin_temp_c": "skin_temperature_c",
+        "soil_temp_c": "soil_temperature_level_1_c",
+        "surface_solar_radiation_downwards": "surface_solar_radiation_downwards",
+        "surface_thermal_radiation_downwards": "surface_thermal_radiation_downwards",
+        "u_component_of_wind_10m": "u_component_of_wind_10m",
+        "v_component_of_wind_10m": "v_component_of_wind_10m"
+      },
+      "required_columns": [
+        "system:index",
+        "fire_label",
+        "fire_temp_raw",
+        "latitude",
+        "longitude",
+        "skin_temp_c",
+        "soil_moist_root",
+        "soil_moist_surf",
+        "soil_temp_c",
+        "stable_grid_id",
+        "surface_solar_radiation_downwards",
+        "surface_thermal_radiation_downwards",
+        "temp_2m_c",
+        "total_precip_mm",
+        "u_component_of_wind_10m",
+        "universal_key",
+        "v_component_of_wind_10m"
+      ],
+      "ai_features": [
+        "temp_2m_c",
+        "skin_temp_c",
+        "soil_temp_c",
+        "surface_solar_radiation_downwards",
+        "surface_thermal_radiation_downwards",
+        "u_component_of_wind_10m",
+        "v_component_of_wind_10m"
+      ],
+      "validation_thresholds": {
+        "latitude": {
+          "min": -90,
+          "max": 90
+        },
+        "longitude": {
+          "min": -180,
+          "max": 180
+        },
+        "victoria_latitude": {
+          "min": -40,
+          "max": -37
+        },
+        "victoria_longitude": {
+          "min": 140,
+          "max": 151
+        },
+        "fire_label": {
+          "values": [
+            0,
+            1
+          ]
+        },
+        "relative_humidity_max": 100,
+        "temperature_min": -50,
+        "temperature_max": 60
+      },
+      "expected_dtypes": null,
+      "remove_duplicates": true,
+      "handle_missing": "drop",
+      "export_format": "csv",
+      "log_level": "INFO"
+    },
+    "export_statistics": {
+      "rows_exported": 2,
+      "columns_exported": 12,
+      "file_size_mb": 0.0,
+      "ai_features_count": 7
+    }
+  },
+  "dataset_info": {
+    "source_file": "C:\\Users\\tarun\\OneDrive\\Deakin_University\\Team project B\\code\\FireFusion_Master_Dataset.csv",
+    "processing_date": "2026-05-15T18:38:03.744300",
+    "feature_mapping": {
+      "temp_2m_c": "temperature_2m_c",
+      "skin_temp_c": "skin_temperature_c",
+      "soil_temp_c": "soil_temperature_level_1_c",
+      "surface_solar_radiation_downwards": "surface_solar_radiation_downwards",
+      "surface_thermal_radiation_downwards": "surface_thermal_radiation_downwards",
+      "u_component_of_wind_10m": "u_component_of_wind_10m",
+      "v_component_of_wind_10m": "v_component_of_wind_10m"
+    },
+    "ai_features": [
+      "temperature_2m_c",
+      "skin_temperature_c",
+      "soil_temperature_level_1_c",
+      "surface_solar_radiation_downwards",
+      "surface_thermal_radiation_downwards",
+      "u_component_of_wind_10m",
+      "v_component_of_wind_10m"
+    ],
+    "spatial_coverage": "Victoria, Australia",
+    "temporal_coverage": "Multi-year environmental time series"
+  },
+  "quality_metrics": {
+    "validation_performed": true,
+    "preprocessing_applied": true,
+    "data_quality_score": "high"
+  },
+  "additional_metadata": {
+    "pipeline_run_id": "2026-05-15T18:38:03.740304",
+    "run_mode": "standard",
+    "validation_passed": true,
+    "preprocessing_applied": true,
+    "ai_features_count": 7
+  }
+}
