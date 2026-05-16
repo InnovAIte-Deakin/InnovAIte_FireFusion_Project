@@ -5,6 +5,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Settings from "./pages/Settings.jsx";
 import MisinfoLandingPage from "./pages/MisinformationLanding.jsx";
+import FeedbackPage from "./FeedbackPage.jsx";
 
 export default function App() {
   const path = window.location.pathname;
@@ -28,6 +29,9 @@ export default function App() {
   if (path === "/signup") {
     return <Signup />;
   }
+  if (path === "/feedback") {
+  return <FeedbackPage />;
+}
   if (path === "/settings") return <Settings />;
-  return <Dashboard />;
+  return <FeedbackPage />;
 }
