@@ -447,7 +447,7 @@ def print_summary(records):
 
 def main():
     parser = argparse.ArgumentParser(description="FireFusion synthetic data generator")
-    parser.add_argument("--n",    type=int, default=200, help="Number of records to generate (default: 200)")
+    parser.add_argument("--n",    type=int, default=5000, help="Number of records to generate (default: 5000)")
     parser.add_argument("--seed", type=int, default=42,  help="Random seed for reproducibility (default: 42)")
     parser.add_argument("--out",  type=str, default=".",  help="Output directory (default: current)")
     args = parser.parse_args()
