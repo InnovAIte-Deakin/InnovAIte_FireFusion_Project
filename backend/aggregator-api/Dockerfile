@@ -1,15 +1,23 @@
-FROM python:3.14
+FROM python:3.14-slim
 
 WORKDIR /code
 
-# this contains all the dependencies required for the application
-COPY ./requirements.txt /code/requirements.txt
+# Copy dependency file first for improved Docker caching
+COPY requirements.txt .
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+# Install dependencies without storing cache
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-COPY ./app /code/app
+# Copy application files
+COPY ./app ./app
 
-# TODO: update hardcoded value
-ENV API_KEY=secret_key 
+# Environment variable
+# TODO: Replace hardcoded API key with secure environment variable management
+ENV API_KEY=secret_key
 
+# Expose application port
+EXPOSE 80
+
+# Run FastAPI application
 CMD ["fastapi", "run", "app/main.py", "--port", "80"]
