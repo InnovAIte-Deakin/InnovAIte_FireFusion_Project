@@ -5,13 +5,13 @@
 1. Ensure [Docker](https://www.docker.com/) is installed and running.
 2. Run `docker compose --profile default -d` from with in `firefusion/backend/.`
 
-API calls should be made to `localhost:80/api`. Information on endpoints can be found in `/firefusion-api/README.md`.
-
-The postgres database can be accesed via `localhost:5432`. 
+API calls should be made to `localhost:8080/api`. Information on endpoints can be found in `/firefusion-api/README.md`.
 
 To signal updates to the system ensure the command run: 
-`docker compose exec relational-db psql -U postgres "NOTIFY fire_events_channel, 'hello';"`
+`docker compose exec relational-db psql -U postgres -c "NOTIFY fire_events_channel, 'hello';"`
 This will signal the system to retrieve data from the database, send to the predictive AI model and then take the model output and send to frontend clients.
+
+The postgres database can be accesed via `localhost:5432`. 
 
 ## Overview
 
