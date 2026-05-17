@@ -23,3 +23,5 @@ venv/
 *.png
 *.html
 *.txt
+
+.vscode/
