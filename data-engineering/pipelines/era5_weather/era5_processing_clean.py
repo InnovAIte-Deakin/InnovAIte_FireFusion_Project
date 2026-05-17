@@ -16,11 +16,19 @@ from scipy.spatial import cKDTree
 # 1. File paths
 # ---------------------------------------------------------
 
-ERA5_FILE = r"C:\Users\shubham sharma\Downloads\capstone\era5_victoria_jan2020_clean.csv"
-LOCATION_REGISTRY_FILE = r"C:\Users\shubham sharma\Downloads\capstone\location_registry_rows.csv"
-TIME_REGISTRY_FILE = r"C:\Users\shubham sharma\Downloads\capstone\time_registry_jan2020.csv"
-OUTPUT_FILE = r"C:\Users\shubham sharma\Downloads\capstone\era5_weather_integrated.csv"
+from pathlib import Path
 
+# Base project directory
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+# File paths
+ERA5_FILE = BASE_DIR / "data" / "processed" / "era5_victoria_jan2020_clean.csv"
+
+LOCATION_REGISTRY_FILE = BASE_DIR / "data" / "processed" / "location_registry_rows.csv"
+
+TIME_REGISTRY_FILE = BASE_DIR / "data" / "processed" / "time_registry_jan2020.csv"
+
+OUTPUT_FILE = BASE_DIR / "data" / "processed" / "era5_weather_integrated.csv"
 
 # ---------------------------------------------------------
 # 2. Load datasets
