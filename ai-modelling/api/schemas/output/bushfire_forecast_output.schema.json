@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bushfire_forecast_output.schema.json",
+  "title": "Bushfire Forecast Output",
+  "description": "Output schema for the ConvLSTM spatiotemporal forecaster. Predicts future values of 7 environmental features across a gridded spatial domain over a configurable forecast horizon.",
+  "type": "object",
+  "required": [
+    "model_id",
+    "model_version",
+    "domain",
+    "task",
+    "metadata",
+    "predictions"
+  ],
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "Registry identifier for the model, e.g. 'bushfire-forecast-convlstm'."
+    },
+    "model_version": {
+      "type": "string",
+      "description": "Schema version following semver, e.g. '1.0.0'.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "domain": {
+      "type": "string",
+      "const": "bushfire",
+      "description": "Model domain."
+    },
+    "task": {
+      "type": "string",
+      "const": "forecast",
+      "description": "Model task type."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Configuration and context metadata for the prediction run.",
+      "required": [
+        "input_steps",
+        "horizon",
+        "features",
+        "grid_shape",
+        "temporal_resolution"
+      ],
+      "properties": {
+        "input_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of historical timesteps used as input (lookback window). Default: 60."
+        },
+        "horizon": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of future timesteps forecasted. Default: 2."
+        },
+        "features": {
+          "type": "array",
+          "description": "Ordered list of environmental feature names matching model training.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            [
+              "skin_temperature_c",
+              "soil_temperature_level_1_c",
+              "surface_solar_radiation_downwards",
+              "surface_thermal_radiation_downwards",
+              "temperature_2m_c",
+              "u_component_of_wind_10m",
+              "v_component_of_wind_10m"
+            ]
+          ]
+        },
+        "grid_shape": {
+          "type": "array",
+          "description": "Spatial grid dimensions as [height, width].",
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "temporal_resolution": {
+          "type": "string",
+          "description": "Time interval between consecutive timesteps, e.g. '12h'."
+        },
+        "checkpoint_path": {
+          "type": "string",
+          "description": "Path to the model checkpoint used for this prediction."
+        },
+        "scaler_path": {
+          "type": "string",
+          "description": "Path to the fitted scaler used for inverse transformation."
+        }
+      },
+      "additionalProperties": false
+    },
+    "predictions": {
+      "type": "array",
+      "description": "Forecast results grouped by forecast timestep.",
+      "items": {
+        "type": "object",
+        "required": [
+          "timestep",
+          "grid_cells"
+        ],
+        "properties": {
+          "timestep": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Forecast step number (1-indexed). Timestep 1 = first future interval."
+          },
+          "grid_cells": {
+            "type": "array",
+            "description": "Forecasted values for each spatial grid cell at this timestep.",
+            "items": {
+              "type": "object",
+              "required": [
+                "row",
+                "col",
+                "values"
+              ],
+              "properties": {
+                "row": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Grid row index (0-indexed)."
+                },
+                "col": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Grid column index (0-indexed)."
+                },
+                "lat": {
+                  "type": "number",
+                  "description": "Latitude of the grid cell centre."
+                },
+                "lon": {
+                  "type": "number",
+                  "description": "Longitude of the grid cell centre."
+                },
+                "values": {
+                  "type": "object",
+                  "description": "Forecasted feature values keyed by feature name.",
+                  "additionalProperties": {
+                    "type": "number"
+                  },
+                  "examples": [
+                    {
+                      "skin_temperature_c": 28.34,
+                      "soil_temperature_level_1_c": 22.15,
+                      "surface_solar_radiation_downwards": 185000.5,
+                      "surface_thermal_radiation_downwards": 320000.2,
+                      "temperature_2m_c": 30.12,
+                      "u_component_of_wind_10m": 3.45,
+                      "v_component_of_wind_10m": -1.22
+                    }
+                  ]
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

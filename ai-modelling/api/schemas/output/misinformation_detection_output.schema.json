@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "misinformation_detection_output.schema.json",
+  "title": "Misinformation Detection Output",
+  "description": "Output schema for the DeBERTa v3-large binary misinformation classifier. Classifies a single social media post as misinformation or non-misinformation with confidence scores, risk assessment, and severity rating.",
+  "type": "object",
+  "required": [
+    "model_id",
+    "domain",
+    "id",
+    "content",
+    "label_id",
+    "label",
+    "confidence",
+    "probabilities",
+    "risk_score",
+    "severity",
+    "checkpoint"
+  ],
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "Registry identifier for the model, e.g. 'misinfo-deberta'."
+    },
+    "domain": {
+      "type": "string",
+      "const": "misinformation",
+      "description": "Model domain."
+    },
+    "id": {
+      "type": "string",
+      "description": "Input post identifier (echoed back from request)."
+    },
+    "author_name": {
+      "type": ["string", "null"],
+      "description": "Post author name (echoed back from request)."
+    },
+    "platform": {
+      "type": ["string", "null"],
+      "description": "Source platform, e.g. 'TWITTER', 'FACEBOOK' (echoed back from request)."
+    },
+    "content": {
+      "type": "string",
+      "description": "Original post text content (echoed back from request)."
+    },
+    "share_count": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Number of shares/retweets (echoed back from request)."
+    },
+    "ts": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "Post timestamp in ISO-8601 format (echoed back from request)."
+    },
+    "post_url": {
+      "type": ["string", "null"],
+      "description": "URL of the original post (echoed back from request)."
+    },
+    "label_id": {
+      "type": "integer",
+      "enum": [0, 1],
+      "description": "Predicted class index. 0 = non_misinformation, 1 = misinformation."
+    },
+    "label": {
+      "type": "string",
+      "enum": ["non_misinformation", "misinformation"],
+      "description": "Human-readable predicted class label."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Softmax probability of the predicted class."
+    },
+    "probabilities": {
+      "type": "object",
+      "description": "Softmax probabilities for each class.",
+      "properties": {
+        "non_misinformation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of non-misinformation class."
+        },
+        "misinformation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of misinformation class."
+        }
+      },
+      "required": ["non_misinformation", "misinformation"],
+      "additionalProperties": false
+    },
+    "risk_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Risk score derived from max softmax probability."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+      "description": "Severity rating based on risk_score thresholds: CRITICAL >= 0.9, HIGH >= 0.75, MEDIUM >= 0.6, LOW < 0.6."
+    },
+    "checkpoint": {
+      "type": "string",
+      "description": "Path to the model checkpoint used for this prediction."
+    }
+  },
+  "additionalProperties": true
+}

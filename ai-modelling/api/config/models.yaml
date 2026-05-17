@@ -18,9 +18,11 @@ models:
     kind: deberta_sequence_binary
     enabled: true
     checkpoint: src/models/misinformation/checkpoints/misinfo-deberta
+    output_schema: api/schemas/output/misinformation_detection_output.schema.json
 
   - id: bushfire-risk-v1
     domain: bushfire
     kind: placeholder
     enabled: false
     checkpoint: null
+    output_schema: api/schemas/output/bushfire_risk_classification_output.schema.json
