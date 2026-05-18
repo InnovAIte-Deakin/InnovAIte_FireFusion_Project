@@ -15,6 +15,7 @@ from datetime import datetime
 from typing import Any
 
 from .llm_client import LLMClient,  LLMConfig, render_prompt
+from embedding_clusterer import cluster_narratives #added to connect to emebedding.py
 from typing import Literal
 from pydantic import BaseModel, Field
 import json
@@ -202,35 +203,44 @@ def main() -> None:
 
     raw_posts = json.loads(posts_path.read_text(encoding="utf-8"))
 
-    client = LLMClient(
-        LLMConfig(
-            provider="gemini",          # or "openai"
-            model="gemini-3-flash-preview",
-            temperature=0.2,
-            max_retries=3,
-        )
-    )
+    # client = LLMClient(
+    #     LLMConfig(
+    #         provider="gemini",          # or "openai"
+    #         model="gemini-3-flash-preview",
+    #         temperature=0.2,
+    #         max_retries=3,
+    #     )
+    # )
 
-    clusterer = NarrativeClusterer(
-        client=client,
-        prompt_template=CLUSTER_PROMPT_TEMPLATE,   # rename to CLUSTER_PROMPT_TEMPLATE if you can
-        config=ClusterConfig(
-            strict_json=True,
-            enforce_all_posts_used_once=True,
-        ),
-    )
+    # clusterer = NarrativeClusterer(
+    #     client=client,
+    #     prompt_template=CLUSTER_PROMPT_TEMPLATE,   # rename to CLUSTER_PROMPT_TEMPLATE if you can
+    #     config=ClusterConfig(
+    #         strict_json=True,
+    #         enforce_all_posts_used_once=True,
+    #     ),
+    # )
 
-    result = clusterer.run(raw_posts)
+    result = cluster_narratives(raw_posts)
 
     # Small test output
-    narratives = result.get("narratives", [])
-    print(f"Generated narratives: {len(narratives)}")
-    for n in narratives:
+    clusters = result.get("clusters", [])
+    print(f"Generated clusters: {len(clusters)}")
+
+    for c in clusters:
         print(
-            f"- {n['narrative_id']} | {n['severity']} | "
-            f"posts={n['post_count']} | "
-            f"{n['timestamp_earliest']} -> {n['timestamp_latest']}"
+            f"- Cluster {c['cluster_id']} | Risk={c['risk_score']}/5 | "
+            f"posts={c['num_posts']} | {c['label']}"
         )
+
+    # narratives = result.get("narratives", [])
+    # print(f"Generated narratives: {len(narratives)}")
+    # for n in narratives:
+    #     print(
+    #         f"- {n['narrative_id']} | {n['severity']} | "
+    #         f"posts={n['post_count']} | "
+    #         f"{n['timestamp_earliest']} -> {n['timestamp_latest']}"
+    #     )
 
 if __name__ == "__main__":
     main()
