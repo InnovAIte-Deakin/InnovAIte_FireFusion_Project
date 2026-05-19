@@ -15,8 +15,6 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 
-import { useNavigate, useLocation } from "react-router-dom";
-
 const menuItems = [
   {
     label: "Dashboard",
@@ -37,7 +35,7 @@ const menuItems = [
     icon: Shield,
     badge: "14",
     path: "/misinfo",
-    activePaths: ["/misinfo", "/misinformation-review"],
+    activePaths: ["/misinfo", "/misinfo-review", "/misinformation-review"],
   },
   {
     label: "Reports",
@@ -61,15 +59,18 @@ function InfoBox({ icon: Icon, title, value }) {
 }
 
 export default function Sidebar({ collapsed, onToggle }) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const currentPath = window.location.pathname;
+
+  const handleNavigate = (path) => {
+    window.location.href = path;
+  };
 
   const handleSignOut = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     sessionStorage.clear();
 
-    navigate("/login", { replace: true });
+    window.location.replace("/login");
   };
 
   return (
@@ -104,7 +105,7 @@ export default function Sidebar({ collapsed, onToggle }) {
       <nav className={`nav-list${collapsed ? " nav-list--collapsed" : ""}`}>
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = item.activePaths.includes(location.pathname);
+          const isActive = item.activePaths.includes(currentPath);
 
           return (
             <button
@@ -113,7 +114,7 @@ export default function Sidebar({ collapsed, onToggle }) {
                 collapsed ? " nav-item--icon-only" : ""
               }`}
               title={collapsed ? item.label : undefined}
-              onClick={() => navigate(item.path)}
+              onClick={() => handleNavigate(item.path)}
             >
               <span>
                 <Icon size={17} />
@@ -158,9 +159,9 @@ export default function Sidebar({ collapsed, onToggle }) {
 
             <button
               className={`nav-item ${
-                location.pathname === "/settings" ? "active" : ""
+                currentPath === "/settings" ? "active" : ""
               }`}
-              onClick={() => navigate("/settings")}
+              onClick={() => handleNavigate("/settings")}
             >
               <span>
                 <Settings size={17} /> Settings

@@ -5,7 +5,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Settings from "./pages/Settings.jsx";
 import MisinfoLandingPage from "./pages/MisinformationLanding.jsx";
-
+import Analytics from "./pages/Analytics.jsx";
 
 export default function App() {
   const path = window.location.pathname;
@@ -18,8 +18,16 @@ export default function App() {
     return <MisinformationReview />;
   }
 
+  if (path === "/misinformation-review") {
+    return <MisinformationReview />;
+  }
+
   if (path === "/misinfo") {
     return <MisinfoLandingPage />;
+  }
+
+  if (path === "/analytics") {
+    return <Analytics />;
   }
 
   if (path === "/login") {
@@ -29,8 +37,10 @@ export default function App() {
   if (path === "/signup") {
     return <Signup />;
   }
-  if (path === "/settings") return <Settings />;
-  return <Dashboard />;
 
-  
+  if (path === "/settings") {
+    return <Settings />;
+  }
+
+  return <Dashboard />;
 }
