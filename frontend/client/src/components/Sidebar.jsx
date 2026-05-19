@@ -11,17 +11,41 @@ import {
   Droplets,
   Eye,
   ChevronRight,
-  ChevronLeft,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
-import { useSidebarCollapse } from "./SidebarCollapseContext";
+
+import { useNavigate, useLocation } from "react-router-dom";
 
 const menuItems = [
-  { label: "Dashboard", icon: Home, badge: null, active: true },
-  { label: "Fire Map", icon: Map, badge: "7" },
-  { label: "Misinformation Review", icon: Shield, badge: "14" },
-  { label: "Reports", icon: FileText, badge: null },
+  {
+    label: "Dashboard",
+    icon: Home,
+    badge: null,
+    path: "/",
+    activePaths: ["/", "/dashboard"],
+  },
+  {
+    label: "Fire Map",
+    icon: Map,
+    badge: "7",
+    path: "/fire-map",
+    activePaths: ["/fire-map"],
+  },
+  {
+    label: "Misinformation Review",
+    icon: Shield,
+    badge: "14",
+    path: "/misinfo",
+    activePaths: ["/misinfo", "/misinformation-review"],
+  },
+  {
+    label: "Reports",
+    icon: FileText,
+    badge: null,
+    path: "/analytics",
+    activePaths: ["/analytics", "/reports"],
+  },
 ];
 
 function InfoBox({ icon: Icon, title, value }) {
@@ -37,11 +61,23 @@ function InfoBox({ icon: Icon, title, value }) {
 }
 
 export default function Sidebar({ collapsed, onToggle }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleSignOut = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.clear();
+
+    navigate("/login", { replace: true });
+  };
+
   return (
     <aside className={`sidebar${collapsed ? " collapsed" : ""}`}>
       <div className="sidebar-header">
         <div className="brand">
           <div className="brand-logo">FF</div>
+
           {!collapsed && (
             <div>
               <h1>FireFusion</h1>
@@ -49,8 +85,17 @@ export default function Sidebar({ collapsed, onToggle }) {
             </div>
           )}
         </div>
-        <button className="sidebar-toggle" onClick={onToggle} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
-          {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+
+        <button
+          className="sidebar-toggle"
+          onClick={onToggle}
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <PanelLeftOpen size={18} />
+          ) : (
+            <PanelLeftClose size={18} />
+          )}
         </button>
       </div>
 
@@ -59,23 +104,16 @@ export default function Sidebar({ collapsed, onToggle }) {
       <nav className={`nav-list${collapsed ? " nav-list--collapsed" : ""}`}>
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const isActive = item.activePaths.includes(location.pathname);
 
           return (
             <button
               key={item.label}
-              className={`nav-item ${item.active ? "active" : ""}${collapsed ? " nav-item--icon-only" : ""}`}
+              className={`nav-item ${isActive ? "active" : ""}${
+                collapsed ? " nav-item--icon-only" : ""
+              }`}
               title={collapsed ? item.label : undefined}
-              onClick={
-                item.label === "Fire Map"
-                  ? () => {
-                      window.location.href = "/fire-map";
-                    }
-                  : item.label === "Dashboard"
-                  ? () => (window.location.href = "/")
-                  : item.label === "Misinformation Review"
-                  ? () => (window.location.href = "/misinfo")
-                  : undefined
-              }
+              onClick={() => navigate(item.path)}
             >
               <span>
                 <Icon size={17} />
@@ -83,7 +121,7 @@ export default function Sidebar({ collapsed, onToggle }) {
               </span>
 
               {!collapsed && item.badge && <b>{item.badge}</b>}
-              {!collapsed && item.active && <ChevronRight size={16} />}
+              {!collapsed && isActive && <ChevronRight size={16} />}
             </button>
           );
         })}
@@ -92,7 +130,9 @@ export default function Sidebar({ collapsed, onToggle }) {
       {!collapsed && (
         <>
           <div className="ban-card">
-            <h3><span></span>Total Fire Ban</h3>
+            <h3>
+              <span></span>Total Fire Ban
+            </h3>
             <p>No fires permitted</p>
             <small>Catastrophic conditions.</small>
           </div>
@@ -110,12 +150,21 @@ export default function Sidebar({ collapsed, onToggle }) {
             <p className="section-title">System</p>
 
             <button className="nav-item">
-              <span><Bell size={17} /> Notifications</span>
+              <span>
+                <Bell size={17} /> Notifications
+              </span>
               <b>3</b>
             </button>
 
-            <button className="nav-item" onClick={() => (window.location.href = "/settings")}>
-              <span><Settings size={17} /> Settings</span>
+            <button
+              className={`nav-item ${
+                location.pathname === "/settings" ? "active" : ""
+              }`}
+              onClick={() => navigate("/settings")}
+            >
+              <span>
+                <Settings size={17} /> Settings
+              </span>
             </button>
 
             <div className="profile-card">
@@ -126,13 +175,14 @@ export default function Sidebar({ collapsed, onToggle }) {
               </span>
             </div>
 
-            <button className="signout">
+            <button className="signout" onClick={handleSignOut}>
               <LogOut size={16} />
               Sign Out
             </button>
 
             <small className="version">
-              Version 2.4.1<br />
+              Version 2.4.1
+              <br />
               Last sync: 2 min ago
             </small>
           </div>

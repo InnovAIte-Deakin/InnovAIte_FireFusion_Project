@@ -6,6 +6,7 @@ import Signup from "./pages/Signup.jsx";
 import Settings from "./pages/Settings.jsx";
 import MisinfoLandingPage from "./pages/MisinformationLanding.jsx";
 
+
 export default function App() {
   const path = window.location.pathname;
 
@@ -30,4 +31,6 @@ export default function App() {
   }
   if (path === "/settings") return <Settings />;
   return <Dashboard />;
+
+  
 }
