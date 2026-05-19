@@ -103,39 +103,6 @@ export default function Settings() {
               </div>
               <SaveBtn saved={saved} onClick={handleSave} />
             </div>
-            <div className="settings-two-col">
-              <div className="panel settings-panel settings-panel-highlight">
-                <h3>Notification Preferences</h3>
-                <NotifRow label="Emergency Alerts" desc="Critical fire & evacuation notifications" enabled={notifs.emergencyAlerts} onChange={v => setNotifs(p => ({ ...p, emergencyAlerts: v }))} />
-                <NotifRow label="Misinformation Alerts" desc="New claims flagged for review" enabled={notifs.misinfoAlerts} onChange={v => setNotifs(p => ({ ...p, misinfoAlerts: v }))} />
-                <NotifRow label="Weather Updates" desc="Wind, temperature & humidity changes" enabled={notifs.weatherUpdates} onChange={v => setNotifs(p => ({ ...p, weatherUpdates: v }))} />
-                <NotifRow label="System Notifications" desc="Sync status & app updates" enabled={notifs.systemNotifs} onChange={v => setNotifs(p => ({ ...p, systemNotifs: v }))} />
-              </div>
-              <div className="panel settings-panel">
-                <h3>Display & Region</h3>
-                <div className="settings-fields-grid2">
-                  <Field label="Region" value={region} onChange={setRegion} />
-                  <Field label="Timezone" value={timezone} onChange={setTimezone} />
-                  <div className="settings-full-col"><Field label="Map Default View" value={mapView} onChange={setMapView} /></div>
-                  <Field label="Date Format" value={dateFormat} onChange={setDateFormat} />
-                  <Field label="Units" value={units} onChange={setUnits} />
-                </div>
-              </div>
-            </div>
-            <div className="settings-two-col">
-              <div className="panel settings-panel">
-                <h3>Security</h3>
-                <NotifRow label="Two-Factor Authentication" desc="Add extra security to your account" enabled={twoFactor} onChange={setTwoFactor} />
-                <NotifRow label="Login Alerts" desc="Get notified of new sign-ins" enabled={loginAlerts} onChange={setLoginAlerts} />
-                <div className="settings-field-single"><SelectField label="Session Timeout" value={sessionTimeout} onChange={setSessionTimeout} options={["15 minutes", "30 minutes", "1 hour", "Never"]} /></div>
-              </div>
-              <div className="panel settings-panel">
-                <h3>Data & Sync</h3>
-                <NotifRow label="Auto-Sync" desc="Sync data every 2 minutes" enabled={autoSync} onChange={setAutoSync} />
-                <NotifRow label="Offline Mode" desc="Cache data for offline access" enabled={offlineMode} onChange={setOfflineMode} />
-                <div className="settings-field-single"><SelectField label="Data Retention" value={dataRetention} onChange={setDataRetention} options={["30 days", "60 days", "90 days", "1 year"]} /></div>
-              </div>
-            </div>
           </>
         )}
 
@@ -200,79 +167,15 @@ export default function Settings() {
         )}
 
         {tab === "About" && (
-          <div className="panel settings-panel settings-panel-about">
-            <div className="about-hero">
-              <div className="about-hero-text">
-                <span className="about-label">About FireFusion</span>
-                <h3>AI-driven bushfire forecasting and misinformation defence system</h3>
-                <p>FireFusion is an AI-powered bushfire management platform designed for Victoria, Australia. It provides real-time fire risk forecasting, emergency alerts, and misinformation detection to support authorities and communities in making informed decisions during bushfire events.</p>
-                <div className="about-summary-grid">
-                  <div>
-                    <span>Application Name</span>
-                    <strong>FireFusion – AI-Driven Bushfire Forecasting System</strong>
-                  </div>
-                  <div>
-                    <span>Version</span>
-                    <strong>v1.0.0 (Beta)</strong>
-                  </div>
-                  <div>
-                    <span>Developed By</span>
-                    <strong>FireFusion Team / InnovAIte</strong>
-                  </div>
-                </div>
+          <div className="panel settings-panel settings-panel-narrow">
+            <h3>About FireFusion</h3>
+            <p className="settings-sub">System information and version details</p>
+            {[["Application","FireFusion Emergency Operations Dashboard"],["Version","2.4.1"],["Last Sync","2 min ago"],["Environment","Production"],["Organisation","Emergency Management Victoria"],["Support","support@firefusion.gov.au"]].map(([k,v]) => (
+              <div key={k} className="settings-about-row">
+                <span className="settings-about-key">{k}</span>
+                <span className="settings-about-val">{v}</span>
               </div>
-
-              <div className="about-hero-side">
-                <div className="about-brand-card">
-                  <div className="about-brand-logo">FF</div>
-                  <div>
-                    <h4>FireFusion</h4>
-                    <p>Emergency Operations</p>
-                  </div>
-                </div>
-                <div className="about-stat-grid">
-                  <div className="about-stat-card">
-                    <span>Vision</span>
-                    <strong>Smart, safe and resilient communities.</strong>
-                  </div>
-                  <div className="about-stat-card">
-                    <span>Mission</span>
-                    <strong>Deliver trusted risk insights for fast action.</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="about-feature-grid">
-              <div className="about-card">
-                <h4>Vision</h4>
-                <p>Enable early and accurate bushfire prediction using advanced AI models that analyze environmental, weather, and historical data to identify high-risk zones and support timely preventive actions.</p>
-              </div>
-              <div className="about-card">
-                <h4>Mission</h4>
-                <p>Provide real-time bushfire risk forecasts and alerts by continuously analyzing environmental, weather, and sensor data to support proactive decision-making and improve community preparedness.</p>
-              </div>
-            </div>
-
-            <div className="about-contact-grid">
-              <div className="about-contact-card">
-                <span>Email</span>
-                <strong>support@firefusion.ai</strong>
-              </div>
-              <div className="about-contact-card">
-                <span>Emergency Contact</span>
-                <strong>Victoria Fire Services</strong>
-                <p>00 61 2 1234 5678</p>
-              </div>
-              <div className="about-contact-card">
-                <span>Website</span>
-                <strong>www.innovalte.ai</strong>
-              </div>
-              <div className="about-contact-card">
-                <span>Location</span>
-                <strong>Victoria, Australia</strong>
-              </div>
-            </div>
+            ))}
           </div>
         )}
       </div>
