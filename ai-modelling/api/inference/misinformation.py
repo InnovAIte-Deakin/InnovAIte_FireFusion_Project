@@ -4,7 +4,7 @@ Misinformation scoring: pure functions over a ``LoadedModel`` bundle.
 Routers call this after resolving ``model_id`` via ``model_loader``.
 """
 from typing import Any, Literal
-
+import math
 from api.model_loader import LoadedModel
 from src.models.misinformation.deberta import classify_text
 
@@ -15,7 +15,6 @@ def risk_score_max_softmax(probabilities: dict[str, float]) -> float:
     if not probabilities:
         return 0.0
     return float(max(probabilities.values()))
-
 
 def severity_from_risk(risk_score: float) -> Severity:
     if risk_score >= 0.9:
