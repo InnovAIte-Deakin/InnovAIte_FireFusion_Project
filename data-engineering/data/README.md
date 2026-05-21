@@ -1,40 +1,197 @@
-# FireFusion: Data Engineering Pipeline
+NASA FIRMS Fire Data Engineering Pipeline
+1. Overview
 
-## Overview
-This repository contains the data engineering pipelines and database architecture for the FireFusion bushfire forecasting project. 
+This module implements a robust data engineering pipeline for ingesting, transforming, and integrating bushfire detection data from NASA FIRMS into the FireFusion system.
 
-Our primary goal in this stream is to extract historical fire data, weather conditions, topography, vegetation health, and infrastructure risk data, and format it into a unified database structure for the AI modeling team.
+The pipeline supports both batch (historical) and near real-time ingestion, enabling continuous updates of fire events for downstream analytics and predictive modelling.
 
-## Repository Structure
-To keep our work organized and prevent merge conflicts, this repository follows a strict directory structure:
+All processed data is aligned with the Fire_Events fact table in the FireFusion Star Schema, ensuring seamless integration with weather, topography, vegetation, and infrastructure datasets.
 
-* **`/architecture`**: Contains the official database design, including the Star Schema Entity Relationship Diagram (ERD) and table documentation. This is our single source of truth for column names and data types.
-* **`/data`**: The local storage for our datasets. 
-  * `/raw`: Unmodified files downloaded directly from APIs or government portals.
-  * `/processed`: Cleaned datasets formatted to match our Star Schema architecture.
-  * `/data_dictionaries`: Markdown files explaining the variables and sources of each dataset.
-* **`/notebooks`**: Jupyter Notebooks used for Exploratory Data Analysis (EDA), testing, and creating visual charts (e.g., soil moisture mapping).
-* **`/pipelines`**: The core Python extraction and transformation scripts. Each data source (e.g., Open-Meteo, NASA FIRMS) has its own dedicated subfolder here.
+2. System Architecture
 
-## Environment Setup
-Before running any extraction scripts, ensure your local environment is configured correctly.
+The pipeline follows a standard ETL (Extract → Transform → Load) architecture:
 
-1. **Clone the repository:**
-   git clone [Insert Your Repository URL Here]
-   cd data-engineering
+NASA FIRMS API / CSV
+        ↓
+Extraction Layer (requests / pandas)
+        ↓
+Transformation Layer (data cleaning, schema alignment)
+        ↓
+Staging Layer (temporary PostgreSQL table)
+        ↓
+Load Layer (Fire_Events fact table)
+        ↓
+Indexed Database (PostgreSQL)
 
-2. **Install Required Libraries:**
-   Ensure you have Python installed. We recommend using a virtual environment.
-   pip install -r requirements.txt
+3. Project Structure
+data-engineering/
+├── pipelines/
+│   └── nasa_firms/
+│       ├── transform_firms.py
+│       ├── load_to_postgres.py
+│       ├── realtime_ingest_firms.py
+│       ├── db_connection.py
+│
+├── data/
+│   ├── raw/
+│   └── processed/
+│
+├── notebooks/
+│   └── fire_analysis.ipynb
 
-3. **Set Up API Keys (Security):**
-   Never hardcode API keys or passwords directly into your Python scripts. 
-   * Create a file named `.env` in the root folder.
-   * Add your keys to this file (e.g., `NASA_API_KEY=your_key_here`).
-   * The `.env` file is already included in our `.gitignore` to prevent it from being uploaded to GitHub.
+4. Data Source
 
-## Data Storage Rules
-GitHub is for version control of our code, not for storing massive datasets. 
+The pipeline uses NASA FIRMS (Fire Information for Resource Management System):
 
-* **Do not push `.csv`, `.zip`, or `.json` data files to GitHub.**
-* Our `.gitignore` file is configured to block files in the `data/raw/` and `data/processed/` folders. Keep your data on your local machine.
+Satellite-based fire detection (MODIS, VIIRS)
+Global coverage with high temporal resolution
+Supports both historical archives and near real-time feeds
+
+Real-time ingestion uses the FIRMS Area API with bounding-box filtering.
+
+5. Data Processing Pipeline
+5.1 Extraction
+
+Two ingestion modes are implemented:
+
+Batch Processing
+Reads raw CSV files downloaded from FIRMS
+Used for historical analysis (Black Summer 2019–2020)
+Real-time Ingestion
+Uses FIRMS API via HTTP requests
+Fetches recent fire detections (last 1–5 days)
+Supports region-based filtering (Victoria / Australia)
+5.2 Transformation
+
+Data is standardised into the Fire_Events schema:
+
+Type conversion and validation
+Handling mixed-type columns (e.g., confidence values)
+Mapping categorical confidence levels to numeric scale
+Filtering invalid or null records
+Deduplication based on spatial-temporal attributes
+
+Key transformations:
+
+acq_date → event_date
+confidence → confidence_score
+Missing foreign keys set to NULL (future integration)
+5.3 Load (PostgreSQL Integration)
+
+Data is inserted into PostgreSQL using a staging + merge strategy:
+
+Load transformed data into a temporary staging table
+Insert into Fire_Events using INSERT ... SELECT
+Apply ON CONFLICT DO NOTHING for deduplication
+Drop staging table after successful load
+
+This ensures:
+
+idempotent ingestion
+safe reprocessing
+consistent dataset state
+
+6. Database Design
+Fire_Events Table
+Column	Type	Description
+event_id	INTEGER	Primary key
+weather_id	INTEGER	Foreign key
+topo_id	INTEGER	Foreign key
+fuel_id	INTEGER	Foreign key
+facility_id	INTEGER	Foreign key
+latitude	DOUBLE	Geographic coordinate
+longitude	DOUBLE	Geographic coordinate
+event_date	DATE	Detection date
+confidence_score	INTEGER	Fire detection confidence
+source_system	VARCHAR	Data origin
+
+6.1 Indexing Strategy
+
+To optimise query performance:
+
+Spatial filtering:
+CREATE INDEX idx_fire_events_latitude ON Fire_Events(latitude);
+CREATE INDEX idx_fire_events_longitude ON Fire_Events(longitude);
+Temporal filtering:
+CREATE INDEX idx_fire_events_event_date ON Fire_Events(event_date);
+Combined index for analytics:
+CREATE INDEX idx_fire_events_location_date 
+ON Fire_Events(latitude, longitude, event_date);
+
+6.2 Deduplication Strategy
+
+A composite uniqueness constraint is applied:
+
+(latitude, longitude, event_date, confidence_score, source_system)
+
+This ensures:
+
+no duplicate fire events
+safe ingestion of overlapping API data
+consistent incremental updates
+
+7. Real-time Ingestion Design
+
+The real-time ingestion pipeline is designed for continuous operation:
+
+Fetches recent fire detections periodically
+Uses bounding-box filtering to reduce data volume
+Supports region-specific processing (Victoria for optimisation)
+Key Features
+API-based ingestion (no manual downloads)
+Automatic deduplication
+Incremental data loading
+Compatible with scheduled execution (cron)
+8. Configuration
+Environment Variables
+FIRMS_MAP_KEY=your_api_key
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=firefusion_db
+DB_USER=postgres
+DB_PASSWORD=your_password
+9. Execution
+Batch Processing
+python3 transform_firms.py
+python3 load_to_postgres.py
+Real-time Ingestion
+python3 realtime_ingest_firms.py
+10. Automation
+
+Real-time ingestion can be scheduled using cron:
+
+*/10 * * * * python3 realtime_ingest_firms.py
+
+This enables near real-time updates every 10 minutes.
+
+11. Data Governance
+Raw and processed datasets are stored locally
+No large datasets are committed to GitHub
+Sensitive configurations (.env) are excluded
+Repository follows strict structure for collaboration
+
+12. Future Enhancements
+Spatial indexing using PostGIS
+Integration with weather and topography tables
+Streaming ingestion (Kafka / real-time pipeline)
+Fire risk scoring models
+Interactive dashboards for monitoring
+
+13. Technical Highlights
+
+This implementation demonstrates:
+
+End-to-end ETL pipeline design
+API-based real-time ingestion
+Database optimisation and indexing
+Data quality and deduplication strategies
+Scalable architecture for multi-source integration
+
+14. Contribution Summary
+
+This module contributes to the FireFusion project by:
+
+providing structured fire event data
+enabling real-time monitoring capability
+supporting predictive modelling workflows
+improving system-wide data consistency and performance
