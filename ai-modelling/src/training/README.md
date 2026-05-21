@@ -1,6 +1,4 @@
-# Training Module
-
-## Overview
+# Overview
 
 This folder contains the training pipelines used for the FireFusion AI modelling system.
 
@@ -19,43 +17,19 @@ The training scripts are designed for:
 - scalable GPU training
 - model checkpointing and evaluation
 
----
-
 # Folder Structure
 
 | File / Folder | Purpose |
 |---|---|
-| `LSTM/` | Contains LSTM forecasting training pipelines |
-| `tcn_train_classifier.py` | Training pipeline for TCN-based bushfire classification |
-| `train_deberta.py` | Fine-tuning pipeline for DeBERTa misinformation detection |
+| `tcn_classifier_train.py` | Training pipeline for TCN-based bushfire classification |
+| `deberta_train.py` | Fine-tuning pipeline for DeBERTa misinformation detection |
 | `ts_convlstm_forecaster_train.py` | ConvLSTM spatiotemporal forecasting training pipeline |
-| `bushfire_training.py` | Placeholder/experimental bushfire training script |
-
----
-
-# Training Architectures
-
-This module contains multiple independent AI training systems.
-
-```text
-Environmental Forecasting
-    ├── LSTM Forecaster
-    └── ConvLSTM Forecaster
-
-Bushfire Classification
-    └── TCN Classifier
-
-Misinformation Detection
-    └── DeBERTa Transformer
-```
-
----
 
 # 1. TCN Bushfire Classification
 
 ## File
 ```text
-tcn_train_classifier.py
+tcn_classifier_train.py
 ```
 
 This training pipeline builds a Temporal Convolutional Network (TCN) classifier for bushfire prediction using:
@@ -103,7 +77,7 @@ Sliding windows are generated dynamically for:
 
 ## File
 ```text
-train_deberta.py
+deberta_train.py
 ```
 
 This script fine-tunes:
@@ -203,153 +177,24 @@ The ConvLSTM predicts:
 - RMSE
 - R² score
 
----
-
-# 4. LSTM Multivariate Forecasting
-
-## Folder
-```text
-LSTM/
-```
-
-## Main File
-```text
-ts_forecaster_train.py
-```
-
-This training pipeline builds a multivariate LSTM forecaster for environmental time-series prediction.
-
-The model learns temporal relationships between:
-- temperature
-- wind
-- radiation
-- soil conditions
-
-using sliding-window forecasting.
-
----
-
-# LSTM Forecasting Workflow
-
-```text
-Environmental Time-Series
-        ↓
-Scaling & Normalisation
-        ↓
-Sliding Window Generation
-        ↓
-LSTM Forecasting
-        ↓
-Future Environmental Predictions
-```
-
----
-
-## Features
-
-### Time-Series Processing
-- chronological ordering
-- leakage-safe scaling
-- sliding-window sequence generation
-
-### Forecasting
-The model predicts:
-- multiple future timesteps
-- multiple environmental variables simultaneously
-
-### Evaluation Metrics
-- MAE
-- RMSE
-- MAPE
-
-### Outputs
-The pipeline saves:
-- trained model weights
-- fitted scalers
-- forecasting metadata
-
----
-
-# Shared Training Design Principles
-
-All training pipelines follow several common principles:
-
-## Leakage Prevention
-- chronological splits
-- train-only scaling
-- held-out evaluation sets
-
-## GPU Support
-Pipelines automatically use:
-- CUDA when available
-- CPU fallback otherwise
-
-## Checkpointing
-Training scripts save:
-- model weights
-- fitted scalers
-- metadata
-
-## Early Stopping
-Most models implement:
-- validation monitoring
-- patience-based stopping
-
----
-
-# Technologies Used
-
-- Python
-- PyTorch
-- Hugging Face Transformers
-- Scikit-learn
-- NumPy
-- Pandas
-- GeoPandas
-- ConvLSTM
-- LSTM
-- TCN
-- DeBERTa v3-large
-
----
-
-# Typical Use Cases
-
-This module supports:
-- Bushfire prediction
-- Environmental forecasting
-- Spatiotemporal climate modelling
-- Fire risk classification
-- NLP misinformation detection
-- Emergency AI workflows
-
----
-
 # Running Training Pipelines
 
 From the project root:
 
 ## TCN Bushfire Classifier
 ```bash
-python -m src.training.tcn_train_classifier
+python -m src.training.tcn_classifier_train
 ```
 
 ## DeBERTa Fine-Tuning
 ```bash
-python src/training/train_deberta.py --train data/train.json --output-dir checkpoints/misinfo-deberta
+python src/training/deberta_train.py --train data/train.json --output-dir checkpoints/misinfo-deberta
 ```
 
 ## ConvLSTM Forecasting
 ```bash
 python -m src.training.ts_convlstm_forecaster_train
 ```
-
-## LSTM Forecasting
-```bash
-python -m src.training.LSTM.ts_forecaster_train
-```
-
----
 
 # Notes
 
@@ -360,4 +205,3 @@ python -m src.training.LSTM.ts_forecaster_train
 ```text
 src/models/bushfire/checkpoints/
 ```
-- Training pipelines are designed to support future expansion into larger multi-modal AI workflows.
