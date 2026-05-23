@@ -1,4 +1,4 @@
-# FireFusion 🔥 — AI Modelling
+# FireFusion — AI Modelling
 
 The AI modelling component of the FireFusion project. This module handles all machine learning work for the system — including geospatial data ingestion from ERA5, bushfire risk forecasting, misinformation detection, a lightweight FastAPI for serving predictions, and integration with LLM APIs.
 
