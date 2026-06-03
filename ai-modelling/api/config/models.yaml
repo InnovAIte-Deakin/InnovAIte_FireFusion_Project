@@ -7,6 +7,8 @@
 #
 # kind (loader dispatch):
 #   deberta_sequence_binary — HF sequence classification checkpoint (misinformation)
+#   bushfire_forecaster     — ConvLSTM spatiotemporal forecaster
+#   bushfire_classifier     — TCN binary fire occurrence classifier
 #   placeholder             — reserved; skipped at load time
 
 defaults:
@@ -17,12 +19,21 @@ models:
     domain: misinformation
     kind: deberta_sequence_binary
     enabled: true
-    checkpoint: src/models/misinformation/checkpoints/misinfo-deberta
+    checkpoint: src/models/misinformation/checkpoints/deberta
     output_schema: api/schemas/output/misinformation_detection_output.schema.json
 
-  - id: bushfire-risk-v1
+  - id: bushfire-forecaster-v1
     domain: bushfire
-    kind: placeholder
-    enabled: false
-    checkpoint: null
+    kind: bushfire_forecaster
+    enabled: true
+    checkpoint: src/models/bushfire/checkpoints/convlstm_forecaster.pth
+    scaler_checkpoint: src/models/bushfire/checkpoints/convlstm_scaler.pkl
+    output_schema: api/schemas/output/bushfire_forecast_output.schema.json
+
+  - id: bushfire-classifier-v1
+    domain: bushfire
+    kind: bushfire_classifier
+    enabled: true
+    checkpoint: src/models/bushfire/checkpoints/tcn_classifier.pth
+    scaler_checkpoint: null
     output_schema: api/schemas/output/bushfire_risk_classification_output.schema.json
