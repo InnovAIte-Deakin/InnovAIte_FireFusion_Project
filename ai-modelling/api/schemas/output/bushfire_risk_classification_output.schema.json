@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bushfire_risk_classification_output.schema.json",
+  "title": "Bushfire Risk Classification Output",
+  "description": "Output schema for the TCN binary fire occurrence classifier. Predicts fire probability per grid cell over a configurable forecast horizon. The pipeline also supports 5-class risk levels (1-5) via the FireRiskPipeline wrapper.",
+  "type": "object",
+  "required": [
+    "model_id",
+    "model_version",
+    "domain",
+    "task",
+    "metadata",
+    "predictions"
+  ],
+  "properties": {
+    "model_id": {
+      "type": "string",
+      "description": "Registry identifier for the model, e.g. 'bushfire-risk-tcn'."
+    },
+    "model_version": {
+      "type": "string",
+      "description": "Schema version following semver, e.g. '1.0.0'.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "domain": {
+      "type": "string",
+      "const": "bushfire",
+      "description": "Model domain."
+    },
+    "task": {
+      "type": "string",
+      "const": "classification",
+      "description": "Model task type."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Configuration and context metadata for the classification run.",
+      "required": [
+        "lookback_steps",
+        "features",
+        "n_classes",
+        "decision_threshold"
+      ],
+      "properties": {
+        "lookback_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of historical timesteps in the input window. Default: 60."
+        },
+        "features": {
+          "type": "array",
+          "description": "Ordered list of environmental feature names matching model training.",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "examples": [
+            [
+              "temperature_2m_c",
+              "skin_temperature_c",
+              "soil_temperature_level_1_c",
+              "surface_solar_radiation_downwards",
+              "surface_thermal_radiation_downwards",
+              "u_component_of_wind_10m",
+              "v_component_of_wind_10m"
+            ]
+          ]
+        },
+        "n_classes": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "Number of output classes. Binary classifier: 2. Risk pipeline: 5."
+        },
+        "decision_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability threshold for positive class (fire). Default: 0.5."
+        },
+        "horizon": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of forecast steps when using multi-step inference. Default: 1."
+        },
+        "checkpoint_path": {
+          "type": "string",
+          "description": "Path to the model checkpoint used for this prediction."
+        },
+        "scaler_path": {
+          "type": "string",
+          "description": "Path to the fitted scaler used for input normalisation."
+        }
+      },
+      "additionalProperties": false
+    },
+    "predictions": {
+      "type": "array",
+      "description": "Classification results per grid cell.",
+      "items": {
+        "type": "object",
+        "required": [
+          "grid_cell",
+          "fire_probability",
+          "is_fire"
+        ],
+        "properties": {
+          "grid_cell": {
+            "type": "object",
+            "description": "Spatial location of the classified cell.",
+            "required": [
+              "row",
+              "col"
+            ],
+            "properties": {
+              "row": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Grid row index (0-indexed)."
+              },
+              "col": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Grid column index (0-indexed)."
+              },
+              "lat": {
+                "type": "number",
+                "description": "Latitude of the grid cell centre."
+              },
+              "lon": {
+                "type": "number",
+                "description": "Longitude of the grid cell centre."
+              },
+              "grid_id": {
+                "type": "string",
+                "description": "Optional ERA5-Land grid cell identifier."
+              }
+            },
+            "additionalProperties": false
+          },
+          "fire_probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Predicted probability of fire occurrence (sigmoid output)."
+          },
+          "is_fire": {
+            "type": "boolean",
+            "description": "Binary fire prediction based on decision_threshold."
+          },
+          "horizon_step": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Forecast step number (1-indexed). Present only for multi-step inference."
+          },
+          "risk_level": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "Fire risk level (1=lowest, 5=highest). Present only when using the FireRiskPipeline wrapper with 5-class risk classification."
+          },
+          "risk_probabilities": {
+            "type": "object",
+            "description": "Class probabilities for each risk level. Present only for 5-class risk classification.",
+            "properties": {
+              "level_1": { "type": "number", "minimum": 0, "maximum": 1 },
+              "level_2": { "type": "number", "minimum": 0, "maximum": 1 },
+              "level_3": { "type": "number", "minimum": 0, "maximum": 1 },
+              "level_4": { "type": "number", "minimum": 0, "maximum": 1 },
+              "level_5": { "type": "number", "minimum": 0, "maximum": 1 }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
