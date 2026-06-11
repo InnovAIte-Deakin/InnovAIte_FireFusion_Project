@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-05-17T23:44:19.477289",
+  "input_records": {
+    "fire": 1886,
+    "weather": 13725,
+    "vegetation": 1530,
+    "topography": 15,
+    "infrastructure": 60
+  },
+  "output_records": {
+    "fire": 1886,
+    "weather": 13725,
+    "vegetation": 1530,
+    "topography": 15,
+    "infrastructure": 60
+  },
+  "registries": {
+    "location_ids": 58,
+    "time_ids": 915
+  }
+}
