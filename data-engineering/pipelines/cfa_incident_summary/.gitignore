@@ -1,0 +1,16 @@
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Raw and generated data (not committed — see DATA_SOURCE.md)
+data/raw/
+data/processed/
+data/quarantine/
+logs/
+output/
+
+*.xlsx
+*.xls
+*.csv
+!data/reference/cfa_district_registry.csv
