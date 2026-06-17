@@ -1,0 +1,78 @@
+{
+  "static_mean": [
+    517.0875,
+    5.30446,
+    180.02608,
+    1712.1388,
+    3.3406,
+    0.45876540000000005,
+    -0.0008982000000000001,
+    0.1985944
+  ],
+  "static_std": [
+    242.8998433876605,
+    3.8888108861707327,
+    126.17307636668609,
+    676.2119291572428,
+    0.8429659779611511,
+    0.10177950856061352,
+    0.08885275818318754,
+    0.0883817802979777
+  ],
+  "static_cols": [
+    "elevation_m",
+    "slope_deg",
+    "aspect_deg",
+    "dist_to_water_m",
+    "veg_type_encoded",
+    "ndvi_at_ignition",
+    "ndwi_at_ignition",
+    "nbr_at_ignition"
+  ],
+  "temporal_min": [
+    20.0,
+    5.0,
+    220.2,
+    2.0,
+    0.0,
+    1.0,
+    0.02,
+    18.0,
+    0.0,
+    1.0,
+    24.08
+  ],
+  "temporal_max": [
+    50.0,
+    100.0,
+    360.0,
+    60.0,
+    5.0,
+    12.7,
+    0.342,
+    48.4,
+    36.0,
+    65.0,
+    104.13000000000001
+  ],
+  "temporal_cols": [
+    "max_temp_c",
+    "wind_speed_kmh",
+    "wind_dir_deg",
+    "rel_humidity_pct",
+    "precipitation_mm",
+    "evapotranspiration",
+    "soil_moisture",
+    "soil_temp_c",
+    "days_since_rain",
+    "years_since_last_fire",
+    "ffdi_proxy"
+  ],
+  "severity_map": {
+    "2": 0,
+    "3": 1,
+    "4": 2,
+    "5": 3
+  },
+  "n_classes": 4
+}
