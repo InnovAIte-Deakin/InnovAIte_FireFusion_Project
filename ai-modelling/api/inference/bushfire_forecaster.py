@@ -12,14 +12,14 @@ from api.model_loader import LoadedModel
 
 def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
     """
-    Forecast environmental variables from time-series observations using ConvLSTM.
+    Predict fire-occurrence probability from weather and environmental time-series observations using the ConvLSTM fire forecaster model.
     
     Args:
-        geojson_dict: GeoJSON FeatureCollection with time-series observations
+        geojson_dict: GeoJSON FeatureCollection with weather
         bundle: LoadedModel bundle with model, device, scaler, metadata
     
     Returns:
-        GeoJSON FeatureCollection with forecast values per feature
+        GeoJSON FeatureCollection with fire probability and threshold prediction per cell
     """
     # Validate input
     request = ForecastRequest(**geojson_dict)
@@ -29,8 +29,8 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
     feature_metas = []
     
     input_steps = bundle.metadata.get("input_steps", 60)
-    horizon = bundle.metadata.get("horizon", 2)
-    grid_shape = bundle.metadata.get("grid_shape")  # (height, width) if gridded
+    horizon = bundle.metadata.get("horizon", 1)
+    grid_shape = bundle.metadata.get("grid_shape")
     
     # Collect observations from each feature
     for feature in request.features:
@@ -77,19 +77,20 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
         
         if len(x_input.shape) == 5:
             # Gridded: [batch, seq_len, height, width, n_features]
-            # ConvLSTM expects [batch, seq_len, height, width, n_features]
-            forecasts = bundle.model.predict(x_tensor).cpu().numpy()  # [batch, horizon, height, width, n_features]
+            probs = bundle.model.predict(x_tensor, return_probs=True).cpu().numpy()
+            # probs: [batch, horizon, height, width, 1]
         else:
             # Non-gridded batch: [n_samples, seq_len, n_features]
-            # Model expects [batch, seq_len, height, width, n_features] so this will fail
-            # For now, reshape to add spatial dims [n_samples, seq_len, 1, 1, n_features]
+            # Reshape to add spatial dimensionss [n_samples, seq_len, height, width, n_features]
             x_tensor = x_tensor.unsqueeze(2).unsqueeze(3)  # [n_samples, seq_len, 1, 1, n_features]
-            forecasts = bundle.model.predict(x_tensor).cpu().numpy()  # [n_samples, horizon, 1, 1, n_features]
-            forecasts = forecasts.squeeze(axis=(2, 3))  # [n_samples, horizon, n_features]
+            probs = bundle.model.predict(x_tensor, return_probs=True).cpu().numpy()
+            # probs: [n_samples, horizon, 1, 1, 1]
+            probs = probs.squeeze(axis=(2, 3))  # [n_samples, horizon, 1]
     
     # Postprocess to GeoJSON
+    fire_threshold = bundle.metadata.get("fire_threshold", 0.5)
     output_features = _postprocess_forecasts(
-        forecasts, feature_metas, has_grid_coords, grid_shape, horizon, bundle.model_id
+        probs, feature_metas, has_grid_coords, grid_shape, horizon, bundle.model_id, fire_threshold
     )
     
     response = ForecastResponse(
@@ -153,51 +154,54 @@ def _apply_scaler(x: np.ndarray, scaler: Any) -> np.ndarray:
     
     # Apply scaler
     x_scaled = scaler.transform(x_flat)
+    x_scaled[np.isnan(x_scaled)] = 0.0
     
     # Reshape back
     return x_scaled.reshape(original_shape)
 
 
 def _postprocess_forecasts(
-    forecasts: np.ndarray,
+    probs: np.ndarray,
     feature_metas: list[dict],
     has_grid_coords: bool,
     grid_shape: Optional[Tuple[int, int]],
     horizon: int,
     model_id: str,
+    fire_threshold: float
 ) -> list[GeoFeatureOut]:
     """
-    Convert forecast arrays back to GeoJSON features.
+    Convert fire_probability arrays back to GeoJSON features.
     
     Args:
-        forecasts: [batch, horizon, height, width, n_features] or [n_samples, horizon, n_features]
+        probs: [batch, horizon, height, width, 1] or [n_samples, horizon, 1]
         feature_metas: List of feature metadata
         has_grid_coords: Whether features have grid coordinates
         grid_shape: (height, width) if gridded
         horizon: Forecast horizon
         model_id: Model ID for response
+        fire_threshold: Probability threshold for the binary prediction
     
     Returns:
         List of GeoFeatureOut
     """
     output_features = []
     
-    if has_grid_coords and grid_shape and len(forecasts.shape) == 5:
-        # Gridded forecasts: [batch, horizon, height, width, n_features]
-        # Extract per-feature forecasts from grid
+    if has_grid_coords and grid_shape and len(probs.shape) == 5:
+        # Gridded forecasts: [batch, horizon, height, width, 1]
         for meta in feature_metas:
             row = meta.get("grid_row")
             col = meta.get("grid_col")
             if row is not None and col is not None:
-                # Extract this cell's forecast [horizon, n_features]
-                forecast_vals = forecasts[0, :, row, col, :].tolist()
-                risk_score = float(np.mean(forecast_vals))  # Aggregate across features and time
+                cell_probs = probs[0, :, row, col, 0].tolist()
+                risk_score = float(np.mean(cell_probs))
+                is_burning_predicted = [p > fire_threshold for p in cell_probs]
                 
                 props_out = ForecastPropertiesOut(
                     id=meta["id"],
-                    forecast=forecast_vals,
+                    forecast=cell_probs,
                     risk_score=risk_score,
-                    model_id=model_id,
+                    is_burning_predicted=is_burning_predicted,
+                    model_id=model_id
                 )
                 feature_out = GeoFeatureOut(
                     type="Feature",
@@ -206,15 +210,18 @@ def _postprocess_forecasts(
                 )
                 output_features.append(feature_out)
     else:
-        # Non-gridded batch forecasts: [n_samples, horizon, n_features]
+        # Non-gridded batch: [n_samples, horizon, 1]
         for i, meta in enumerate(feature_metas):
-            forecast_vals = forecasts[i, :, :].tolist()  # [horizon, n_features]
-            risk_score = float(np.mean(forecast_vals))
+            cell_probs = probs[i, :, 0].tolist()
+            risk_score = float(np.mean(cell_probs))
+            is_burning_predicted = [p > fire_threshold for p in cell_probs]
             
             props_out = ForecastPropertiesOut(
                 id=meta["id"],
-                forecast=forecast_vals,
-                model_id=model_id,
+                forecast=cell_probs,
+                risk_score=risk_score,
+                is_burning_predicted=is_burning_predicted,
+                model_id=model_id
             )
             feature_out = GeoFeatureOut(
                 type="Feature",
