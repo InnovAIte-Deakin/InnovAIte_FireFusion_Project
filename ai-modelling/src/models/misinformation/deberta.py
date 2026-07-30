@@ -3,7 +3,7 @@ DeBERTa v3-large: model wiring and data objects that feed the classifier.
 
 Checkpoints from ``build_fresh_classifier`` / ``save_pretrained`` include ``id2label``
 and ``label2id`` on the model config. Training loops, metrics, and seeding live in
-``src/training/train_deberta.py``.
+``src/training/deberta_train.py``.
 """
 
 from __future__ import annotations
@@ -56,6 +56,10 @@ def load_table(path: Path, text_col: str, label_col: str) -> pd.DataFrame:
 
 class TextClsDataset(Dataset):
     def __init__(self, texts: list[str], labels: list[int], tokenizer: Any, max_len: int):
+        if len(texts) != len(labels):
+            raise ValueError("texts and labels must have the same length")
+        if max_len <= 0:
+            raise ValueError("max_len must be greater than zero")
         self.texts = texts
         self.labels = [int(x) for x in labels]
         self.tokenizer = tokenizer
@@ -78,6 +82,8 @@ class TextClsDataset(Dataset):
 
 
 def collate_text_cls_batch(batch: list[dict[str, Any]]) -> dict[str, Any]:
+    if not batch:
+        raise ValueError("batch must not be empty")
     keys = [k for k in batch[0].keys() if k != "labels"]
     out: dict[str, Any] = {}
     for k in keys:
@@ -125,6 +131,10 @@ def classify_text(
     Tokenize a single string and run the classifier head (softmax probs).
     API layers can add severity, rationale, etc.
     """
+    if not isinstance(text, str) or not text.strip():
+        raise ValueError("text must be a non-empty string")
+    if max_len <= 0:
+        raise ValueError("max_len must be greater than zero")
     model.eval()
     enc = tokenizer(
         text,
