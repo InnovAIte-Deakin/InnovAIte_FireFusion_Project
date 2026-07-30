@@ -263,9 +263,26 @@ Forecast environmental variables for the next N timesteps (default N=2).
 }
 ```
 
-**Features:**
-- `observations`: [seq_len, n_features] array (e.g., 60 timesteps × 7 features)
-- Features: `[skin_temperature_c, soil_temperature_level_1_c, surface_solar_radiation_downwards, surface_thermal_radiation_downwards, temperature_2m_c, u_component_of_wind_10m, v_component_of_wind_10m]`
+**Input properties:**
+
+| Property | Required | Description |
+|---|---|---|
+| `observations` | yes | `[seq_len, n_features]` array (e.g. 60 timesteps × 7 features). Padded/truncated to the checkpoint's `input_steps`. |
+| `id` | no | Cell identifier, echoed in the response and used to join forecaster → classifier output. |
+| `timestamps` | no | ISO-8601 timestamps, must be the same length as `observations`. |
+| `grid_row`, `grid_col` | no | Position of the cell in the model grid. Must be supplied **together**. |
+
+**Channel order** (`feature_names`, defaults to `DEFAULT_FEATURE_NAMES`):
+`[skin_temperature_c, soil_temperature_level_1_c, surface_solar_radiation_downwards, surface_thermal_radiation_downwards, temperature_2m_c, u_component_of_wind_10m, v_component_of_wind_10m]`
+
+**Gridded vs batched input:** the ConvLSTM is spatiotemporal — it expects
+`[batch, seq_len, height, width, n_features]`. When every cell carries `grid_row`/`grid_col`
+**and** the checkpoint's scaler bundle declares `grid_shape`, the adapter reassembles the real
+grid so neighbouring cells inform each other. Otherwise each cell is processed as a
+degenerate 1×1 grid (`[n_samples, seq_len, 1, 1, n_features]`) and spatial context is lost —
+functional, but not what the model was trained on. Cells inside `grid_shape` that are not
+supplied are filled with the training mean (0 after scaling), matching
+`ts_convlstm_forecaster_train.scale_and_fill`.
 
 **Query Parameters:**
 - `model_id` (optional): Specific forecaster model
@@ -284,12 +301,32 @@ Forecast environmental variables for the next N timesteps (default N=2).
           [20.8, 15.3, 102.5, 51.2, 22.5, 2.4, 1.25],
           [21.2, 15.6, 107.8, 53.5, 23.5, 2.3, 1.15]
         ],
+        "horizon": 2,
+        "n_output_channels": 7,
+        "output_feature_names": ["skin_temperature_c", "..."],
+        "grid_row": null,
+        "grid_col": null,
+        "risk_score": null,
+        "risk_probabilities": null,
+        "risk_levels": null,
         "model_id": "bushfire-forecaster-v1"
       }
     }
   ]
 }
 ```
+
+**Output properties:**
+
+| Property | Description |
+|---|---|
+| `forecast` | `[horizon, n_output_channels]` — forecast values per timestep |
+| `horizon` | Number of forecast timesteps returned |
+| `n_output_channels` | Values per timestep |
+| `output_feature_names` | Channel order of `forecast` (null if the checkpoint's feature list does not match `n_output_channels`) |
+| `grid_row`, `grid_col` | Echoed grid position (only set on the gridded path) |
+| `risk_score` | Mean of `forecast` — only set on the gridded path. Coarse aggregate, **not** a calibrated probability; use `/predict/bushfire/classify` for risk. |
+| `risk_probabilities`, `risk_levels` | Reserved for a model that emits bushfire risk probability directly (single-channel output); null for the environmental-variable forecaster. |
 
 ### Bushfire Risk Classification
 
@@ -314,6 +351,8 @@ Classify risk for each forecasted timestep (pipeline: forecaster → classifier)
         "id": "cell-001",
         "risk_probabilities": [0.15, 0.32],
         "risk_levels": [0, 1],
+        "risk_labels": ["LOW", "MEDIUM_LOW"],
+        "horizon": 2,
         "model_id": "bushfire-classifier-v1"
       }
     }
@@ -321,12 +360,20 @@ Classify risk for each forecasted timestep (pipeline: forecaster → classifier)
 }
 ```
 
+`risk_probabilities`, `risk_levels` and `risk_labels` are always the same length, one entry per
+forecast step (`horizon`).
+
 **Risk Level Mapping (from probability):**
-- `p < 0.2` → level `0` (Low)
-- `0.2 ≤ p < 0.4` → level `1` (Medium-Low)
-- `0.4 ≤ p < 0.6` → level `2` (Medium)
-- `0.6 ≤ p < 0.8` → level `3` (Medium-High)
-- `p ≥ 0.8` → level `4` (High)
+
+| Probability | Level | Label |
+|---|---|---|
+| `p < 0.2` | 0 | `LOW` |
+| `0.2 ≤ p < 0.4` | 1 | `MEDIUM_LOW` |
+| `0.4 ≤ p < 0.6` | 2 | `MEDIUM` |
+| `0.6 ≤ p < 0.8` | 3 | `MEDIUM_HIGH` |
+| `p ≥ 0.8` | 4 | `HIGH` |
+
+Thresholds live in one place — `prob_to_risk_level()` in `api/schemas/bushfire.py`.
 
 ## Contributing
 
