@@ -119,6 +119,7 @@ def evaluate_model(
         precision_recall_fscore_support(
             labels,
             predictions,
+            labels=[0, 1],
             average="macro",
             zero_division=0,
         )
@@ -573,7 +574,14 @@ def main() -> None:
         raise RuntimeError(
             "Training finished without saving a checkpoint."
         )
+    # Free memory before checking the saved model
+    del optimizer
+    del scheduler
+    del scaler
+    del model
 
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     # Reload the checkpoint to confirm that it works
     _, reloaded_model = load_classifier_from_checkpoint(
         args.output_dir
