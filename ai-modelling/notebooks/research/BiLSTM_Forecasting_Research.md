@@ -1,26 +1,28 @@
-# BiLSTM — Research for Potential Forecasting Features
+# Evaluation of BiLSTM as an Additional Layer for the Existing ConvLSTM Model
 
 **Stream:** AI Modelling
-**Author:** RISHU KUMAR DUBE and ANDRES GOMEZ PEREZ
+
+**Author:** Rishu Kumar Dube and Andres Gomez Perez
+
 **Date:** 31 July 2026
 
 ---
 
 ## Purpose
 
-This document evaluates Bidirectional Long Short-Term Memory (BiLSTM) networks as a candidate architecture for the bushfire forecasting component of FireFusion. It covers the functionality BiLSTM could provide, its strengths and weaknesses in this context, and a proposed implementation approach.
+This document evaluates Bidirectional Long Short-Term Memory (BiLSTM) networks as a potential additional layer for the existing ConvLSTM model used in the bushfire forecasting component of FireFusion. It covers the functionality BiLSTM could provide, its strengths and weaknesses in this context, possible integration with the current architecture, and the expected benefits and trade-offs of adopting a hybrid ConvLSTM-BiLSTM approach.
 
 ---
 
 ## 1. What BiLSTM Is
 
-BiLSTM stands for Bidirectional Long Short-Term Memory. It is a recurrent neural network architecture designed for sequential data, where the ordering of observations carries information — a series of daily weather observations, for example.
+BiLSTM stands for Bidirectional Long Short-Term Memory. It is a recurrent neural network architecture designed for sequential data, where the ordering of observations carries information—for example, a series of daily weather observations.
 
 A standard LSTM is causal: it processes a sequence in one direction, and its hidden state at any timestep depends only on the inputs that preceded it. A BiLSTM runs two independent LSTMs over the same sequence, one forward and one backward, and concatenates their hidden states at each timestep.
 
 The result is that every timestep is represented using context from both directions, rather than from preceding timesteps alone.
 
-### 1.1 Causality and the forecast origin
+### 1.1 Causality and the Forecast Origin
 
 Because the backward pass consumes information from later timesteps, BiLSTM is often described as non-causal and therefore unsuitable for forecasting. This objection is worth addressing directly, since it is the most likely challenge to the approach.
 
@@ -31,6 +33,8 @@ To make this concrete: suppose the model receives a window of the previous seven
 - Days one to seven are all historical. Actual measurements exist for each of them.
 - The backward pass allows day three to be encoded with context from days four to seven. Those timesteps are future relative to day three, but they are past relative to the forecast origin, so no unobserved information is used.
 - Day eight, the prediction target, never enters the input window.
+
+In the hybrid architecture proposed in Section 5, the BiLSTM does not read raw observations at all. It operates over the sequence of feature representations produced by the ConvLSTM from the observed input window, so the same reasoning applies: bidirectional encoding is confined entirely to the observed window, and the forecast horizon lies outside it.
 
 The design is therefore sound, but only because of how the windowing is constructed. It fails under three conditions:
 
@@ -46,183 +50,225 @@ Each of these introduces look-ahead bias, producing validation metrics that are 
 
 BiLSTM could support the following within FireFusion.
 
-### Weather-driven risk forecasting
+### Weather-driven Risk Forecasting
 
-A sliding window of recent daily conditions — temperature, relative humidity, wind speed and direction, rainfall, drought factor and fuel indices — mapped to a risk estimate for the following day. Input tensor of shape `(window_length, n_features)`, output a scalar risk value per location.
+A sliding window of recent daily conditions—temperature, relative humidity, wind speed and direction, rainfall, drought factor and fuel indices—mapped to a risk estimate for the following day.
 
-### Automatic temporal feature learning
+**Input:** `(window_length, n_features)`
+
+**Output:** scalar risk value per location.
+
+### Automatic Temporal Feature Learning
 
 Bushfire risk is driven by conditions accumulating over time: consecutive dry days, a sustained heatwave, progressive fuel drying. A BiLSTM learns these dependencies from the raw sequence, reducing the amount of manual feature engineering needed to construct lag variables and rolling aggregates.
 
 This reduces the need for engineered features but does not eliminate it. Established domain indices such as drought factor and dead fuel moisture content still tend to improve performance and should be supplied as inputs rather than left for the network to infer from first principles.
 
-### Sensor gap-filling and imputation
+### Sensor Gap-filling and Imputation
 
-Weather station records contain missing observations. Because the BiLSTM conditions on context from both directions, it is well suited to reconstructing missing values within a gap — this is the standard application of bidirectionality and the one use case where it is unambiguously the correct choice. It would benefit the Data Engineering stream regardless of what is decided about the forecasting model.
+Weather station records contain missing observations. Because the BiLSTM conditions on context from both directions, it is well suited to reconstructing missing values within a gap. This is the standard application of bidirectionality and the one use case where it is unambiguously the correct choice rather than merely defensible. It is also independent of the architectural question addressed in Section 5, and would support the Data Engineering pipeline regardless of the outcome of that evaluation.
 
-### Temporal encoder within a hybrid architecture
+### Temporal Encoder Within a Hybrid Architecture
 
-The BiLSTM can serve as the temporal component of a hybrid model, paired with a CNN, U-Net or ConvLSTM handling the spatial component. This is the pattern used in the published wildfire spread literature.
-
-### Text classification for the misinformation stream
-
-Natural language is also sequential. The same architecture can act as a baseline classifier over word embeddings for the misinformation detection workflow, allowing the team to develop one approach and apply it across two components of the project.
+The BiLSTM can serve as the temporal component of a hybrid model, paired with a CNN, U-Net or ConvLSTM handling the spatial component. This is the pattern used in the published wildfire spread literature and the basis of the proposal developed in Section 5.
 
 ---
 
 ## 3. Strengths
 
 - **Automatic representation learning over the temporal axis**, reducing dependence on hand-crafted lag features and rolling window statistics.
-- **Full-window contextual encoding**, so each timestep is represented relative to the entire observed sequence rather than only its history. This helps the model identify the temporal regime — a building heatwave versus a cooling trend — rather than only the trajectory so far.
-- **Mature tooling and literature.** First-class support in TensorFlow and PyTorch, and a substantial published base, which makes implementation realistic within a single trimester.
-- **Precedent in wildfire research.** Bidirectional LSTM modules appear in published wildfire spread prediction models, including hybrid CNN-BiLSTM architectures evaluated on Australian fire data.
-- **Native multivariate input handling.** Meteorological, terrain and fuel variables are supplied as parallel input channels without restructuring.
-- **Cross-stream reusability**, covering both the forecasting and misinformation components.
-- **Composable** with convolutional or attention-based modules if the project scales beyond the prototype.
-- **Modest compute footprint** relative to transformer architectures — trainable on a single GPU, or on CPU at the data volumes involved here.
+- **Full-window contextual encoding**, allowing each timestep to be represented relative to the entire observed sequence.
+- **Mature tooling and literature**, with first-class support in TensorFlow and PyTorch.
+- **Precedent in wildfire research**, including hybrid CNN-BiLSTM architectures.
+- **Native multivariate input handling.**
+- **Composable** with convolutional or attention-based modules.
+- **Modest compute footprint** relative to transformer architectures.
 
-On the final point, BiLSTM has lower memory requirements than a transformer, but its sequential computation cannot be parallelised across timesteps, so a transformer may still converge faster in wall-clock time. The advantage lies in resource constraints rather than throughput.
+On the final point, BiLSTM has lower memory requirements than a transformer, but its sequential computation cannot be parallelised across timesteps, so a transformer may still converge faster in wall-clock time.
 
 ---
 
 ## 4. Weaknesses
 
-- **No spatial awareness.** A BiLSTM models temporal dependencies only. It has no representation of terrain, fuel continuity, slope, aspect, or the geographic relationship between adjacent cells. Fire spread is fundamentally a spatiotemporal process, so this is a substantive architectural limitation and the main reason the literature pairs BiLSTM with a CNN or U-Net rather than using it alone.
-- **Data requirements.** Deep sequence models overfit on small datasets, and the publicly available Victorian fire record is limited. Severe fire seasons are rare events, which means the training distribution contains few examples of precisely the cases with the highest operational significance.
-- **Doubled parameter count** relative to an equivalent unidirectional LSTM. Two networks are trained instead of one, increasing training time and overfitting risk on a constrained dataset.
-- **Poor interpretability.** The model is effectively a black box, which is difficult to defend in a safety-critical domain where emergency decision-makers must justify their actions. Attention mechanisms or post-hoc attribution methods such as SHAP would partially mitigate this.
-- **Sequential computation.** Timesteps cannot be processed in parallel, giving slower training and higher inference latency than parallel architectures.
-- **Susceptibility to look-ahead bias.** The three specific failure modes are set out in Section 1.1.
-- **May not outperform classical baselines.** On tabular datasets of this scale, gradient-boosted tree ensembles frequently match or exceed deep sequence models at substantially lower computational cost.
-- **Spatial sampling bias in the training data.** Victorian weather station coverage is dense around Melbourne and Geelong and sparse across the northeast, where a disproportionate share of large fires occur. Any model trained on this distribution inherits that bias, and evaluation metrics computed across all stations will understate error in the under-sampled regions.
+- **No spatial awareness.** A BiLSTM only models time. It has no concept of terrain, fuel continuity or where one location sits relative to another, which is why it works alongside the ConvLSTM rather than in place of it.
+- **Data requirements.** Deep sequence models overfit on small datasets, and the Victorian fire record is limited. Severe seasons are rare, so there are few examples of the cases that matter most.
+- **Doubled parameter count.** Two networks are trained instead of one, so training is slower and overfitting is more likely.
+- **Poor interpretability.** The model cannot explain its predictions, which is a problem when emergency decision-makers have to justify their actions. Attention layers or SHAP would partly address this.
+- **Sequential computation.** Timesteps must be processed in order, so training and inference are both slower than parallel architectures.
+- **Susceptibility to look-ahead bias.** If the windowing or the data split is set up incorrectly, results look strong but are invalid. The three failure modes are listed in Section 1.1.
+- **May not outperform classical baselines.** On datasets of this size, gradient-boosted trees often match deep models at a fraction of the cost.
+- **Spatial sampling bias in the training data.** Victorian weather stations are dense around Melbourne and Geelong and sparse in the northeast, where many large fires occur. The model inherits that bias, and overall metrics will hide poor performance in under-sampled regions.
 
 ---
 
-## 5. Implementation Approach
+## 5. Evaluation of BiLSTM Integration into the Existing ConvLSTM Model
 
-### 5.1 Tools
+### 5.1 Current FireFusion ConvLSTM Architecture
 
-Python, with TensorFlow/Keras or PyTorch, plus pandas, NumPy and scikit-learn for preprocessing and evaluation.
+The existing forecasting model uses a ConvLSTM, which replaces the matrix multiplications inside a standard LSTM cell with convolution operations. This allows the cell to maintain a spatial hidden state, so spatial and temporal dependencies are learned jointly rather than in separate stages.
 
-### 5.2 Prediction target
+The implementation takes an input tensor of shape `(batch, timesteps, height, width, channels)`, where the spatial dimensions correspond to the gridded study area and the channels carry the stacked input variables—meteorological drivers, terrain features and fuel indices. One or more ConvLSTM layers extract spatiotemporal features, followed by a convolutional or dense head producing the forecast output.
 
-The target variable must be agreed before implementation begins, as it determines the output layer, loss function, evaluation metrics and API schema.
+The architecture is well suited to modelling how fire risk propagates across neighbouring cells. Its temporal modelling, however, is causal and single-pass: each timestep is encoded using only the timesteps preceding it, and the representation of an early day in the window is never revised in light of how the sequence developed afterwards.
 
-The configuration below assumes binary classification: for a given location and day, whether fire activity occurred. If the team prefers a continuous fire danger value such as FFDI, the output layer becomes `Dense(1)` with linear activation and the loss changes to Huber, which is more robust than MSE to the extreme-value outliers characteristic of fire weather data.
+### 5.2 Potential Contribution of BiLSTM
 
-### 5.3 Steps
+The limitation identified above is where a BiLSTM could contribute.
 
-**1. Data preparation**
+The ConvLSTM produces a sequence of spatiotemporal feature representations, one per input timestep. Under the current design, the output head consumes only the final timestep or a simple aggregation across them. A BiLSTM placed after the ConvLSTM would instead process that full sequence in both directions before the forecast is produced.
 
-Assemble daily records combining meteorological variables, fuel and drought indices, and static terrain features. Handle missing values, and apply cyclical encoding to wind direction using sine and cosine components so that 359° and 1° are represented as adjacent rather than maximally distant.
+Three specific contributions follow:
 
-**2. Feature scaling**
+**Sequence-level context.** Each encoded timestep is interpreted relative to the whole observed window rather than only what preceded it, which helps distinguish a risk profile that is building from one that is subsiding.
 
-Standardise continuous features. Fit the scaler on the training partition only and apply the fitted transform to validation and test partitions.
+**Refinement of early-window representations.** In a causal encoder, features extracted from the first timestep are fixed at the moment they are computed. The backward pass allows them to be re-encoded with knowledge of how the remainder of the window developed, which is relevant when fire weather builds progressively across several days.
 
-**3. Sequence windowing**
+**A dedicated temporal stage.** The ConvLSTM currently carries both the spatial and the temporal load. Separating these concerns gives each component a narrower task and allows temporal depth to be tuned without altering the spatial configuration.
 
-Construct fixed-length sliding windows, producing an input tensor of shape `(n_samples, window_length, n_features)` with the subsequent timestep as the target. The target must always fall outside the input window.
+These are hypotheses rather than established results, and form the basis for the evaluation proposed in Section 6.
 
-**4. Chronological partitioning**
+### 5.3 Proposed ConvLSTM-BiLSTM Architecture
 
-Train on earlier fire seasons and evaluate on later ones. Random splitting is invalid for time-series data, as temporal autocorrelation between adjacent windows leaks information across the partition boundary.
+A potential integration strategy is to preserve the existing ConvLSTM architecture as the primary spatiotemporal feature extractor and introduce a BiLSTM layer after the ConvLSTM output.
 
-**5. Model architecture**
+#### Proposed Architecture
+
+```text
+Input  (batch, timesteps, height, width, channels)
+   │
+   ▼
+ConvLSTM  (return_sequences=True)
+   │
+   ▼
+Spatial reduction
+   │
+   ▼
+BiLSTM  (batch, timesteps, features)
+   │
+   ▼
+Dense head
+   │
+   ▼
+Output
+```
+
+The `return_sequences=True` setting on the ConvLSTM is required. Without it, only the final timestep is passed forward and the BiLSTM receives no sequence to process.
+
+#### Spatial Reduction
+
+The ConvLSTM returns feature maps retaining height and width dimensions, whereas a BiLSTM expects a sequence of shape `(timesteps, features)`. An intermediate layer must therefore collapse the spatial axes. The choice determines how much spatial structure is carried into the temporal stage:
+
+| Option | Effect | Consideration |
+|---------|--------|---------------|
+| `TimeDistributed(GlobalAveragePooling2D())` | Averages each feature map to one value per channel | Simplest; discards spatial detail |
+| `TimeDistributed(Flatten())` | Retains all spatial detail | Feature dimension becomes very large; high overfitting risk |
+| `TimeDistributed(Conv2D + Pooling)` | Learned reduction | Balanced, but adds parameters |
+
+Global average pooling is proposed as the initial configuration, as it carries the lowest overfitting risk on a dataset of this size. The learned reduction is the natural subsequent variant should initial results prove favourable.
+
+A minimal implementation:
 
 ```python
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Input, Bidirectional, LSTM, Dense, Dropout
-from tensorflow.keras.metrics import AUC, Recall, Precision
+from tensorflow.keras.layers import (
+    Input, ConvLSTM2D, BatchNormalization, TimeDistributed,
+    GlobalAveragePooling2D, Bidirectional, LSTM, Dropout, Dense
+)
 
 model = Sequential([
-    Input(shape=(window_length, n_features)),
+    Input(shape=(timesteps, height, width, channels)),
+
+    ConvLSTM2D(filters=32, kernel_size=(3, 3),
+               padding='same', return_sequences=True),
+    BatchNormalization(),
+
+    TimeDistributed(GlobalAveragePooling2D()),
+
     Bidirectional(LSTM(64)),
     Dropout(0.3),
+
     Dense(32, activation='relu'),
     Dense(1, activation='sigmoid')
 ])
-
-model.compile(
-    optimizer='adam',
-    loss='binary_crossentropy',
-    metrics=[
-        AUC(curve='PR', name='pr_auc'),
-        Recall(name='recall'),
-        Precision(name='precision')
-    ]
-)
 ```
 
-The AUC metric is configured for the precision-recall curve rather than the default ROC curve. Under severe class imbalance, ROC-AUC is dominated by the majority class and yields an optimistic figure that conceals poor minority-class performance, making PR-AUC the appropriate measure here.
+### 5.4 Expected Benefits and Trade-offs
 
-**6. Training**
+| Aspect | Current ConvLSTM | Proposed ConvLSTM + BiLSTM |
+|---------|------------------|----------------------------|
+| Spatial feature learning | Strong | Strong |
+| Temporal feature learning | Good | Potentially improved through bidirectional sequence modelling |
+| Model complexity | Lower | Higher |
+| Training time | Lower | Higher |
+| Inference cost | Lower | Higher |
+| Memory requirements | Lower | Higher |
+| Overfitting risk | Lower | Higher, given the limited dataset |
+| Forecasting performance | Baseline | Potential improvement (to be validated experimentally) |
 
-Adam optimiser with an initial learning rate of 1e-3 and learning rate reduction on plateau. Early stopping on validation loss with a patience of around ten epochs. Apply class weighting, as days with fire activity are heavily outnumbered by days without. Fix and record random seeds for reproducibility.
+Based on the current literature, integrating a BiLSTM layer appears technically promising; however, the available evidence is not sufficient to justify replacing the existing ConvLSTM model without experimental validation using the FireFusion dataset and benchmarking against the current baseline.
 
-**7. Evaluation**
-
-Report precision, recall, F1 and PR-AUC rather than raw accuracy. Under class imbalance, a degenerate classifier predicting the majority class at every timestep achieves high accuracy while detecting nothing of operational value.
-
-**8. Baseline comparison**
-
-Evaluate all of the following on identical partitions using identical metrics:
-
-1. **Persistence or climatology** — the naive forecast, either the previous day's value or the seasonal mean for that date. Computationally free, and the honest performance floor. If the model does not beat this, no other comparison is meaningful.
-2. **Gradient-boosted trees** — XGBoost or LightGBM on flattened window features.
-3. **Unidirectional LSTM**, matched for approximate parameter count.
-4. **BiLSTM.**
+The additional model capacity is the principal risk. The proposed hybrid introduces a substantial number of parameters into a model already training on a limited record of Victorian fire seasons, so any improvement in validation performance must be assessed against the possibility that the model is fitting the training distribution more closely rather than generalising better.
 
 ---
 
-## 6. Recommendation
+## 6. Implementation Approach
 
-BiLSTM warrants prototyping, but it should be evaluated empirically rather than assumed to be the optimal architecture.
+### 6.1 Development Tools
 
-Proposed sequence of work:
+Python 3.10 or later with TensorFlow/Keras, matching the framework used by the existing ConvLSTM implementation so that both models share the same data pipeline and training harness. Supporting libraries: pandas and NumPy for data handling, scikit-learn for metrics and preprocessing, and matplotlib for results visualisation.
 
-1. Establish the performance floor with a persistence or climatology baseline.
-2. Establish a classical baseline using gradient-boosted trees or Random Forest.
-3. Evaluate the sequence models — LSTM, GRU and BiLSTM — on identical windowed data with identical metrics.
-4. Consider a hybrid architecture incorporating a spatial component, if the preceding stages demonstrate that sequence modelling adds measurable value and the schedule permits.
+Experiment tracking should record, for every run, the training and evaluation window, the feature set, all hyperparameters, the random seed and the resulting metrics. Without this the comparison in Section 6.3 cannot be substantiated.
 
-Independently of the above, BiLSTM should be adopted now for imputation of missing sensor observations. That application carries none of the causality concerns raised in Section 1.1 and would benefit the Data Engineering stream immediately.
+Development follows the project version control guidelines, on a task branch created from `developer` and merged by pull request after review.
 
-The value of this work lies in producing a fair, documented comparison with limitations stated explicitly, rather than selecting an architecture and constructing a justification afterwards. If BiLSTM does not outperform the simpler baselines, that finding should be reported. A clearly evidenced negative result is a legitimate outcome for this sprint.
+### 6.2 Evaluation Strategy
 
----
+The comparison must be controlled. All models are trained on identical data partitions, with identical preprocessing, identical random seeds and identical evaluation metrics. The only variable is the temporal stage under test.
 
-## 7. Integration Considerations
+**Data preparation and partitioning.** Reuse the existing ConvLSTM pipeline without modification. Confirm that it applies chronological partitioning—training on earlier fire seasons, evaluating on later ones—since random splitting allows temporal autocorrelation between adjacent windows to leak information across the partition boundary. Normalisation statistics must be fitted on the training partition only.
 
-**Model output** is a risk score per location per day, attachable as a property on GeoJSON features for rendering by the Frontend stream.
+**Training configuration.** Adam optimiser at an initial learning rate of 1e-3 with reduction on plateau, early stopping on validation loss with a patience of approximately ten epochs, and class weighting applied, as days with fire activity are heavily outnumbered by days without.
 
-**Inference cost** is a single forward pass per prediction. The complete input window must be processed in both directions before an output is produced, but at the window lengths proposed here latency remains well within dashboard refresh requirements.
+**Metrics.** Report precision, recall, F1 and PR-AUC rather than raw accuracy. Under this degree of class imbalance a model predicting the majority class at every timestep achieves high accuracy while detecting nothing of operational value. PR-AUC is preferred to ROC-AUC because ROC-AUC is dominated by the majority class and yields an optimistic figure that conceals poor minority-class performance. For spatial outputs, also report IoU against observed burn extents.
 
-**Data dependency:** generating a prediction requires the most recent N days of features to be available for every location at inference time. This constrains ETL design, storage layout and refresh scheduling, and must be agreed with the Data Engineering stream during pipeline specification.
+**Repeated runs.** Each architecture is trained across multiple random seeds and results reported as mean and standard deviation. On a dataset of this size, run-to-run variance may exceed the difference between architectures, and a single training run per model would not support a conclusion either way.
 
-**Scope:** this is a prototype for feasibility assessment. Any output surfaced on the dashboard requires an explicit statement that it is not an operational forecast and must not be relied upon for emergency decision-making.
+**Computational measurements.** Record training time to convergence, inference latency per prediction, peak memory usage and total parameter count for each model. The trade-offs summarised in Section 5.4 are only meaningful once measured rather than assumed.
 
----
+### 6.3 Proposed Evaluation Steps
 
-## 8. Conclusion
+1. Review the existing ConvLSTM implementation and document its current configuration.
+2. Establish the baseline by retraining the current ConvLSTM on the agreed partitions and recording its metrics.
+3. Add a persistence or climatology reference—the previous timestep's value, or the seasonal mean for the corresponding date—to establish the performance floor.
+4. Implement the ConvLSTM-BiLSTM hybrid described in Section 5.3, using global average pooling as the spatial reduction step.
+5. Implement a ConvLSTM with a unidirectional LSTM as a control, so that any improvement can be attributed to bidirectionality rather than to the addition of a temporal stage.
+6. Train all models on identical data, seeds and configuration, repeated across multiple seeds.
+7. Compare forecasting performance using the metrics defined in Section 6.2.
+8. Measure and compare the computational trade-offs.
+9. Recommend adoption, rejection, or further work on the basis of the measured results.
 
-BiLSTM is a credible candidate for the temporal component of bushfire risk forecasting. Its principal advantage is that it learns patterns of accumulation — sustained dry periods, progressive fuel drying, building heat — directly from sequential data, without those relationships being specified through manual feature engineering. Its principal limitation is that it models the temporal axis alone and holds no representation of spatial structure, which is central to fire behaviour.
-
-On that basis, BiLSTM is recommended for inclusion in the modelling experiments as one candidate among several, benchmarked against a persistence baseline, a classical model, and a unidirectional sequence model. Adopting it without that comparison would not be supported by the evidence reviewed here.
-
-**Next steps for the AI Modelling stream:**
-
-1. Confirm the availability, spatial resolution and temporal span of Victorian fire and weather data.
-2. Agree the prediction target and forecast horizon with the industry mentor. This blocks the API schema and should be resolved first.
-3. Implement the persistence and classical baselines described in Section 6.
-4. Determine whether an explainability component is required for the final deliverable.
-5. Confirm the spatial unit of analysis — weather station, grid cell, or LGA — as all downstream design depends on it.
+A clearly evidenced negative result is a legitimate outcome. If the hybrid does not improve on the current ConvLSTM, that finding should be reported directly and the additional complexity rejected.
 
 ---
 
-## 9. References
+## 7. Conclusion
 
-1. Marjani, M., Mahdianpari, M., Mohammadimanesh, F. (2024). *CNN-BiLSTM: A Novel Deep Learning Model for Near-Real-Time Daily Wildfire Spread Prediction.* Remote Sensing, 16(8), 1467.
-2. Andrianarivony, H. S., Akhloufi, M. A. (2024). *Machine Learning and Deep Learning for Wildfire Spread Prediction: A Review.* Fire, 7(12), 482.
-3. Hochreiter, S., Schmidhuber, J. (1997). *Long Short-Term Memory.* Neural Computation, 9(8).
-4. Schuster, M., Paliwal, K. (1997). *Bidirectional Recurrent Neural Networks.* IEEE Transactions on Signal Processing, 45(11).
+This research evaluated the potential integration of a BiLSTM layer into the existing ConvLSTM architecture used for bushfire forecasting in FireFusion. The literature indicates that hybrid ConvLSTM-BiLSTM models can provide richer spatiotemporal feature representations by combining ConvLSTM's ability to extract spatial and temporal patterns with BiLSTM's bidirectional sequence learning. Recent studies have reported improved prediction performance using this hybrid approach in complex spatiotemporal forecasting tasks. The integration is technically straightforward, requires no change to the existing data pipeline or output contract, and can be evaluated as a controlled comparison against the current model.
+
+However, these benefits are accompanied by increased computational complexity, training cost and a materially higher parameter count, which raises overfitting risk on a dataset as limited as the Victorian fire record. Therefore, the proposed architecture should be considered as a potential enhancement to the current ConvLSTM model and validated experimentally using the FireFusion dataset before any deployment decision is made.
+
+Independently of that decision, BiLSTM is recommended for imputation of missing sensor observations, as described in Section 2. That application carries none of the causality considerations discussed in Section 1.1 and would support the Data Engineering pipeline immediately.
+
+---
+
+## References
+
+1. Marjani M, Mahdianpari M and Mohammadimanesh F (2024) *CNN-BiLSTM: A Novel Deep Learning Model for Near-Real-Time Daily Wildfire Spread Prediction*. Remote Sensing, 16(8), 1467.
+
+2. Andrianarivony HS and Akhloufi MA (2024) *Machine Learning and Deep Learning for Wildfire Spread Prediction: A Review*. Fire, 7(12), 482.
+
+3. Hochreiter S and Schmidhuber J (1997) *Long Short-Term Memory*. Neural Computation, 9(8).
+
+4. Schuster M and Paliwal K (1997) *Bidirectional Recurrent Neural Networks*. IEEE Transactions on Signal Processing, 45(11).
+
+5. Li W, Zhu H, Yang F, Wen C, Shi S, Zhao D, He C and Li Z (2025) *Storm-time ionospheric model over Yunnan-Sichuan area of China based on the SSA-ConvLSTM-BiLSTM algorithm*. GPS Solutions, 29:77. https://doi.org/10.1007/s10291-025-01836-6. Cited as evidence for the ConvLSTM-BiLSTM architectural pattern in spatiotemporal forecasting; the application domain is ionospheric modelling rather than wildfire, so it supports the structural approach rather than fire-specific results.
