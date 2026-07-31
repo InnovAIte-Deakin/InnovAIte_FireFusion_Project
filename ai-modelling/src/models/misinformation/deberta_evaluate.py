@@ -1,24 +1,3 @@
-"""Evaluate a trained DeBERTa misinformation classifier.
-
-The evaluator loads a Hugging Face checkpoint and a CSV/JSON test dataset,
-runs batched inference, calculates binary-classification metrics, and writes the
-results to JSON. The expected dataset columns are:
-
-- ``claim``: input text
-- ``label``: target integer (0 or 1)
-
-Shared labels:
-    0 = non_misinformation
-    1 = misinformation
-
-Example:
-    python -m src.training.deberta_evaluate \
-        --checkpoint checkpoints/deberta-best \
-        --test-data data/test.csv \
-        --output-json artifacts/deberta_metrics.json \
-        --confusion-matrix-image artifacts/deberta_confusion_matrix.png
-"""
-
 from __future__ import annotations
 
 import argparse
