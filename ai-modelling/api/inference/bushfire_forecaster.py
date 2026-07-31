@@ -34,7 +34,8 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
     
     # Collect observations from each feature
     for feature in request.features:
-        obs = np.array(feature.properties.observations, dtype=np.float32)  # [seq_len, n_features]
+        # [seq_len, n_features]
+        obs = np.array(feature.properties.observations, dtype=np.float32)
         
         # Enforce sequence length: pad or truncate
         seq_len = obs.shape[0]
@@ -53,8 +54,16 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
             "grid_row": feature.properties.__dict__.get("grid_row"),
             "grid_col": feature.properties.__dict__.get("grid_col"),
         })
+
+    expected_features = bundle.metadata.get("weather_features", DEFAULT_FEATURE_NAMES)
+    if observations_list:
+        n_features = observations_list[0].shape[1]
+        if n_features != len(expected_features):
+            raise ValueError(
+                f"Expected {len(expected_features)} weather features ({expected_features}), but received observations with {n_features} columns."
+            )
     
-    # Determine if we have grid coordinates
+    # Determine if request provided grid coordinates
     has_grid_coords = any(m["grid_row"] is not None and m["grid_col"] is not None for m in feature_metas)
     
     if has_grid_coords and grid_shape:
@@ -82,7 +91,7 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
         else:
             # Non-gridded batch: [n_samples, seq_len, n_features]
             # Reshape to add spatial dimensionss [n_samples, seq_len, height, width, n_features]
-            x_tensor = x_tensor.unsqueeze(2).unsqueeze(3)  # [n_samples, seq_len, 1, 1, n_features]
+            x_tensor = x_tensor.unsqueeze(2).unsqueeze(3)
             probs = bundle.model.predict(x_tensor, return_probs=True).cpu().numpy()
             # probs: [n_samples, horizon, 1, 1, 1]
             probs = probs.squeeze(axis=(2, 3))  # [n_samples, horizon, 1]
