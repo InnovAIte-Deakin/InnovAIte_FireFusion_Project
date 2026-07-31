@@ -1,15 +1,15 @@
 """
-Fine-tune DeBERTa for binary misinformation classification.
+Train the DeBERTa misinformation classifier.
 
-Training data may be CSV or JSON and must contain:
+The training data must be a CSV or JSON file containing:
 - claim: text to classify
 - label: 0 for non_misinformation or 1 for misinformation
 
-Run from the ai-modelling folder:
+Example:
 
-    python src/training/deberta_train.py \
-        --train data/train.json \
-        --output-dir checkpoints/misinfo-deberta
+python src/training/deberta_train.py \
+    --train data/train.json \
+    --output-dir checkpoints/misinfo-deberta
 """
 
 from __future__ import annotations
@@ -47,7 +47,7 @@ from src.models.misinformation.deberta import (
 
 
 def set_seed(seed: int) -> None:
-    """Set random seeds to make training more reproducible."""
+    """Set random seeds for reproducible training."""
 
     random.seed(seed)
     np.random.seed(seed)
@@ -57,186 +57,86 @@ def set_seed(seed: int) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
-def validate_arguments(args: argparse.Namespace) -> None:
-    """Validate training arguments before starting."""
-
-    if args.batch_size < 1:
-        raise ValueError("--batch-size must be at least 1")
-
-    if args.grad_accum < 1:
-        raise ValueError("--grad-accum must be at least 1")
-
-    if args.epochs < 1:
-        raise ValueError("--epochs must be at least 1")
-
-    if args.max_len < 1:
-        raise ValueError("--max-len must be at least 1")
-
-    if args.lr <= 0:
-        raise ValueError("--lr must be greater than 0")
-
-    if not 0 < args.test_size < 1:
-        raise ValueError("--test-size must be between 0 and 1")
-
-    if not 0 <= args.warmup_ratio < 1:
-        raise ValueError("--warmup-ratio must be between 0 and 1")
-
-    if args.max_grad_norm <= 0:
-        raise ValueError("--max-grad-norm must be greater than 0")
-
-    if args.early_stopping_patience < 1:
-        raise ValueError(
-            "--early-stopping-patience must be at least 1"
-        )
-
-    if args.min_delta < 0:
-        raise ValueError("--min-delta cannot be negative")
-
-
-def validate_datasets(train_df: Any, val_df: Any) -> None:
-    """Check that the prepared datasets can be used for training."""
-
-    if train_df.empty:
-        raise ValueError("The training dataset is empty")
-
-    if val_df.empty:
-        raise ValueError("The validation dataset is empty")
-
-    train_labels = {
-        int(label)
-        for label in train_df["label"].unique()
-    }
-
-    if train_labels != {0, 1}:
-        raise ValueError(
-            "The training dataset must contain both labels: "
-            "0 = non_misinformation and 1 = misinformation"
-        )
-
-
-def normalise_id2label(model: Any) -> dict[int, str]:
-    """Return the model label mapping using integer keys."""
-
-    raw_mapping = getattr(model.config, "id2label", None) or {}
-
-    return {
-        int(key): str(value)
-        for key, value in dict(raw_mapping).items()
-    }
-
-
 @torch.no_grad()
-def evaluate_classification(
+def evaluate_model(
     model: Any,
-    loader: DataLoader,
+    data_loader: DataLoader,
     device: torch.device,
 ) -> dict[str, float]:
     """Calculate validation loss and classification metrics."""
 
     model.eval()
 
-    all_labels: list[int] = []
-    all_predictions: list[int] = []
-
     total_loss = 0.0
     total_examples = 0
+    labels: list[int] = []
+    predictions: list[int] = []
 
-    for batch in loader:
+    for batch in data_loader:
         batch = {
             key: value.to(device)
             for key, value in batch.items()
         }
 
         output = model(**batch)
+        batch_size = batch["labels"].size(0)
 
-        batch_size = int(batch["labels"].shape[0])
-
-        total_loss += (
-            float(output.loss.detach().item())
-            * batch_size
-        )
-
+        total_loss += output.loss.item() * batch_size
         total_examples += batch_size
 
-        predictions = torch.argmax(
+        predicted_labels = torch.argmax(
             output.logits,
             dim=-1,
         )
 
-        all_labels.extend(
-            batch["labels"].detach().cpu().tolist()
+        labels.extend(
+            batch["labels"].cpu().tolist()
         )
 
-        all_predictions.extend(
-            predictions.detach().cpu().tolist()
+        predictions.extend(
+            predicted_labels.cpu().tolist()
         )
 
     if total_examples == 0:
-        raise ValueError(
-            "The validation data loader is empty"
-        )
+        raise ValueError("Validation dataset is empty.")
 
-    labels_array = np.asarray(
-        all_labels,
-        dtype=int,
+    accuracy = accuracy_score(
+        labels,
+        predictions,
     )
 
-    predictions_array = np.asarray(
-        all_predictions,
-        dtype=int,
-    )
-
-    accuracy = float(
-        accuracy_score(
-            labels_array,
-            predictions_array,
+    precision, recall, f1, _ = (
+        precision_recall_fscore_support(
+            labels,
+            predictions,
+            average="binary",
+            pos_label=1,
+            zero_division=0,
         )
     )
 
-    binary_metrics = precision_recall_fscore_support(
-        labels_array,
-        predictions_array,
-        average="binary",
-        pos_label=1,
-        zero_division=0,
-    )
-
-    macro_metrics = precision_recall_fscore_support(
-        labels_array,
-        predictions_array,
-        labels=[0, 1],
-        average="macro",
-        zero_division=0,
+    _, _, macro_f1, _ = (
+        precision_recall_fscore_support(
+            labels,
+            predictions,
+            average="macro",
+            zero_division=0,
+        )
     )
 
     return {
-        "loss": total_loss / total_examples,
-        "accuracy": accuracy,
-        "precision_binary_pos1": float(
-            binary_metrics[0]
-        ),
-        "recall_binary_pos1": float(
-            binary_metrics[1]
-        ),
-        "f1_binary_pos1": float(
-            binary_metrics[2]
-        ),
-        "macro_precision": float(
-            macro_metrics[0]
-        ),
-        "macro_recall": float(
-            macro_metrics[1]
-        ),
-        "macro_f1": float(
-            macro_metrics[2]
-        ),
+        "loss": float(total_loss / total_examples),
+        "accuracy": float(accuracy),
+        "precision": float(precision),
+        "recall": float(recall),
+        "f1": float(f1),
+        "macro_f1": float(macro_f1),
     }
 
 
-def train_one_epoch(
-    *,
+def train_epoch(
     model: Any,
-    loader: DataLoader,
+    data_loader: DataLoader,
     optimizer: torch.optim.Optimizer,
     scheduler: Any,
     scaler: Any,
@@ -244,38 +144,25 @@ def train_one_epoch(
     grad_accum: int,
     max_grad_norm: float,
     use_amp: bool,
-    epoch_number: int,
+    epoch: int,
     total_epochs: int,
 ) -> float:
-    """Train one epoch and return average training loss."""
+    """Train the model for one epoch."""
 
     model.train()
     optimizer.zero_grad(set_to_none=True)
 
     total_loss = 0.0
     total_examples = 0
+    total_batches = len(data_loader)
 
-    total_batches = len(loader)
-
-    if total_batches == 0:
-        raise ValueError(
-            "The training data loader is empty"
-        )
-
-    incomplete_group_size = (
-        total_batches % grad_accum
-    )
-
-    progress_bar = tqdm(
-        loader,
-        desc=(
-            f"train epoch "
-            f"{epoch_number}/{total_epochs}"
-        ),
+    progress = tqdm(
+        data_loader,
+        desc=f"Training epoch {epoch}/{total_epochs}",
     )
 
     for step, batch in enumerate(
-        progress_bar,
+        progress,
         start=1,
     ):
         batch = {
@@ -283,43 +170,30 @@ def train_one_epoch(
             for key, value in batch.items()
         }
 
-        accumulation_group_size = grad_accum
+        # Use the real size of the final accumulation group
+        incomplete_group_size = total_batches % grad_accum
 
         if (
             incomplete_group_size
-            and step
-            > total_batches - incomplete_group_size
+            and step > total_batches - incomplete_group_size
         ):
-            accumulation_group_size = (
-                incomplete_group_size
-            )
+            accumulation_size = incomplete_group_size
+        else:
+            accumulation_size = grad_accum
 
         with torch.amp.autocast(
             device_type=device.type,
             enabled=use_amp,
         ):
             output = model(**batch)
-
             raw_loss = output.loss
+            loss = raw_loss / accumulation_size
 
-            loss_for_backward = (
-                raw_loss
-                / accumulation_group_size
-            )
+        scaler.scale(loss).backward()
 
-        scaler.scale(
-            loss_for_backward
-        ).backward()
+        batch_size = batch["labels"].size(0)
 
-        batch_size = int(
-            batch["labels"].shape[0]
-        )
-
-        total_loss += (
-            float(raw_loss.detach().item())
-            * batch_size
-        )
-
+        total_loss += raw_loss.item() * batch_size
         total_examples += batch_size
 
         should_update = (
@@ -338,91 +212,27 @@ def train_one_epoch(
             scaler.step(optimizer)
             scaler.update()
 
-            optimizer.zero_grad(
-                set_to_none=True
-            )
+            optimizer.zero_grad(set_to_none=True)
 
-            # The scheduler must also step for the
-            # final incomplete accumulation group.
+            # Update the scheduler after every optimiser step
             scheduler.step()
 
-        average_loss = (
-            total_loss / total_examples
-        )
+        average_loss = total_loss / total_examples
 
-        progress_bar.set_postfix(
+        progress.set_postfix(
             train_loss=f"{average_loss:.4f}"
         )
 
     return total_loss / total_examples
 
 
-def verify_saved_checkpoint(
-    checkpoint_dir: Path,
-    expected_id2label: dict[int, str],
-) -> tuple[Any, Any]:
-    """
-    Reopen the saved model using the shared checkpoint
-    loading function and verify its structure.
-    """
+def parse_arguments() -> argparse.Namespace:
+    """Read command-line arguments."""
 
-    tokenizer, model = (
-        load_classifier_from_checkpoint(
-            checkpoint_dir
-        )
-    )
-
-    num_labels = int(
-        getattr(
-            model.config,
-            "num_labels",
-            0,
-        )
-    )
-
-    if num_labels != 2:
-        raise RuntimeError(
-            "Reloaded checkpoint does not contain "
-            "a two-label classifier"
-        )
-
-    reloaded_id2label = normalise_id2label(
-        model
-    )
-
-    if reloaded_id2label != expected_id2label:
-        raise RuntimeError(
-            "Reloaded checkpoint label mapping "
-            "does not match the training model. "
-            f"Found: {reloaded_id2label}"
-        )
-
-    encoded = tokenizer(
-        "Checkpoint verification sample.",
-        truncation=True,
-        max_length=16,
-        return_tensors="pt",
-    )
-
-    with torch.no_grad():
-        logits = model(**encoded).logits
-
-    if tuple(logits.shape) != (1, 2):
-        raise RuntimeError(
-            "Reloaded checkpoint produced an "
-            f"unexpected logits shape: "
-            f"{tuple(logits.shape)}"
-        )
-
-    return tokenizer, model
-
-
-def main() -> None:
     parser = argparse.ArgumentParser(
         description=(
-            "Fine-tune DeBERTa for binary "
-            "misinformation classification using "
-            "claim and label fields."
+            "Train DeBERTa for binary misinformation "
+            "classification."
         )
     )
 
@@ -430,32 +240,27 @@ def main() -> None:
         "--train",
         type=Path,
         required=True,
-        help="Training CSV or JSON file",
+        help="Training CSV or JSON file.",
     )
 
     parser.add_argument(
         "--val",
         type=Path,
         default=None,
-        help=(
-            "Optional separate validation "
-            "CSV or JSON file"
-        ),
+        help="Optional validation CSV or JSON file.",
     )
 
     parser.add_argument(
         "--output-dir",
         type=Path,
         required=True,
-        help="Checkpoint output directory",
+        help="Directory used to save the checkpoint.",
     )
 
     parser.add_argument(
         "--hf-model-id",
         type=str,
-        default=(
-            DebertaMisinfoTrainConfig.hf_model_id
-        ),
+        default=DebertaMisinfoTrainConfig.hf_model_id,
     )
 
     parser.add_argument(
@@ -473,9 +278,7 @@ def main() -> None:
     parser.add_argument(
         "--max-len",
         type=int,
-        default=(
-            DebertaMisinfoTrainConfig.max_len
-        ),
+        default=DebertaMisinfoTrainConfig.max_len,
     )
 
     parser.add_argument(
@@ -543,9 +346,24 @@ def main() -> None:
         action="store_true",
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    validate_arguments(args)
+
+def main() -> None:
+    args = parse_arguments()
+
+    if args.batch_size < 1:
+        raise ValueError("--batch-size must be at least 1.")
+
+    if args.grad_accum < 1:
+        raise ValueError("--grad-accum must be at least 1.")
+
+    if args.epochs < 1:
+        raise ValueError("--epochs must be at least 1.")
+
+    if not 0 < args.test_size < 1:
+        raise ValueError("--test-size must be between 0 and 1.")
+
     set_seed(args.seed)
 
     device = torch.device(
@@ -569,69 +387,34 @@ def main() -> None:
             "label",
         )
 
-        split_method = (
-            "separate_validation_file"
-        )
+        split_method = "separate_validation_file"
 
     else:
-        label_counts = (
-            train_df["label"].value_counts()
-        )
+        label_counts = train_df["label"].value_counts()
 
         if (
-            len(label_counts) < 2
-            or int(label_counts.min()) < 2
+            len(label_counts) != 2
+            or label_counts.min() < 2
         ):
             raise ValueError(
-                "A stratified split requires "
-                "both labels and at least two "
-                "examples of each label. "
-                "Provide more data or use --val."
+                "A stratified split needs both labels "
+                "and at least two examples of each label."
             )
 
-        try:
-            train_df, val_df = (
-                train_test_split(
-                    train_df,
-                    test_size=args.test_size,
-                    random_state=args.seed,
-                    stratify=train_df["label"],
-                )
-            )
-
-        except ValueError as error:
-            raise ValueError(
-                "Unable to create a stratified "
-                "training and validation split. "
-                "Increase the dataset size, change "
-                "--test-size, or provide --val."
-            ) from error
-
-        split_method = (
-            "stratified_train_validation_split"
+        train_df, val_df = train_test_split(
+            train_df,
+            test_size=args.test_size,
+            random_state=args.seed,
+            stratify=train_df["label"],
         )
 
-    train_df = train_df.reset_index(
-        drop=True
-    )
+        split_method = "stratified_split"
 
-    val_df = val_df.reset_index(
-        drop=True
-    )
+    train_df = train_df.reset_index(drop=True)
+    val_df = val_df.reset_index(drop=True)
 
-    validate_datasets(
-        train_df,
-        val_df,
-    )
-
-    tokenizer, model = (
-        build_fresh_classifier(
-            args.hf_model_id
-        )
-    )
-
-    expected_id2label = (
-        normalise_id2label(model)
+    tokenizer, model = build_fresh_classifier(
+        args.hf_model_id
     )
 
     model.to(device)
@@ -678,32 +461,25 @@ def main() -> None:
         weight_decay=args.weight_decay,
     )
 
-    optimizer_steps_per_epoch = int(
+    steps_per_epoch = int(
         np.ceil(
-            len(train_loader)
-            / args.grad_accum
+            len(train_loader) / args.grad_accum
         )
     )
 
-    total_optimizer_steps = max(
+    total_steps = max(
         1,
-        optimizer_steps_per_epoch
-        * args.epochs,
+        steps_per_epoch * args.epochs,
     )
 
     warmup_steps = int(
-        total_optimizer_steps
-        * args.warmup_ratio
+        total_steps * args.warmup_ratio
     )
 
-    scheduler = (
-        get_linear_schedule_with_warmup(
-            optimizer,
-            num_warmup_steps=warmup_steps,
-            num_training_steps=(
-                total_optimizer_steps
-            ),
-        )
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=warmup_steps,
+        num_training_steps=total_steps,
     )
 
     use_amp = device.type == "cuda"
@@ -721,21 +497,17 @@ def main() -> None:
     best_macro_f1 = -1.0
     best_epoch = 0
     best_metrics: dict[str, float] = {}
-
-    history: list[
-        dict[str, float | int]
-    ] = []
+    history: list[dict[str, float | int]] = []
 
     patience = 0
     epochs_completed = 0
 
-    for epoch_index in range(args.epochs):
-        epoch_number = epoch_index + 1
-        epochs_completed = epoch_number
+    for epoch in range(1, args.epochs + 1):
+        epochs_completed = epoch
 
-        train_loss = train_one_epoch(
+        train_loss = train_epoch(
             model=model,
-            loader=train_loader,
+            data_loader=train_loader,
             optimizer=optimizer,
             scheduler=scheduler,
             scaler=scaler,
@@ -743,128 +515,94 @@ def main() -> None:
             grad_accum=args.grad_accum,
             max_grad_norm=args.max_grad_norm,
             use_amp=use_amp,
-            epoch_number=epoch_number,
+            epoch=epoch,
             total_epochs=args.epochs,
         )
 
-        validation_metrics = (
-            evaluate_classification(
-                model,
-                val_loader,
-                device,
-            )
+        val_metrics = evaluate_model(
+            model,
+            val_loader,
+            device,
         )
 
-        epoch_result = {
-            "epoch": epoch_number,
-            "train_loss": train_loss,
-            **validation_metrics,
-        }
-
-        history.append(epoch_result)
+        history.append(
+            {
+                "epoch": epoch,
+                "train_loss": train_loss,
+                **val_metrics,
+            }
+        )
 
         print(
-            f"Epoch {epoch_number}/"
-            f"{args.epochs} | "
+            f"Epoch {epoch}/{args.epochs} | "
             f"train_loss={train_loss:.4f} | "
-            f"val_loss="
-            f"{validation_metrics['loss']:.4f} | "
-            f"val_accuracy="
-            f"{validation_metrics['accuracy']:.4f} | "
-            f"val_macro_f1="
-            f"{validation_metrics['macro_f1']:.4f} | "
-            f"val_precision_pos1="
-            f"{validation_metrics['precision_binary_pos1']:.4f} | "
-            f"val_recall_pos1="
-            f"{validation_metrics['recall_binary_pos1']:.4f}"
+            f"val_loss={val_metrics['loss']:.4f} | "
+            f"accuracy={val_metrics['accuracy']:.4f} | "
+            f"macro_f1={val_metrics['macro_f1']:.4f} | "
+            f"precision={val_metrics['precision']:.4f} | "
+            f"recall={val_metrics['recall']:.4f}"
         )
 
         improved = (
-            validation_metrics["macro_f1"]
-            > best_macro_f1
-            + args.min_delta
+            val_metrics["macro_f1"]
+            > best_macro_f1 + args.min_delta
         )
 
         if improved:
-            best_macro_f1 = (
-                validation_metrics["macro_f1"]
-            )
-
-            best_epoch = epoch_number
-
-            best_metrics = dict(
-                validation_metrics
-            )
-
+            best_macro_f1 = val_metrics["macro_f1"]
+            best_epoch = epoch
+            best_metrics = dict(val_metrics)
             patience = 0
 
-            model.save_pretrained(
-                args.output_dir
-            )
-
-            tokenizer.save_pretrained(
-                args.output_dir
-            )
+            model.save_pretrained(args.output_dir)
+            tokenizer.save_pretrained(args.output_dir)
 
             print(
-                "Saved new best checkpoint to "
+                f"Saved best checkpoint to "
                 f"{args.output_dir}"
             )
 
         else:
             patience += 1
 
-        if (
-            patience
-            >= args.early_stopping_patience
-        ):
-            print(
-                "Early stopping triggered after "
-                f"{args.early_stopping_patience} "
-                "epoch(s) without improvement."
-            )
-
+        if patience >= args.early_stopping_patience:
+            print("Early stopping triggered.")
             break
 
     if best_epoch == 0:
         raise RuntimeError(
-            "Training finished without "
-            "producing a checkpoint"
+            "Training finished without saving a checkpoint."
         )
 
-    # Remove the current model from memory before
-    # reopening the saved best checkpoint.
-    del model
-
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
-
-    (
-        reloaded_tokenizer,
-        reloaded_model,
-    ) = verify_saved_checkpoint(
-        args.output_dir,
-        expected_id2label,
+    # Reload the checkpoint to confirm that it works
+    _, reloaded_model = load_classifier_from_checkpoint(
+        args.output_dir
     )
+
+    if reloaded_model.config.num_labels != 2:
+        raise RuntimeError(
+            "Reloaded checkpoint has an incorrect "
+            "number of labels."
+        )
 
     reloaded_model.to(device)
 
-    final_validation = (
-        evaluate_classification(
-            reloaded_model,
-            val_loader,
-            device,
-        )
+    final_metrics = evaluate_model(
+        reloaded_model,
+        val_loader,
+        device,
     )
 
+    label_mapping = {
+        str(key): value
+        for key, value
+        in reloaded_model.config.id2label.items()
+    }
+
     metadata = {
-        "checkpoint_reload_verified": True,
         "hf_model_id": args.hf_model_id,
-        "label_mapping": {
-            str(key): value
-            for key, value
-            in expected_id2label.items()
-        },
+        "checkpoint_reload_verified": True,
+        "label_mapping": label_mapping,
         "data": {
             "train_path": str(args.train),
             "validation_path": (
@@ -873,106 +611,55 @@ def main() -> None:
                 else None
             ),
             "split_method": split_method,
-            "test_size": (
-                args.test_size
-                if args.val is None
-                else None
-            ),
             "text_field": "claim",
             "label_field": "label",
-            "n_train": int(len(train_df)),
-            "n_validation": int(len(val_df)),
+            "train_size": len(train_df),
+            "validation_size": len(val_df),
         },
         "training_settings": {
             "seed": args.seed,
             "max_len": args.max_len,
             "batch_size": args.batch_size,
-            "gradient_accumulation_steps": (
-                args.grad_accum
-            ),
+            "gradient_accumulation_steps": args.grad_accum,
             "effective_batch_size": (
-                args.batch_size
-                * args.grad_accum
+                args.batch_size * args.grad_accum
             ),
             "epochs_requested": args.epochs,
-            "epochs_completed": (
-                epochs_completed
-            ),
+            "epochs_completed": epochs_completed,
             "learning_rate": args.lr,
-            "weight_decay": (
-                args.weight_decay
-            ),
-            "warmup_ratio": (
-                args.warmup_ratio
-            ),
-            "warmup_steps": warmup_steps,
-            "optimizer_steps_per_epoch": (
-                optimizer_steps_per_epoch
-            ),
-            "total_optimizer_steps_planned": (
-                total_optimizer_steps
-            ),
-            "max_grad_norm": (
-                args.max_grad_norm
-            ),
-            "early_stopping_patience": (
-                args.early_stopping_patience
-            ),
-            "min_delta": args.min_delta,
-            "num_workers": args.num_workers,
+            "weight_decay": args.weight_decay,
+            "warmup_ratio": args.warmup_ratio,
             "gradient_checkpointing": (
                 args.gradient_checkpointing
             ),
-            "mixed_precision": use_amp,
             "device": str(device),
         },
         "best_epoch": best_epoch,
         "best_validation": best_metrics,
-        "final_validation_after_reload": (
-            final_validation
-        ),
+        "final_validation": final_metrics,
         "history": history,
     }
 
     metadata_path = (
-        args.output_dir
-        / "training_meta.json"
+        args.output_dir / "training_meta.json"
     )
 
     metadata_path.write_text(
-        json.dumps(
-            metadata,
-            indent=2,
-        ),
+        json.dumps(metadata, indent=2),
         encoding="utf-8",
     )
 
-    print(
-        "Checkpoint reload verification: passed"
-    )
+    print("Checkpoint reload verification: passed")
 
     print(
-        f"Best epoch: {best_epoch} | "
-        f"final_val_loss="
-        f"{final_validation['loss']:.4f} | "
-        f"final_val_accuracy="
-        f"{final_validation['accuracy']:.4f} | "
-        f"final_val_macro_f1="
-        f"{final_validation['macro_f1']:.4f}"
+        f"Final validation | "
+        f"loss={final_metrics['loss']:.4f} | "
+        f"accuracy={final_metrics['accuracy']:.4f} | "
+        f"macro_f1={final_metrics['macro_f1']:.4f}"
     )
 
-    print(
-        "Saved model and tokenizer to: "
-        f"{args.output_dir}"
-    )
-
-    print(
-        "Saved training metadata to: "
-        f"{metadata_path}"
-    )
-
-    del reloaded_model
-    del reloaded_tokenizer
+    print(f"Saved model to: {args.output_dir}")
+    print(f"Saved metadata to: {metadata_path}")
 
 
 if __name__ == "__main__":
