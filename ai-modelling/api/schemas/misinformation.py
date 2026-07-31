@@ -11,6 +11,9 @@ class MisinformationPostIn(BaseModel):
     share_count: int = Field(default=0, ge=0)
     ts: datetime | None = None
     post_url: str = ""
+class MisinformationBatchIn(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    posts: list[MisinformationPostIn] = Field(min_length=1, max_length=100)
 
 
 class MisinformationPostOut(BaseModel):
@@ -32,3 +35,7 @@ class MisinformationPostOut(BaseModel):
     risk_score: float
     severity: str
     checkpoint: str
+class MisinformationBatchOut(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    results: list[MisinformationPostOut]
+    count: int
