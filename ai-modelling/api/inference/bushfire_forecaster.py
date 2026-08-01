@@ -86,13 +86,13 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
         
         if len(x_input.shape) == 5:
             # Gridded: [batch, seq_len, height, width, n_features]
-            probs = bundle.model.predict(x_tensor, return_probs=True).cpu().numpy()
+            probs = bundle.model.predict(x_tensor).cpu().numpy()
             # probs: [batch, horizon, height, width, 1]
         else:
             # Non-gridded batch: [n_samples, seq_len, n_features]
             # Reshape to add spatial dimensionss [n_samples, seq_len, height, width, n_features]
             x_tensor = x_tensor.unsqueeze(2).unsqueeze(3)
-            probs = bundle.model.predict(x_tensor, return_probs=True).cpu().numpy()
+            probs = bundle.model.predict(x_tensor).cpu().numpy()
             # probs: [n_samples, horizon, 1, 1, 1]
             probs = probs.squeeze(axis=(2, 3))  # [n_samples, horizon, 1]
     
