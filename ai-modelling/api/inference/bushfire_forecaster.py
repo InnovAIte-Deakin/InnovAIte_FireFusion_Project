@@ -6,7 +6,7 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import torch
 
-from api.schemas.bushfire import ForecastRequest, ForecastResponse, GeoFeatureOut, ForecastPropertiesOut, DEFAULT_FEATURE_NAMES
+from api.schemas.bushfire import ForecastRequest, ForecastResponse, GeoFeatureOut, ForecastPropertiesOut, RiskPropertiesOut, DEFAULT_FEATURE_NAMES
 from api.model_loader import LoadedModel
 
 
@@ -205,7 +205,7 @@ def _postprocess_forecasts(
                 risk_score = float(np.mean(cell_probs))
                 is_burning_predicted = [p > fire_threshold for p in cell_probs]
                 
-                props_out = ForecastPropertiesOut(
+                props_out = RiskPropertiesOut(
                     id=meta["id"],
                     forecast=cell_probs,
                     risk_score=risk_score,
@@ -225,7 +225,7 @@ def _postprocess_forecasts(
             risk_score = float(np.mean(cell_probs))
             is_burning_predicted = [p > fire_threshold for p in cell_probs]
             
-            props_out = ForecastPropertiesOut(
+            props_out = RiskPropertiesOut(
                 id=meta["id"],
                 forecast=cell_probs,
                 risk_score=risk_score,
