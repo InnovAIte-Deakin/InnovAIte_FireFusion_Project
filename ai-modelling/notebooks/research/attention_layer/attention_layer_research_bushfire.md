@@ -7,9 +7,13 @@
 
 # 1. Introduction
 
-FireFusion aims to forecast bushfire behaviour using machine learning models that analyse spatial and temporal data such as satellite imagery, weather conditions, and historical fire observations. Current deep learning approaches for spatiotemporal forecasting commonly use Long Short-Term Memory (LSTM) or Convolutional Long Short-Term Memory (ConvLSTM) networks.
+This document investigates attention mechanisms with the specific goal of improving the current **FireFusion ConvLSTM** forecasting model.
+Rather than providing a general survey alone, this document evaluates how attention can be integrated into the existing architecture,
+identifies the most suitable mechanism for FireFusion, and proposes a practical implementation approach.
 
-This research investigates whether **attention mechanisms** could improve FireFusion's forecasting performance by allowing the model to automatically focus on the most relevant information instead of treating every feature equally.
+The current FireFusion model consists of two stacked ConvLSTM layers followed by dropout and a 1×1 convolution projection layer for
+forecasting. This architecture is efficient and well suited to modelling spatiotemporal environmental data, but like many ConvLSTM models it may
+struggle to capture long-range spatial dependencies when information must travel through recurrent hidden states.
 
 ---
 
@@ -93,11 +97,23 @@ Each attention head can learn different relationships, for example:
 - another focuses on vegetation,
 - another focuses on fire boundaries.
 
-The outputs are combined to improve prediction quality.
+These mechanisms remain relevant, but the remainder of this document focuses on which is most appropriate for FireFusion.
 
 ---
 
-# 4. Applications in Forecasting
+# 4. Existing Research
+
+Recent work has shown that integrating attention with ConvLSTM improves wildfire prediction performance by allowing the network to model
+long-range spatial relationships that standard convolution kernels may miss. In particular, the reviewer-recommended paper integrates
+self-attention directly with ConvLSTM units and demonstrates improved wildfire spread prediction compared with a baseline ConvLSTM. [(*Masrur, Yu and Taylor, 2024*)](https://www.sciencedirect.com/science/article/pii/S1574954124003029)
+
+
+The paper evaluates both Pairwise Self-Attention and Patchwise Self-Attention. Both outperform a standard ConvLSTM, demonstrating that
+attention helps the model capture important spatial interactions during fire spread. [(*Masrur, Yu and Taylor, 2024*)](https://www.sciencedirect.com/science/article/pii/S1574954124003029)
+
+------------------------------------------------------------------------
+
+# 5. Applications in Forecasting
 
 Attention mechanisms have been successfully applied in several forecasting domains.
 
@@ -116,217 +132,200 @@ Many recent forecasting models combine ConvLSTM with attention modules to improv
 
 ---
 
-# 5. Potential Functionality in FireFusion
+# 6. FireFusion Current Architecture
 
-Several opportunities exist for integrating attention mechanisms into FireFusion.
+The current implementation is:
 
-## 5.1 Spatial Attention
-
-Spatial attention could help the model focus on regions where fires are actively spreading.
-
-Potential focus areas include:
-
-- hotspots
-- fire boundaries
-- dense vegetation
-- high-risk terrain
-- smoke movement
-
-Benefits:
-
-- reduces influence of irrelevant image regions
-- improves feature extraction
-- increases prediction accuracy
-
----
-
-## 5.2 Temporal Attention
-
-Fire behaviour depends heavily on recent environmental conditions.
-
-Temporal attention could allow the model to prioritise:
-
-- recent wind changes
-- humidity trends
-- temperature changes
-- recent fire growth
-
-rather than treating every historical observation equally.
-
----
-
-## 5.3 Weather Feature Attention
-
-Different weather variables influence bushfires differently under different conditions.
-
-Attention mechanisms could dynamically assign importance to variables such as:
-
-- wind speed
-- wind direction
-- temperature
-- humidity
-- rainfall
-- atmospheric pressure
-
-For example, during strong wind events, wind speed may receive higher attention than humidity.
-
----
-
-## 5.4 Multi-Modal Attention
-
-FireFusion may eventually combine multiple data sources.
-
-Possible inputs include:
-
-- satellite imagery
-- weather forecasts
-- vegetation maps
-- elevation models
-- fuel moisture
-- historical fire records
-
-Attention mechanisms could learn relationships between these different information sources without requiring manually engineered weighting rules.
-
----
-
-# 6. Strengths
-
-Using attention layers provides several advantages.
-
-## Improved Feature Selection
-
-The model automatically learns which information is most important rather than relying on manually selected features.
-
-## Better Long-Term Dependencies
-
-Attention helps retain useful information from earlier observations, reducing the limitations of standard recurrent networks.
-
-## Improved Accuracy
-
-Many recent forecasting studies report improved prediction accuracy after integrating attention modules.
-
-## Interpretability
-
-Attention maps provide visualisations showing which regions or features influenced predictions.
-
-This improves transparency compared with traditional neural networks.
-
-## Flexibility
-
-Attention modules can often be added to existing ConvLSTM or LSTM architectures without redesigning the entire model.
-
----
-
-# 7. Weaknesses
-
-Attention mechanisms also introduce several challenges.
-
-## Increased Computational Cost
-
-Additional attention layers require more mathematical operations.
-
-Training and inference become slower.
-
----
-
-## Higher Memory Usage
-
-Attention layers increase GPU memory requirements, particularly for high-resolution satellite imagery. The existing GPU allocation issue we are facing, therefore, needs to be taken into consideration.
-
----
-
-## Increased Model Complexity
-
-The model becomes more difficult to understand, debug, and optimise.
-
-Hyperparameter tuning also becomes more challenging.
-
----
-
-## Risk of Overfitting
-
-Larger models may memorise the training data if the dataset is limited.
-
-Regularisation and sufficient training data become increasingly important.
-
----
-
-## Implementation Effort
-
-Integrating attention into an existing ConvLSTM pipeline requires architectural modifications and additional experimentation.
-
----
-
-# 8. Possible Implementation in FireFusion
-
-A practical implementation would be to extend the current ConvLSTM architecture rather than replacing it completely.
-
-A possible pipeline is shown below.
-
-```
-Satellite Images
+``` text
+Input Weather Sequence
         │
         ▼
-Feature Extraction
+ConvLSTM Layer 1
+        │
+     Dropout
         │
         ▼
-ConvLSTM Layers
+ConvLSTM Layer 2
+        │
+     Dropout
         │
         ▼
-Spatial Attention
+1×1 Convolution Projection
         │
         ▼
-Temporal Attention
-        │
-        ▼
-Prediction Layer
+Forecast
 ```
 
-Another future architecture could incorporate multiple data sources.
+The model processes every timestep through the first ConvLSTM, passes
+the outputs through a second ConvLSTM, and finally projects the last
+hidden representation into future predictions.
 
+Strengths:
+
+-   Simple architecture
+-   Efficient inference
+-   Easy to maintain
+
+Limitations:
+
+-   Long-range spatial interactions are compressed into the hidden
+    state.
+-   Important regions may receive equal importance as less informative
+    regions.
+-   Model interpretability is limited.
+
+------------------------------------------------------------------------
+
+# 7. Recommended Attention Mechanism
+
+Based on the literature and FireFusion's current architecture,
+**Self-Attention** is recommended as the first attention mechanism to
+investigate.
+
+Reasons:
+
+-   Learns long-range spatial relationships.
+-   Preserves compatibility with the existing ConvLSTM design.
+-   Supported by recent wildfire forecasting literature.
+    fileciteturn3file0L2-L15
+
+Future work may also investigate combinations of spatial and temporal
+attention after an initial self-attention implementation.
+
+------------------------------------------------------------------------
+``` text
+                FireFusion ConvLSTM with Proposed Self-Attention
+
+┌────────────────────────────┐
+│  Input Weather Sequence    │
+│ (T timesteps × H × W × C)  │
+└────────────────────────────┘
+              │
+              ▼
+┌─────────────────────────────┐
+│      ConvLSTM Layer 1       │
+│  Extract low-level spatial  │
+│ and temporal representations│
+└─────────────────────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│        Dropout Layer       │
+└────────────────────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│      ConvLSTM Layer 2      │
+│ Learn higher-level spatio- │
+│ temporal feature maps      │
+└────────────────────────────┘
+              │
+              ▼
+╔════════════════════════════╗
+║  Proposed Self-Attention   ║
+║         Module             ║
+║                            ║
+║ • Re-weight important      ║
+║   spatial regions          ║
+║ • Capture long-range       ║
+║   dependencies             ║
+║ • Emphasise informative    ║
+║   feature representations  ║
+╚════════════════════════════╝
+              │
+              ▼
+┌────────────────────────────┐
+│   1×1 Convolution Layer    │
+│ (Projection to Forecast)   │
+└────────────────────────────┘
+              │
+              ▼
+┌────────────────────────────┐
+│ Predicted Fire Risk Maps   │
+│      (Forecast Horizon)    │
+└────────────────────────────┘
 ```
-Satellite Images
-Weather Data
-Vegetation Maps
-Terrain Data
-Historical Fire Data
-        │
-        ▼
-Feature Fusion
-        │
-        ▼
-Multi-Head Attention
-        │
-        ▼
-ConvLSTM
-        │
-        ▼
-Fire Spread Prediction
+
+The highlighted self-attention module is the only additional component introduced into the existing FireFusion architecture. It operates on the learned spatiotemporal representation produced by the second ConvLSTM layer before the final projection stage. This minimises changes to the existing model while allowing the network to emphasise informative spatial and temporal features prior to prediction.
+
+------------------------------------------------------------------------
+
+# 9. Example Pseudocode
+
+``` python
+features = ConvLSTM1(x)
+features = Dropout(features)
+
+features = ConvLSTM2(features)
+
+features = SelfAttention(features)
+
+prediction = Projection(features)
+
+return prediction
 ```
 
-This staged approach would minimise disruption to the current architecture while allowing attention mechanisms to be evaluated experimentally.
+This pseudocode illustrates the proposed integration rather than a
+production implementation.
 
----
+------------------------------------------------------------------------
 
-# 9. Recommendation
+# 10. What Should the Attention Learn?
 
-Attention mechanisms appear to be a promising enhancement for FireFusion.
+FireFusion should investigate attention over:
 
-Among the available approaches, **spatial attention** and **temporal attention** are the most immediately applicable because bushfire forecasting depends heavily on both geographic patterns and recent environmental changes.
+-   **Spatial locations** (important fire regions)
+-   **Timesteps** (critical historical observations)
+-   **Weather variables/channels** (wind, humidity, temperature, etc.)
 
-A recommended development strategy is:
+An initial implementation should prioritise self-attention over the
+learned ConvLSTM feature representation before exploring hybrid
+spatial-temporal approaches.
 
-1. Establish the current ConvLSTM model as the baseline.
-2. Integrate a lightweight spatial attention module.
-3. Evaluate forecasting accuracy and computational cost.
-4. Add temporal attention if measurable improvements are observed.
-5. Investigate multi-head attention only after validating simpler approaches.
+------------------------------------------------------------------------
 
-This incremental approach reduces implementation risk while providing measurable evidence of any performance improvements.
+# 11. Implementation Considerations
 
----
+Potential benefits:
 
-# 10. Conclusion
+-   Better modelling of long-range fire spread.
+-   Improved representation of important weather patterns.
+-   Increased model interpretability through attention maps.
+
+Potential challenges:
+
+-   Increased GPU memory usage.
+-   Longer training time.
+-   Additional model complexity.
+-   Increased risk of overfitting on limited datasets.
+
+Future experiments should compare:
+
+-   Baseline ConvLSTM
+-   ConvLSTM + Self-Attention
+
+using the project's forecasting metrics together with training time,
+inference time and memory usage.
+
+------------------------------------------------------------------------
+
+# 12. Recommendation
+
+Based on the current FireFusion implementation and recent wildfire
+forecasting research, a lightweight self-attention module inserted after
+the second ConvLSTM layer and before the projection layer is recommended
+as the initial implementation.
+
+This approach requires minimal modification to the existing architecture
+while addressing one of ConvLSTM's key limitations: modelling long-range
+spatiotemporal dependencies. If future experiments demonstrate
+measurable improvements, more advanced combinations of spatial, temporal
+or channel attention can then be investigated.
+
+
+------------------------------------------------------------------------
+
+# 13. Conclusion
 
 Attention mechanisms enable neural networks to focus on the most informative parts of their input, making them particularly suitable for complex spatiotemporal forecasting problems.
 
@@ -348,4 +347,4 @@ Although attention increases computational requirements and implementation compl
 
 5. Dosovitskiy, A., et al. (2021). [*An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale*](https://arxiv.org/pdf/2010.11929). ICLR.
 
-6. Recent literature on attention-based spatiotemporal forecasting, remote sensing, and wildfire prediction (2022–2025).
+6. Masrur et al. (2024). [*Capturing and interpreting wildfire spread dynamics: attention-based spatiotemporal models using ConvLSTM networks*](https://www.sciencedirect.com/science/article/pii/S1574954124003029). ScienceDirect.
