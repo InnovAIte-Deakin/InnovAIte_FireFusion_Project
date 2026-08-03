@@ -1,189 +1,194 @@
-# [Bushfire] Refactor Input/Output Schemas to Support the Refined ConvLSTM Model
+# [Bushfire] Refactor Input/Output Schemas for the Single-Model ConvLSTM
 
-**Stream:** AI Modelling · **Type:** refactor · **Risk:** Low · **Breaking changes:** none
+**Stream:** AI Modelling · **Type:** refactor + docs + test · **Risk:** Low · **Breaking changes:** none
 
 ---
 
-## Summary
+## Scope
 
-The bushfire API schemas described *what the endpoint happened to return*, not *what the
-ConvLSTM actually consumes and produces*. Two consequences:
+**Schema and documentation only.** This change touches:
 
-1. The spatial input the ConvLSTM is built for could not be expressed in a request at all.
-2. Bushfire risk probability — the output the product actually cares about — had no schema;
-   it was assembled as untyped dictionaries.
+| File | Change |
+|---|---|
+| `api/schemas/bushfire.py` | Input grid dimensions, output fire-probability contract, dimension constants |
+| `api/README.md` | Input/output property tables, 5-D tensor explanation, classifier marked deprecated |
+| `tests/test_bushfire_schemas.py` | New — 28 schema tests |
 
-This change makes both explicit, **additively**. Every payload that worked before still works
-and returns the same values under the same keys.
+**Deliberately not touched:** `api/inference/bushfire_forecaster.py` and
+`api/inference/bushfire_classifier.py`. An earlier revision of this branch modified both; those
+changes were removed on review, because a separate task has already refactored the inference
+script for the single-ConvLSTM architecture and the classifier is being retired. The useful
+inference-side changes are listed under [Deferred to the refactored inference script](#deferred-to-the-refactored-inference-script)
+so they are not lost.
+
+No model, training, or checkpoint code is touched. No retraining, no re-serialisation.
 
 ---
 
 ## Part 1 — Inputs: data variables, dimensions, structure
 
-### What changed
+The ConvLSTM is spatiotemporal and works on 5-D tensors end to end:
 
-| # | Change | File |
-|---|---|---|
-| 1.1 | Added `grid_row` / `grid_col` to `FeatureTimeseriesPropertiesIn` | `api/schemas/bushfire.py` |
-| 1.2 | Added validation: grid indices come in pairs, are `>= 0`, and no two cells claim the same position | `api/schemas/bushfire.py` |
-| 1.3 | Added `schema_version` to `ForecastRequest` (optional) | `api/schemas/bushfire.py` |
-| 1.4 | Added dimension constants `N_DEFAULT_FEATURES`, `DEFAULT_INPUT_STEPS = 60`, `DEFAULT_HORIZON = 2` and replaced the magic numbers in both adapters | `api/schemas/bushfire.py`, both adapters |
-| 1.5 | Documented the 7 data variables (name, index, unit) and both tensor layouts in the module docstring | `api/schemas/bushfire.py` |
-| 1.6 | Unfilled grid cells are now filled after scaling, mirroring training | `api/inference/bushfire_forecaster.py` |
-| 1.7 | Out-of-range grid positions raise a clear `ValueError` instead of an `IndexError` | `api/inference/bushfire_forecaster.py` |
+```
+input   [batch, seq_len, height, width, n_features]
+output  [batch, horizon, height, width, n_output_channels]
+```
 
-### Why
+The input schema could not express the `height`/`width` axes at all, so a request had no way to
+say where a cell sits in the grid.
 
-**1.1 / 1.2 — the gridded path was unreachable.** `MultivariateTSForecaster` is a *2D*
-ConvLSTM: it expects `[batch, seq_len, height, width, n_features]` and learns from
-neighbouring cells. The adapter already had the code to reassemble that grid, gated on
+| # | Change |
+|---|---|
+| 1.1 | Added `grid_row` / `grid_col` to `FeatureTimeseriesPropertiesIn` |
+| 1.2 | Validation — grid indices come in pairs, are `>= 0`, and no two cells claim the same position |
+| 1.3 | Added optional `schema_version` to `ForecastRequest` |
+| 1.4 | Dimension constants `N_DEFAULT_FEATURES`, `DEFAULT_INPUT_STEPS = 60`, `DEFAULT_HORIZON = 1`, `DEFAULT_FIRE_THRESHOLD = 0.5` |
+| 1.5 | Documented the 7 ERA5-Land data variables (index, name, unit) and both tensor layouts in the module docstring |
+
+**Why 1.1 / 1.2.** The inference adapter already had the code to reassemble the grid, gated on
 `properties.grid_row` / `grid_col` — but those fields were never declared on the input schema,
 and the schema is `extra="forbid"`. Any request carrying them was rejected with a 422, so
-`has_grid_coords` was always `False` and **every** request silently fell through to the
-fallback branch, which reshapes each cell to a 1×1 grid:
+`has_grid_coords` was always `False` and **every** request fell through to the fallback that
+reshapes each cell into a 1×1 grid:
 
 ```
 [n_samples, seq_len, n_features] -> [n_samples, seq_len, 1, 1, n_features]
 ```
 
-That runs, but a 1×1 grid means the convolution has no spatial neighbourhood — the model was
-being used as an expensive per-cell LSTM, not the spatiotemporal model it was trained as.
-Declaring the two fields is the minimum needed to make the intended path reachable.
+Still 5-D, but a 1×1 grid gives the convolution no spatial neighbourhood — the ConvLSTM was
+being used as an expensive per-cell LSTM. Declaring the two fields is the minimum needed to
+make the intended path reachable.
 
 The extra validation exists because a half-specified position (`grid_row` with no `grid_col`)
-or two cells claiming `(1, 1)` would previously have been a silent wrong answer: the first
-would be dropped from the grid, the second would overwrite the first.
+or two cells claiming `(1, 1)` would otherwise be a silent wrong answer: the first is dropped
+from the grid, the second overwrites the first.
 
-**1.3 — `schema_version`.** `extra="forbid"` means clients cannot send anything undeclared,
-so there was no way to version a payload. `InputDataSchema.md` already specifies
-`schema_version` for the inference contract; this closes that gap without forcing it.
-
-**1.4 — dimensions in one place.** `60` and `2` were hardcoded as fallbacks in three
-different files. They are training hyperparameters (`INPUT_STEPS`, `HORIZON`), so they now
-live next to the feature list with a comment pointing at the training script.
-
-**1.6 — NaN would have poisoned the whole grid.** `_build_grid_tensor` initialises the grid
-with `NaN` and only fills the cells the request supplied. Training fills the gaps with `0`
-*after* scaling (`scale_and_fill`), i.e. with the feature mean. Inference did not. Because a
-convolution mixes each cell with its neighbours, **one** empty cell would have spread `NaN`
-across the entire output. This never fired before only because the gridded path was
-unreachable and JSON cannot carry `NaN` — so enabling 1.1 without this would have shipped a
-bug. The fill happens after scaling, exactly as in training. It is a no-op for the
-non-gridded path.
+**Why `DEFAULT_HORIZON = 1`.** The single-model ConvLSTM predicts one timestep ahead. The old
+value of 2 came from the two-model pipeline, where the classifier consumed `horizon - 1`
+forecast steps. `60` and `2` were also hardcoded as fallbacks in several files; they are
+training hyperparameters, so they now live next to the feature list with a comment pointing at
+the training script.
 
 ---
 
-## Part 2 — Outputs: bushfire risk probability, dimensions, structure
+## Part 2 — Outputs: fire probability, dimensions, structure
 
-### What changed
+The old output schema described a multivariate regression forecast, plus a separate risk
+response for the TCN classifier. Neither matches a single ConvLSTM that emits fire probability.
 
-| # | Change | File |
-|---|---|---|
-| 2.1 | New `RiskPropertiesOut` / `GeoRiskFeatureOut` / `RiskResponse` schemas — the risk endpoint's contract is now typed | `api/schemas/bushfire.py` |
-| 2.2 | Both classifier functions build their response through those schemas via one shared `_build_risk_response()` helper | `api/inference/bushfire_classifier.py` |
-| 2.3 | Threshold table centralised as `RISK_LEVEL_THRESHOLDS` + `prob_to_risk_level()`; the two duplicated copies deleted | `api/schemas/bushfire.py`, `api/inference/bushfire_classifier.py` |
-| 2.4 | Added `risk_labels` (`LOW` … `HIGH`) and `horizon` to the risk response | both |
-| 2.5 | `ForecastPropertiesOut` now declares `horizon`, `n_output_channels`, `output_feature_names`, `grid_row`, `grid_col`, `risk_score` | `api/schemas/bushfire.py`, forecaster adapter |
-| 2.6 | `ForecastPropertiesOut` gained optional `risk_probabilities` / `risk_levels` | `api/schemas/bushfire.py` |
-| 2.7 | Validation: `risk_probabilities`, `risk_levels` and `risk_labels` must be the same length | `api/schemas/bushfire.py` |
-| 2.8 | Removed a dead `risk_score` computation in the non-gridded forecast branch | `api/inference/bushfire_forecaster.py` |
+| # | Change |
+|---|---|
+| 2.1 | `ForecastPropertiesOut` now leads with `fire_probability` — probability in `[0, 1]`, one entry per horizon step |
+| 2.2 | Added `is_burning_predicted` (thresholded) and `fire_threshold` (the threshold used) |
+| 2.3 | `risk_score` is now defined as the mean `fire_probability` across the horizon |
+| 2.4 | Added `risk_levels` / `risk_labels`, from the single threshold table `RISK_LEVEL_THRESHOLDS` + `prob_to_risk_level()` |
+| 2.5 | `forecast` kept as `[horizon, n_output_channels]` — one **row** per horizon step — and made optional, so a multi-channel checkpoint can still be served |
+| 2.6 | Added `horizon`, `n_output_channels`, and echoed `grid_row` / `grid_col` |
+| 2.7 | Validation — every per-horizon-step field must describe the same number of steps |
+| 2.8 | Removed `RiskPropertiesOut` / `GeoRiskFeatureOut` / `RiskResponse` — they were the TCN classifier's contract |
+| 2.9 | Removed `output_feature_names` — it described the multivariate regression output |
 
-### Why
+**Why 2.1–2.4.** Fire probability is what the product consumes, and it had no declared home:
+`risk_score` was previously smuggled through `extra="allow"`, undocumented, set on one branch
+and not the other. `is_burning_predicted` and `fire_threshold` are named to match the
+refactored inference script so the two do not drift.
 
-**2.1 / 2.2 — the risk output had no schema.** `/predict/bushfire/classify` is the endpoint the
-rest of the product consumes, and it was the only one returning hand-built `dict`s
-(`response_model=dict`). Nothing validated it and it did not appear in the OpenAPI docs, so a
-frontend or backend integrating against it had to read the adapter source. It is now a
-declared model, which also means `/docs` describes it.
+**Why 2.5 — `forecast` stays a list of rows.** Per-cell output sliced out of the 5-D tensor is
+`[horizon, n_output_channels]`. For a 1-channel model that is `[[p]]`, not `[p]`. Keeping the
+row structure is what makes "5-D in, 5-D out consistently" visible in the payload, and it
+means a checkpoint with more than one output channel is not locked out. A flat list of
+probabilities belongs in `fire_probability`.
 
-**2.3 — the thresholds were duplicated.** `_prob_to_label_index` and a nested `prob_to_level`
-were byte-for-byte identical implementations of the same 0.2/0.4/0.6/0.8 cut points in one
-file. Two copies of a business rule drift. The behaviour is unchanged — verified exhaustively
-against the old implementation over `[-0.5, 1.5]`.
-
-**2.4 — `horizon` and `risk_labels`.** A consumer previously had to know that
-`risk_probabilities` has one entry per forecast step, and had to re-implement the level →
-label mapping (which existed only in the README) to display anything. Both are now in the
-payload.
-
-**2.5 — output dimensions were implicit.** A client had to infer horizon and channel count
-from array lengths, and had no way to know the channel order of `forecast`. `risk_score` was
-also being smuggled through `extra="allow"` — present on the gridded branch, absent
-otherwise, and undocumented. It is now declared, so it shows up in the schema and its
-gridded-only behaviour is written down.
-
-**2.6 — forward compatibility for a risk-probability ConvLSTM.** If the refined model is
-retrained to emit risk probability directly (`output_channels=1` with a sigmoid) instead of
-environmental variables, its output already has a home: set `risk_probabilities` /
-`risk_levels` on the forecast response using the same shared threshold helper, no schema
-change needed. These fields are intentionally unused today and serialise as `null`.
+**Why 2.7.** `fire_probability`, `is_burning_predicted`, `risk_levels`, `risk_labels` and
+`forecast` all index the same horizon axis. A mismatch means a postprocessing bug, and it is
+cheaper to catch it at the boundary than to debug a misaligned map later.
 
 ---
 
-## Explicitly *not* changed
+## Deferred to the refactored inference script
 
-Kept as-is so this stays a schema refactor and nothing else:
+These were found while working on the schema and belong to whoever lands the grid handling in
+the refactored `bushfire_forecaster.py`. Written down so they are not lost:
 
-- **No model, training, or checkpoint changes.** `ts_convlstm_forecaster.py`,
-  `tcn_classifier.py` and `src/training/` are untouched. No retraining, no re-serialisation.
-- **No numerical logic changed.** Same padding/truncation policy, same scaler application,
-  same forward passes, same thresholds, same `risk_score` formula.
-- **The `risk_score` asymmetry is preserved, not fixed.** The gridded branch sets
-  `risk_score = mean(forecast)`; the non-gridded branch does not. That mean is taken over
-  scaled environmental variables, so it is not a meaningful risk figure — but changing it
-  would change output values. It is documented as a known wart in the API README; deciding
-  whether to drop it or replace it belongs to a separate ticket.
-- **The 1×1 fallback path is kept.** Callers that cannot supply grid positions keep working.
-  If `grid_shape` is missing from a checkpoint's scaler bundle, gridded requests still fall
-  back to it — worth flagging to whoever regenerates checkpoints, since `grid_shape` is what
-  activates the real grid.
-- **No tightening of existing validation.** `feature_names` is still only length-checked, not
-  matched against known variable names — tightening it could reject payloads that work today.
+1. **Read the declared fields directly.** The adapter uses
+   `feature.properties.__dict__.get("grid_row")`. Now that `grid_row` / `grid_col` are declared,
+   `feature.properties.grid_row` works and is clearer.
+2. **Fill unsupplied grid cells after scaling.** `_build_grid_tensor` initialises the grid with
+   `NaN` and only fills the cells the request supplied. Training fills the gaps with the feature
+   mean *after* scaling (`scale_and_fill`); inference does not. Because a convolution mixes each
+   cell with its neighbours, **one** empty cell spreads `NaN` across the whole output. Verified:
+   a partial 2×2 grid returns `"forecast": [[NaN]]`. Note this is already handled in the
+   refactored script (`x_scaled[np.isnan(x_scaled)] = 0.0` in `_apply_scaler`) — but only when a
+   scaler is present, so a checkpoint shipped without one still leaks `NaN`.
+3. **Bounds-check grid positions.** `grid_row >= height` raises a bare `IndexError`; a clear
+   `ValueError` naming the offending cell and the model `grid_shape` is easier to act on.
+4. **Populate the output dimension fields** (`horizon`, `n_output_channels`, `grid_row`,
+   `grid_col`). They are declared but nothing sets them yet, so they serialise as `null`.
+
+---
+
+## Merge order — please read
+
+This PR makes the gridded path *reachable*, but the NaN fill lives in the refactored inference
+script. If this lands on top of the current `bushfire_forecaster.py`, a gridded request that
+does not cover every cell in `grid_shape` returns `NaN` — and `NaN` is not valid JSON.
+
+Verified against the current inference script with a partial 2×2 grid:
+
+```
+gridded path reachable : True
+forecast returned      : [[nan]]
+```
+
+Two things gate the exposure: `grid_shape` must be present in the checkpoint's scaler bundle
+(it may not be), and the request must supply only part of the grid. Safest order is **refactored
+inference script first, this PR second**. Merging this first is fine too, as long as the
+refactored script follows before anyone sends a partial gridded request.
+
+---
 
 ## Backward compatibility
 
-- Every previously valid request is still valid (only optional fields were added).
-- Every previously returned key is still returned, with the same value.
-- New optional response fields serialise as `null` when unset — additive for consumers that
-  read keys by name.
-- Requests that previously got a 422 (`grid_row`/`grid_col` present) now succeed. That is the
-  point of the ticket, but note it for anyone whose tests assert on that rejection.
+- Every previously valid request is still valid — only optional fields were added.
+- The current inference script still validates against this schema: it passes
+  `forecast=[[...], [...]]` and `risk_score=...`, both of which the schema accepts.
+- Removed output schemas (`RiskResponse` and friends) were only ever used by the TCN classifier
+  adapter, which builds raw dicts and does not import them.
+- Requests that previously got a 422 for carrying `grid_row` / `grid_col` now succeed. That is
+  the point of the ticket, but note it for anyone whose tests assert on that rejection.
 
 ## Tests
 
-- `tests/test_bushfire_schemas.py` — 26 new tests: dimension constants, threshold parity,
-  legacy payload acceptance, grid-position validation, output dimension fields, risk response
-  shape, vector alignment. Pure pydantic, so they run without torch:
-  ```bash
-  cd ai-modelling && python -m pytest tests/test_bushfire_schemas.py -q   # 26 passed
-  ```
-- Adapters exercised end-to-end (both branches) with stub models: legacy output byte-compatible,
-  gridded path produces `[horizon, n_features]` per cell with no `NaN` leakage, out-of-bounds
-  positions raise `ValueError`, classifier response keys are a superset of the old ones.
-- The three pre-existing test modules in `ai-modelling/tests/` still fail to collect
-  (`src.data.preprocessing` missing, torch/transformers not installed). Unrelated to this
-  change — none of them import the bushfire API.
+```bash
+cd ai-modelling && python -m pytest tests/test_bushfire_schemas.py -q   # 28 passed
+```
 
-## Follow-ups (not in this change)
+Covers dimension constants (including `horizon = 1`), probability → risk level thresholds,
+backward-compatible payload acceptance, grid-position validation, the fire-probability output,
+`forecast` row structure, per-horizon-step alignment, and multi-channel checkpoints. Pure
+pydantic, so it runs without torch installed.
 
-1. Regenerate the forecaster scaler bundle so `grid_shape` is present — otherwise gridded
+The three pre-existing test modules in `ai-modelling/tests/` still fail to collect
+(`src.data.preprocessing` missing, torch/transformers not installed). Unrelated — none of them
+import the bushfire API.
+
+## Follow-ups
+
+1. `model_loader.py` still defaults `horizon` to `2` and never sets `fire_threshold` or a
+   feature-name key the refactored script can read. Belongs with the checkpoint/metadata work.
+2. Regenerate the forecaster scaler bundle so `grid_shape` is present — without it, gridded
    requests silently keep using the 1×1 fallback.
-2. Decide the fate of `risk_score` on the forecast response.
-3. Reconcile `DEFAULT_FEATURE_NAMES` (7 ERA5-Land variables) with
-   `notebooks/research/InputDataSchema.md` (8 static + 10 temporal). The API follows the
-   trained checkpoint; the research doc describes the target schema. They need to converge.
+3. Retire `POST /predict/bushfire/classify` and `bushfire_classifier.py` once the single-ConvLSTM
+   refactor lands. Marked deprecated in the README for now; the route is still registered.
+4. Reconcile `DEFAULT_FEATURE_NAMES` (7 ERA5-Land variables, following the trained checkpoint)
+   with `notebooks/research/InputDataSchema.md` (8 static + 10 temporal, the target schema).
+5. Agree a single risk contract with BE/FE. They currently read `properties.risk_factor` — a
+   single int `0..5` where `1` is extreme and `5` is very low
+   (`backend/model-api/app/models/geojson_model.py`, `FireRiskMap.tsx`). This schema produces
+   `risk_levels` as a list, range `0..4`, with `0 = LOW` — the opposite direction. Piping one
+   into the other would invert the map colours.
 
 ## Rollback
 
-Revert the commit. Three files touched plus one new test file and docs; no checkpoint,
+Revert the PR. One schema file, one README, one new test file and this doc; no checkpoint,
 migration, or config change to undo.
-
-## Files touched
-
-| File | Change |
-|---|---|
-| `api/schemas/bushfire.py` | Input grid fields + validation, dimension constants, shared risk mapping, risk output schemas, documented output dimensions |
-| `api/inference/bushfire_forecaster.py` | Reads declared grid fields, NaN fill after scaling, bounds check, populates output dimension fields |
-| `api/inference/bushfire_classifier.py` | Builds typed risk response via one shared helper, duplicated thresholds removed |
-| `api/README.md` | Input/output property tables, gridded-vs-batched explanation, risk level table |
-| `tests/test_bushfire_schemas.py` | New — 26 schema tests |

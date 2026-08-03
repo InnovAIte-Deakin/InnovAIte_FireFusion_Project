@@ -6,51 +6,19 @@ from typing import Any, Optional
 import numpy as np
 import torch
 
-from api.schemas.bushfire import (
-    DEFAULT_INPUT_STEPS,
-    ForecastRequest,
-    GeoRiskFeatureOut,
-    RiskPropertiesOut,
-    RiskResponse,
-    prob_to_risk_level,
-    risk_level_label,
-)
+from api.schemas.bushfire import ForecastRequest, ForecastResponse, GeoFeatureOut, ForecastPropertiesOut, DEFAULT_FEATURE_NAMES
 from api.model_loader import LoadedModel
 
 
 from api.model_loader import list_models
 from api.inference.bushfire_forecaster import predict_bushfire_forecast
 
-
-def _build_risk_response(
-    ids: list,
-    geometries: list,
-    probs: np.ndarray,
-    model_id: str,
-) -> dict:
-    """
-    Assemble the risk FeatureCollection from a [n_samples, horizon] probability matrix.
-
-    Thresholds live in api.schemas.bushfire.prob_to_risk_level so the forecaster and
-    classifier cannot drift apart.
-    """
-    features_out = []
-    for i, fid in enumerate(ids):
-        prob_vec = [float(p) for p in probs[i].tolist()]
-        level_vec = [prob_to_risk_level(p) for p in prob_vec]
-        props = RiskPropertiesOut(
-            id=fid,
-            risk_probabilities=prob_vec,
-            risk_levels=level_vec,
-            risk_labels=[risk_level_label(lvl) for lvl in level_vec],
-            horizon=len(prob_vec),
-            model_id=model_id,
-        )
-        features_out.append(
-            GeoRiskFeatureOut(type="Feature", geometry=geometries[i], properties=props)
-        )
-
-    return RiskResponse(type="FeatureCollection", features=features_out).model_dump(mode="json")
+def _prob_to_label_index(prob: float) -> int:
+    if prob < 0.2: return 0
+    if prob < 0.4: return 1
+    if prob < 0.6: return 2
+    if prob < 0.8: return 3
+    return 4
 
 def predict_bushfire_classify(geojson_dict: dict, bundle: LoadedModel) -> dict:
     request = ForecastRequest(**geojson_dict)
@@ -68,8 +36,9 @@ def predict_bushfire_classify(geojson_dict: dict, bundle: LoadedModel) -> dict:
         for f in forecast_fc["features"]
     }
 
-    lookback = bundle.metadata.get("lookback_steps", DEFAULT_INPUT_STEPS)
+    lookback = bundle.metadata.get("lookback_steps", 60)
     horizon = list(fc_map.values())[0].shape[0]  # e.g. 2
+    outputs = []
 
     observations_list = []
     ids = []
@@ -115,7 +84,23 @@ def predict_bushfire_classify(geojson_dict: dict, bundle: LoadedModel) -> dict:
         probs = probs.squeeze(-1)
 
     # Build GeoJSON response: per-feature risk_probabilities and risk_levels (ints)
-    return _build_risk_response(ids, geometries, probs, bundle.model_id)
+    out_features = []
+    for i, fid in enumerate(ids):
+        prob_vec = probs[i].tolist()  # length = horizon
+        label_vec = [_prob_to_label_index(p) for p in prob_vec]
+        props = {
+            "id": fid,
+            "risk_probabilities": prob_vec,
+            "risk_levels": label_vec,
+            "model_id": bundle.model_id,
+        }
+        out_features.append({
+            "type": "Feature",
+            "geometry": geometries[i],
+            "properties": props,
+        })
+
+    return {"type": "FeatureCollection", "features": out_features}
 
 
 def predict_bushfire_classify_from_forecast(
@@ -139,7 +124,7 @@ def predict_bushfire_classify_from_forecast(
             fid = str(idx)
         fc_map[fid] = np.array(props["forecast"], dtype=np.float32)
 
-    lookback = int(bundle.metadata.get("lookback_steps", DEFAULT_INPUT_STEPS))
+    lookback = int(bundle.metadata.get("lookback_steps", 60))
     # horizon from forecast (assume all have same horizon)
     sample_fc = next(iter(fc_map.values()), None)
     if sample_fc is None:
@@ -217,4 +202,28 @@ def predict_bushfire_classify_from_forecast(
             else:
                 raise RuntimeError("unexpected classifier output shape")
 
-    return _build_risk_response(ids, geometries, probs, bundle.model_id)
+    # map probabilities -> discrete risk levels (0..4) per your thresholds
+    def prob_to_level(p: float) -> int:
+        if p < 0.2:
+            return 0
+        if p < 0.4:
+            return 1
+        if p < 0.6:
+            return 2
+        if p < 0.8:
+            return 3
+        return 4
+
+    features_out = []
+    for i, fid in enumerate(ids):
+        prob_vec = probs[i].tolist()
+        level_vec = [prob_to_level(float(p)) for p in prob_vec]
+        props = {
+            "id": fid,
+            "risk_probabilities": prob_vec,
+            "risk_levels": level_vec,
+            "model_id": bundle.model_id,
+        }
+        features_out.append({"type": "Feature", "geometry": geometries[i], "properties": props})
+
+    return {"type": "FeatureCollection", "features": features_out}

@@ -6,15 +6,7 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import torch
 
-from api.schemas.bushfire import (
-    ForecastRequest,
-    ForecastResponse,
-    GeoFeatureOut,
-    ForecastPropertiesOut,
-    DEFAULT_FEATURE_NAMES,
-    DEFAULT_HORIZON,
-    DEFAULT_INPUT_STEPS,
-)
+from api.schemas.bushfire import ForecastRequest, ForecastResponse, GeoFeatureOut, ForecastPropertiesOut, DEFAULT_FEATURE_NAMES
 from api.model_loader import LoadedModel
 
 
@@ -36,11 +28,10 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
     observations_list = []
     feature_metas = []
     
-    input_steps = bundle.metadata.get("input_steps", DEFAULT_INPUT_STEPS)
-    horizon = bundle.metadata.get("horizon", DEFAULT_HORIZON)
+    input_steps = bundle.metadata.get("input_steps", 60)
+    horizon = bundle.metadata.get("horizon", 2)
     grid_shape = bundle.metadata.get("grid_shape")  # (height, width) if gridded
-    feature_names = bundle.metadata.get("features") or DEFAULT_FEATURE_NAMES
-
+    
     # Collect observations from each feature
     for feature in request.features:
         obs = np.array(feature.properties.observations, dtype=np.float32)  # [seq_len, n_features]
@@ -59,8 +50,8 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
         feature_metas.append({
             "id": feature.properties.id,
             "geometry": feature.geometry,
-            "grid_row": feature.properties.grid_row,
-            "grid_col": feature.properties.grid_col,
+            "grid_row": feature.properties.__dict__.get("grid_row"),
+            "grid_col": feature.properties.__dict__.get("grid_col"),
         })
     
     # Determine if we have grid coordinates
@@ -76,10 +67,7 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
     # Apply scaler if available
     if bundle.scaler is not None:
         x_input = _apply_scaler(x_input, bundle.scaler)
-
-    if np.isnan(x_input).any():
-        x_input = np.nan_to_num(x_input, nan=0.0)
-
+    
     # Convert to tensor and move to device
     x_tensor = torch.from_numpy(x_input).float().to(bundle.device)
     
@@ -101,7 +89,7 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
     
     # Postprocess to GeoJSON
     output_features = _postprocess_forecasts(
-        forecasts, feature_metas, has_grid_coords, grid_shape, horizon, bundle.model_id, feature_names
+        forecasts, feature_metas, has_grid_coords, grid_shape, horizon, bundle.model_id
     )
     
     response = ForecastResponse(
@@ -140,11 +128,6 @@ def _build_grid_tensor(
         row = meta.get("grid_row")
         col = meta.get("grid_col")
         if row is not None and col is not None:
-            if row >= height or col >= width:
-                raise ValueError(
-                    f"grid position (grid_row={row}, grid_col={col}) is outside the model "
-                    f"grid_shape {grid_shape}"
-                )
             grid[:, row, col, :] = obs
     
     # Add batch dimension
@@ -182,11 +165,10 @@ def _postprocess_forecasts(
     grid_shape: Optional[Tuple[int, int]],
     horizon: int,
     model_id: str,
-    feature_names: Optional[list[str]] = None,
 ) -> list[GeoFeatureOut]:
     """
     Convert forecast arrays back to GeoJSON features.
-
+    
     Args:
         forecasts: [batch, horizon, height, width, n_features] or [n_samples, horizon, n_features]
         feature_metas: List of feature metadata
@@ -194,18 +176,12 @@ def _postprocess_forecasts(
         grid_shape: (height, width) if gridded
         horizon: Forecast horizon
         model_id: Model ID for response
-        feature_names: Channel order of the model output, echoed back to the client
-
+    
     Returns:
         List of GeoFeatureOut
     """
     output_features = []
-
-    n_output_channels = int(forecasts.shape[-1])
-    output_feature_names = (
-        list(feature_names) if feature_names and len(feature_names) == n_output_channels else None
-    )
-
+    
     if has_grid_coords and grid_shape and len(forecasts.shape) == 5:
         # Gridded forecasts: [batch, horizon, height, width, n_features]
         # Extract per-feature forecasts from grid
@@ -216,15 +192,10 @@ def _postprocess_forecasts(
                 # Extract this cell's forecast [horizon, n_features]
                 forecast_vals = forecasts[0, :, row, col, :].tolist()
                 risk_score = float(np.mean(forecast_vals))  # Aggregate across features and time
-
+                
                 props_out = ForecastPropertiesOut(
                     id=meta["id"],
                     forecast=forecast_vals,
-                    horizon=len(forecast_vals),
-                    n_output_channels=n_output_channels,
-                    output_feature_names=output_feature_names,
-                    grid_row=row,
-                    grid_col=col,
                     risk_score=risk_score,
                     model_id=model_id,
                 )
@@ -238,13 +209,11 @@ def _postprocess_forecasts(
         # Non-gridded batch forecasts: [n_samples, horizon, n_features]
         for i, meta in enumerate(feature_metas):
             forecast_vals = forecasts[i, :, :].tolist()  # [horizon, n_features]
-
+            risk_score = float(np.mean(forecast_vals))
+            
             props_out = ForecastPropertiesOut(
                 id=meta["id"],
                 forecast=forecast_vals,
-                horizon=len(forecast_vals),
-                n_output_channels=n_output_channels,
-                output_feature_names=output_feature_names,
                 model_id=model_id,
             )
             feature_out = GeoFeatureOut(

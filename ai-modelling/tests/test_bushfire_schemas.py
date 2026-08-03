@@ -12,14 +12,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from api.schemas.bushfire import (
     DEFAULT_FEATURE_NAMES,
+    DEFAULT_FIRE_THRESHOLD,
     DEFAULT_HORIZON,
     DEFAULT_INPUT_STEPS,
     N_DEFAULT_FEATURES,
     RISK_LEVEL_LABELS,
     ForecastPropertiesOut,
     ForecastRequest,
-    RiskPropertiesOut,
-    RiskResponse,
+    ForecastResponse,
     prob_to_risk_level,
     risk_level_label,
 )
@@ -49,10 +49,12 @@ def collection(*properties):
 def test_dimension_constants_match_training_config():
     assert N_DEFAULT_FEATURES == len(DEFAULT_FEATURE_NAMES) == 7
     assert DEFAULT_INPUT_STEPS == 60
-    assert DEFAULT_HORIZON == 2
+    # Single-model ConvLSTM predicts one timestep ahead.
+    assert DEFAULT_HORIZON == 1
+    assert DEFAULT_FIRE_THRESHOLD == 0.5
 
 
-# --- risk level mapping ----------------------------------------------------
+# --- fire probability -> risk level ---------------------------------------
 @pytest.mark.parametrize(
     "prob,level",
     [(0.0, 0), (0.19, 0), (0.2, 1), (0.39, 1), (0.4, 2), (0.59, 2),
@@ -76,6 +78,7 @@ def test_accepts_payload_without_grid_position():
 
 
 def test_accepts_grid_position():
+    """Grid indices are what let the adapter rebuild the 5-D ConvLSTM input tensor."""
     req = ForecastRequest(**collection(
         {"id": "c00", "observations": observations(), "grid_row": 0, "grid_col": 0},
         {"id": "c01", "observations": observations(), "grid_row": 0, "grid_col": 1},
@@ -133,64 +136,70 @@ def test_schema_version_is_optional_and_accepted():
     assert req.schema_version == "2.0.0"
 
 
-# --- output schemas --------------------------------------------------------
-def test_forecast_properties_reports_output_dimensions():
+# --- output schema ---------------------------------------------------------
+def test_fire_probability_output():
+    """Primary output of the single-model ConvLSTM: probability per horizon step."""
+    prob = 0.85
     props = ForecastPropertiesOut(
         id="cell-001",
-        forecast=[[1.0] * N_DEFAULT_FEATURES, [2.0] * N_DEFAULT_FEATURES],
-        horizon=2,
-        n_output_channels=N_DEFAULT_FEATURES,
-        output_feature_names=DEFAULT_FEATURE_NAMES,
-        model_id="bushfire-forecaster-v1",
+        fire_probability=[prob],
+        is_burning_predicted=[prob > DEFAULT_FIRE_THRESHOLD],
+        fire_threshold=DEFAULT_FIRE_THRESHOLD,
+        risk_score=prob,
+        risk_levels=[prob_to_risk_level(prob)],
+        risk_labels=[risk_level_label(prob_to_risk_level(prob))],
+        forecast=[[prob]],
+        horizon=DEFAULT_HORIZON,
+        n_output_channels=1,
+        grid_row=3,
+        grid_col=7,
+        model_id="bushfire-convlstm-v1",
     )
     dumped = props.model_dump(mode="json")
-    assert dumped["horizon"] == 2
-    assert dumped["n_output_channels"] == N_DEFAULT_FEATURES
-    assert dumped["output_feature_names"] == DEFAULT_FEATURE_NAMES
-    # Risk fields exist for a single-channel (risk probability) model but stay unset here.
-    assert dumped["risk_probabilities"] is None
-    assert dumped["risk_levels"] is None
+    assert dumped["fire_probability"] == [0.85]
+    assert dumped["is_burning_predicted"] == [True]
+    assert dumped["risk_levels"] == [4]
+    assert dumped["risk_labels"] == ["HIGH"]
+    assert dumped["horizon"] == 1 and dumped["n_output_channels"] == 1
+    assert dumped["grid_row"] == 3 and dumped["grid_col"] == 7
 
 
-def test_forecast_properties_can_carry_risk_probability_directly():
-    """A refined single-channel ConvLSTM can be served through the forecast response."""
+def test_forecast_row_is_one_horizon_step():
+    """5-D model output sliced per cell is [horizon, n_output_channels] — a row per step."""
+    props = ForecastPropertiesOut(forecast=[[0.15], [0.85]], horizon=2, n_output_channels=1)
+    assert props.forecast == [[0.15], [0.85]]
+
+
+def test_flat_forecast_rejected():
+    """A flat list of probabilities belongs in fire_probability, not forecast."""
+    with pytest.raises(ValueError):
+        ForecastPropertiesOut(forecast=[0.15, 0.85])
+
+
+def test_per_horizon_step_vectors_must_be_aligned():
+    with pytest.raises(ValueError, match="same length"):
+        ForecastPropertiesOut(fire_probability=[0.1, 0.2], is_burning_predicted=[False])
+    with pytest.raises(ValueError, match="same length"):
+        ForecastPropertiesOut(fire_probability=[0.1], risk_levels=[0], risk_labels=["LOW", "LOW"])
+
+
+def test_multi_channel_checkpoint_still_serves():
+    """A checkpoint with more than one output channel is not locked out by the schema."""
     props = ForecastPropertiesOut(
-        id="cell-001",
-        forecast=[[0.15], [0.85]],
-        horizon=2,
-        n_output_channels=1,
-        risk_probabilities=[0.15, 0.85],
-        risk_levels=[prob_to_risk_level(0.15), prob_to_risk_level(0.85)],
-        model_id="bushfire-forecaster-v2",
+        forecast=[[1.0, 2.0, 3.0]], horizon=1, n_output_channels=3
     )
-    assert props.risk_levels == [0, 4]
+    assert props.n_output_channels == 3
 
 
-def test_risk_response_shape():
-    resp = RiskResponse(
+def test_response_wraps_features():
+    resp = ForecastResponse(
         type="FeatureCollection",
         features=[{
             "type": "Feature",
             "geometry": {"type": "Point", "coordinates": [144.9631, -37.8136]},
-            "properties": {
-                "id": "cell-001",
-                "risk_probabilities": [0.15, 0.85],
-                "risk_levels": [0, 4],
-                "risk_labels": ["LOW", "HIGH"],
-                "horizon": 2,
-                "model_id": "bushfire-classifier-v1",
-            },
+            "properties": {"id": "cell-001", "fire_probability": [0.15], "risk_levels": [0]},
         }],
     )
     props = resp.model_dump(mode="json")["features"][0]["properties"]
-    # Keys the pre-refactor endpoint already returned must all still be present.
-    assert {"id", "risk_probabilities", "risk_levels", "model_id"} <= set(props)
-    assert props["risk_labels"] == ["LOW", "HIGH"]
-    assert props["horizon"] == 2
-
-
-def test_risk_vectors_must_be_aligned():
-    with pytest.raises(ValueError, match="same length"):
-        RiskPropertiesOut(risk_probabilities=[0.1, 0.2], risk_levels=[0])
-    with pytest.raises(ValueError, match="same length"):
-        RiskPropertiesOut(risk_probabilities=[0.1], risk_levels=[0], risk_labels=["LOW", "LOW"])
+    assert props["fire_probability"] == [0.15]
+    assert props["risk_levels"] == [0]

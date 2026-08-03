@@ -1,15 +1,19 @@
 """
-Bushfire I/O schemas (GeoJSON) for the ConvLSTM forecaster and TCN risk classifier.
+Bushfire I/O schemas (GeoJSON) for the single-model ConvLSTM fire predictor.
+
+The ConvLSTM is spatiotemporal and operates on 5-D tensors end to end:
+
+    input   [batch, seq_len, height, width, n_features]
+    output  [batch, horizon, height, width, n_output_channels]
 
 INPUT — GeoJSON FeatureCollection, one Feature per grid cell
     properties.observations : [seq_len, n_features] float matrix, channel order given by
                               ``feature_names`` (falls back to DEFAULT_FEATURE_NAMES)
-    properties.grid_row/col : optional grid indices. When present — and the loaded model
-                              bundle declares ``grid_shape`` — the inference adapter builds
-                              the 5-D tensor the refined ConvLSTM expects:
-                              [batch, seq_len, height, width, n_features].
-                              When absent, cells are batched as
-                              [n_samples, seq_len, 1, 1, n_features] (spatial context lost).
+    properties.grid_row/col : grid indices of the cell. Required to reassemble the real
+                              5-D grid, so neighbouring cells inform each other. Without
+                              them the adapter can only build a degenerate 1x1 grid
+                              ([n_samples, seq_len, 1, 1, n_features]) and the spatial
+                              context the ConvLSTM was trained on is lost.
 
 Data variables (default channel order, 7 channels, ERA5-Land):
     0 skin_temperature_c                      °C
@@ -21,9 +25,13 @@ Data variables (default channel order, 7 channels, ERA5-Land):
     6 v_component_of_wind_10m                 m/s (northward)
 
 OUTPUT — GeoJSON FeatureCollection, one Feature per input cell
-    forecast            : [horizon, n_output_channels] — forecast environmental variables
-    risk_probabilities  : [horizon] bushfire risk probability in [0, 1]
-    risk_levels         : [horizon] discrete level 0..4 (see RISK_LEVEL_THRESHOLDS)
+    fire_probability     : [horizon] fire-occurrence probability in [0, 1]
+    is_burning_predicted : [horizon] fire_probability > fire_threshold
+    risk_score           : mean fire_probability across the horizon
+    risk_levels          : [horizon] discrete level 0..4 (see RISK_LEVEL_THRESHOLDS)
+    forecast             : [horizon, n_output_channels] raw model output, one row per
+                           horizon step. For the fire-probability model
+                           n_output_channels == 1, so a row is [p].
 
 Keep DEFAULT_FEATURE_NAMES, DEFAULT_INPUT_STEPS and DEFAULT_HORIZON in sync with
 ``src/training/ts_convlstm_forecaster_train.py``.
@@ -33,7 +41,6 @@ from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from typing import Literal
 
-# Default feature order used by the forecaster model (keep in-sync with model code)
 DEFAULT_FEATURE_NAMES = [
     "skin_temperature_c",
     "soil_temperature_level_1_c",
@@ -49,16 +56,16 @@ DEFAULT_FEATURE_NAMES = [
 # ships without them.
 N_DEFAULT_FEATURES = len(DEFAULT_FEATURE_NAMES)
 DEFAULT_INPUT_STEPS = 60
-DEFAULT_HORIZON = 2
+DEFAULT_HORIZON = 1
 
-# Bushfire risk probability -> discrete level. Single source of truth for the mapping
-# that was previously duplicated inside the classifier adapter.
+DEFAULT_FIRE_THRESHOLD = 0.5
+
 RISK_LEVEL_THRESHOLDS = (0.2, 0.4, 0.6, 0.8)
 RISK_LEVEL_LABELS = ("LOW", "MEDIUM_LOW", "MEDIUM", "MEDIUM_HIGH", "HIGH")
 
 
 def prob_to_risk_level(prob: float) -> int:
-    """Map a probability in [0, 1] to a discrete risk level 0..4."""
+    """Map a fire probability in [0, 1] to a discrete risk level 0..4."""
     for level, threshold in enumerate(RISK_LEVEL_THRESHOLDS):
         if prob < threshold:
             return level
@@ -72,6 +79,7 @@ def risk_level_label(level: int) -> str:
     return "UNKNOWN"
 
 
+# ---- Input schemas ----
 class FeatureTimeseriesPropertiesIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -79,7 +87,7 @@ class FeatureTimeseriesPropertiesIn(BaseModel):
     # observations: list of timesteps; each timestep is list of feature values in model order
     observations: List[List[float]] = Field(..., description="[[f1...fN], [f1...fN], ...] (seq_len × n_features)")
     timestamps: Optional[List[datetime]] = Field(None, description="ISO8601 timestamps aligned with observations")
-   
+    
     grid_row: Optional[int] = Field(None, ge=0, description="Row index (height axis) in the model grid")
     grid_col: Optional[int] = Field(None, ge=0, description="Column index (width axis) in the model grid")
 
@@ -143,22 +151,51 @@ class ForecastRequest(BaseModel):
 
 # ---- Output schemas ----
 class ForecastPropertiesOut(BaseModel):
+    """Fire prediction for one grid cell, one value per horizon step."""
+
     model_config = ConfigDict(extra="allow")
 
     id: Optional[str] = None
-    # forecast: list of timesteps; each timestep is list of feature values (horizon × n_features)
-    forecast: List[List[float]]
+    fire_probability: Optional[List[float]] = Field(
+        None, description="Fire-occurrence probability in [0, 1], one per horizon step"
+    )
+    is_burning_predicted: Optional[List[bool]] = Field(
+        None, description="fire_probability > fire_threshold, one per horizon step"
+    )
+    fire_threshold: Optional[float] = Field(None, description="Threshold used for is_burning_predicted")
+    risk_score: Optional[float] = Field(None, description="Mean fire_probability across the horizon")
+    risk_levels: Optional[List[int]] = Field(None, description="Discrete risk level 0..4 per horizon step")
+    risk_labels: Optional[List[str]] = Field(None, description="Label per risk level (see RISK_LEVEL_LABELS)")
+    
+    forecast: Optional[List[List[float]]] = Field(
+        None, description="[horizon, n_output_channels] raw model output, one row per horizon step"
+    )
     forecast_timestamps: Optional[List[datetime]] = None
-    horizon: Optional[int] = Field(None, description="Number of forecast timesteps returned")
-    n_output_channels: Optional[int] = Field(None, description="Number of values per forecast timestep")
-    output_feature_names: Optional[List[str]] = Field(None, description="Channel order of each forecast timestep")
+
+    horizon: Optional[int] = Field(None, description="Number of predicted timesteps returned")
+    n_output_channels: Optional[int] = Field(None, description="Number of values per predicted timestep")
+    
     grid_row: Optional[int] = None
     grid_col: Optional[int] = None
-    risk_score: Optional[float] = None
-    
-    risk_probabilities: Optional[List[float]] = Field(None, description="Bushfire risk probability per horizon step")
-    risk_levels: Optional[List[int]] = Field(None, description="Discrete risk level 0..4 per horizon step")
     model_id: Optional[str] = None
+
+    @model_validator(mode="after")
+    def validate_aligned_vectors(self):
+        """Every per-horizon-step vector must describe the same number of steps."""
+        lengths = {
+            name: len(value)
+            for name, value in (
+                ("fire_probability", self.fire_probability),
+                ("is_burning_predicted", self.is_burning_predicted),
+                ("risk_levels", self.risk_levels),
+                ("risk_labels", self.risk_labels),
+                ("forecast", self.forecast),
+            )
+            if value is not None
+        }
+        if len(set(lengths.values())) > 1:
+            raise ValueError(f"per-horizon-step fields must have the same length, got {lengths}")
+        return self
 
 
 class GeoFeatureOut(BaseModel):
@@ -172,38 +209,3 @@ class ForecastResponse(BaseModel):
 
     type: Literal["FeatureCollection"]
     features: List[GeoFeatureOut]
-
-
-class RiskPropertiesOut(BaseModel):
-    """Bushfire risk output for one grid cell, one probability per horizon step."""
-
-    model_config = ConfigDict(extra="allow")
-
-    id: Optional[str] = None
-    risk_probabilities: List[float] = Field(..., description="Bushfire risk probability per horizon step")
-    risk_levels: List[int] = Field(..., description="Discrete risk level 0..4 per horizon step")
-    risk_labels: Optional[List[str]] = Field(None, description="Label per risk level (see RISK_LEVEL_LABELS)")
-    horizon: Optional[int] = Field(None, description="Number of forecast steps scored")
-    model_id: Optional[str] = None
-
-    @model_validator(mode="after")
-    def validate_aligned_vectors(self):
-        n = len(self.risk_probabilities)
-        if len(self.risk_levels) != n:
-            raise ValueError("risk_levels must have the same length as risk_probabilities")
-        if self.risk_labels is not None and len(self.risk_labels) != n:
-            raise ValueError("risk_labels must have the same length as risk_probabilities")
-        return self
-
-
-class GeoRiskFeatureOut(BaseModel):
-    type: Literal["Feature"]
-    geometry: Dict[str, Any]
-    properties: RiskPropertiesOut
-
-
-class RiskResponse(BaseModel):
-    model_config = ConfigDict(extra="allow")
-
-    type: Literal["FeatureCollection"]
-    features: List[GeoRiskFeatureOut]
