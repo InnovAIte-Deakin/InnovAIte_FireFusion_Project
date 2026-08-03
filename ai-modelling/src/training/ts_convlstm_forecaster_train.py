@@ -213,8 +213,7 @@ def predict(model, dataloader, device):
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
             X_batch = X_batch.to(device)
-            # forward() returns raw logits; apply sigmoid here to get per-cell fire probabilities in [0, 1] for evaluation
-            preds = torch.sigmoid(model(X_batch)).cpu().numpy()
+            preds = model.predict(X_batch).cpu().numpy()
             predictions.append(preds)
             actuals.append(y_batch.numpy())
     return np.concatenate(predictions), np.concatenate(actuals)
