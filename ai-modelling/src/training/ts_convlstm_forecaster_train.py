@@ -37,6 +37,8 @@ EPOCHS = 50
 LEARNING_RATE = 0.001
 
 TRAIN_VAL_RATIO = 0.9
+FIRE_THRESHOLD = 0.5
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Environmental features
@@ -446,7 +448,7 @@ def main():
     10. Evaluate (pending — classification metrics not yet implemented)
     11. Save trained model, scaler and inference metadata
     """
-    os.makedirs("models", exist_ok=True)
+    os.makedirs("src/models/bushfire/checkpoints", exist_ok=True)
     print("Using device:", DEVICE)
     
     print("STEP 1: Load Gridded Data")
@@ -684,6 +686,10 @@ def main():
             "input_steps": INPUT_STEPS,
             "horizon": HORIZON,
             "grid_shape": (grid_height, grid_width),
+            # Provisional. Inference falls back to 0.5 if absent, so this is written
+            # explicitly to make the value a recorded decision rather than a default.
+            # To be set from validation once classification metrics land.
+            "fire_threshold": FIRE_THRESHOLD,
         },
         SCALER_SAVE_PATH
     )
