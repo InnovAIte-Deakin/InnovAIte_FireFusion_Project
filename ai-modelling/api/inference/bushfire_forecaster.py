@@ -6,7 +6,7 @@ from typing import Any, Optional, Tuple
 import numpy as np
 import torch
 
-from api.schemas.bushfire import ForecastRequest, ForecastResponse, GeoFeatureOut, ForecastPropertiesOut, RiskPropertiesOut, DEFAULT_FEATURE_NAMES
+from api.schemas.bushfire import ForecastRequest, ForecastResponse, GeoFeatureOut, ForecastPropertiesOut, DEFAULT_FEATURE_NAMES
 from api.model_loader import LoadedModel
 
 
@@ -205,12 +205,18 @@ def _postprocess_forecasts(
                 risk_score = float(np.mean(cell_probs))
                 is_burning_predicted = [p > fire_threshold for p in cell_probs]
                 
-                props_out = RiskPropertiesOut(
+                props_out = ForecastPropertiesOut(
                     id=meta["id"],
-                    forecast=cell_probs,
+                    fire_probability=cell_probs,
+                    forecast=[[p] for p in cell_probs],
                     risk_score=risk_score,
                     is_burning_predicted=is_burning_predicted,
-                    model_id=model_id
+                    fire_threshold=fire_threshold,
+                    horizon=horizon,
+                    n_output_channels=1,
+                    model_id=model_id,
+                    grid_row=row,
+                    grid_col=col,
                 )
                 feature_out = GeoFeatureOut(
                     type="Feature",
@@ -225,12 +231,18 @@ def _postprocess_forecasts(
             risk_score = float(np.mean(cell_probs))
             is_burning_predicted = [p > fire_threshold for p in cell_probs]
             
-            props_out = RiskPropertiesOut(
+            props_out = ForecastPropertiesOut(
                 id=meta["id"],
-                forecast=cell_probs,
+                fire_probability=cell_probs,
+                forecast=[[p] for p in cell_probs],
                 risk_score=risk_score,
                 is_burning_predicted=is_burning_predicted,
-                model_id=model_id
+                fire_threshold=fire_threshold,
+                horizon=horizon,
+                n_output_channels=1,
+                model_id=model_id,
+                grid_row=meta.get("grid_row"),
+                grid_col=meta.get("grid_col"),
             )
             feature_out = GeoFeatureOut(
                 type="Feature",
