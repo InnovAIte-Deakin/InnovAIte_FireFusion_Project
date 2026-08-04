@@ -1,9 +1,9 @@
 """
 2D ConvLSTM-based Spatiotemporal Forecaster
  
-Defines a 2D ConvLSTM architecture for forecasting environmental variables
-across gridded spatial domains. Supports configurable hidden sizes, dropout,
-and flexible input/output channels.
+Defines a 2D ConvLSTM architecture that uses environmental variables to
+forecast the probability that each grid cell is burning at the next timestep. Supports configurable input channels, hidden sizes, and dropout, with a
+single output channel for the 'is burning' probability.
  
 Architecture:
     - Layer 1: ConvLSTM2d (input_channels -> hidden_size_1)
@@ -26,14 +26,14 @@ class ForecasterConfig:
     Attributes:
         input_channels (int): Number of input features per grid cell.
         horizon (int): Number of future timesteps to forecast.
-        output_channels (Optional[int]): Number of output features. If None, defaults to input_channels.
+        output_channels (int): Number of output features. Defaults to 1 for the 'is burning' output.
         hidden_size_1 (int): Hidden dimension of first ConvLSTM2d layer.
         hidden_size_2 (int): Hidden dimension of second ConvLSTM2d layer.
         dropout (float): Dropout probability applied after each ConvLSTM2d layer.
     """
     input_channels: int
-    horizon: int
-    output_channels: Optional[int] = None
+    horizon: int = 1
+    output_channels: int = 1
     hidden_size_1: int = 32
     hidden_size_2: int = 16
     dropout: float = 0.2
@@ -82,14 +82,14 @@ class MultivariateTSForecaster(nn.Module):
     """
     2D ConvLSTM spatiotemporal forecasting model.
     
-    Learns patterns from gridded historical sequences to predict future values
-    across each grid cell. Uses two stacked ConvLSTM2d layers with dropout regularization.
+    Learns patterns from gridded historical sequences to predict the probability
+    that each grid cell is burning at the next timestep. Uses two stacked ConvLSTM2d layers with dropout regularization.
 
     Inputs:
         x: [batch_size, seq_len, height, width, input_channels]
 
     Outputs:
-        y_hat: [batch_size, horizon, height, width, output_channels]
+        y_hat: Raw logits of shape [batch_size, horizon, height, width, output_channels]
     """
     def __init__(self, config: ForecasterConfig) -> None:
         """
@@ -102,7 +102,7 @@ class MultivariateTSForecaster(nn.Module):
             config (ForecasterConfig): Model configuration specifying
                 - input_channels: Number of input features
                 - horizon: Forecast horizon
-                - output_channels: Number of output features (defaults to input_channels)
+                - output_channels: Number of output channels (defaults to 1)
                 - hidden_size_1: Hidden dimension of first ConvLSTM2d
                 - hidden_size_2: Hidden dimension of second ConvLSTM2d
                 - dropout: Dropout probability
@@ -111,7 +111,7 @@ class MultivariateTSForecaster(nn.Module):
         self.config = config
         self.input_channels = config.input_channels
         self.horizon = config.horizon
-        self.output_channels = config.output_channels or config.input_channels
+        self.output_channels = config.output_channels
         
         self.convlstm1 = ConvLSTMCell(
             input_channels=self.input_channels,
@@ -136,7 +136,7 @@ class MultivariateTSForecaster(nn.Module):
         Forward pass through the 2D ConvLSTM forecaster.
         
         Processes input grid sequences through two stacked ConvLSTM2d layers,
-        applies dropout, and projects to forecast horizon.
+        applies dropout, and projects to projects to the configured prediction horizon.
         
         Processing Steps:
             1. Reshape input
@@ -151,7 +151,7 @@ class MultivariateTSForecaster(nn.Module):
             x (Tensor): Input grid sequence of shape [batch_size, seq_len, height, width, input_channels]
         
         Outputs:
-            Tensor: Forecast grid of shape [batch_size, horizon, height, width, output_channels]
+            y_hat (Tensor): Raw 'is burning' logits of shape [batch_size, 1, height, width, 1].
         """
         batch_size, seq_len, grid_height, grid_width, _ = x.shape
     
@@ -194,11 +194,12 @@ class MultivariateTSForecaster(nn.Module):
             x (Tensor): Input grid sequence of shape [batch_size, seq_len, height, width, input_channels]
         
         Outputs:
-            Tensor: Forecast grid of shape [batch_size, horizon, height, width, output_channels]
+            y_hat (Tensor): Burning probabilities between 0 and 1 with shape [batch_size, 1, height, width, 1].
         """
         self.eval()
         with torch.no_grad():
-            return self.forward(x)
+            logits = self.forward(x)
+            return torch.sigmoid(logits)
 
     def save(self, path: str) -> None:
         """
