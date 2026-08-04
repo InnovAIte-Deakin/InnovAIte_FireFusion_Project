@@ -1,7 +1,12 @@
 """
-Training script for ConvLSTM with data already in gridded format.
+Training script for the ConvLSTM bushfire classifier.
 
-Assumes data is loaded as: [n_timesteps, height, width, n_features]
+Loads two aligned gridded arrays:
+  - weather/environmental features [n_timesteps, height, width, n_features]
+  - binary is_burning labels       [n_timesteps, height, width, 1]
+
+The model takes a sequence of weather grids as input and predicts the
+probability that each cell is burning at the next timestep.
 """
 
 import os
@@ -21,14 +26,19 @@ DATA_PATH = "src/data/bushfire/forecaster_test_data.csv"
 MODEL_SAVE_PATH = "src/models/bushfire/checkpoints/convlstm_forecaster.pth"
 SCALER_SAVE_PATH = "src/models/bushfire/checkpoints/convlstm_scaler.pkl"
 
+LABEL_PATH = "src/data/bushfire/historic_fire/unified_fire_data/satellite_detections_within_fires.csv"
+LABEL_CACHE = "src/data/bushfire/label_grid_cache.npy"
+
 # Model hyperparameters
 INPUT_STEPS = 60
-HORIZON = 2
+HORIZON = 1
 BATCH_SIZE = 8
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
 TRAIN_VAL_RATIO = 0.9
+FIRE_THRESHOLD = 0.5
+
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Environmental features
@@ -52,6 +62,11 @@ class MaskedMSELoss(nn.Module):
  
     Inputs:
         valid_mask (Tensor): Boolean [H, W] tensor — True where cells are valid.
+    
+    Note: retained as a placeholder from the regression architecture. The model
+    now outputs raw logits for binary classification, so this is not an
+    appropriate training objective — to be replaced with a masked
+    BCEWithLogitsLoss using the computed pos_weight.
     """
     def __init__(self, valid_mask: torch.Tensor) -> None:
         super().__init__()
@@ -78,58 +93,55 @@ class MaskedMSELoss(nn.Module):
 class GriddedTimeSeriesDataset(Dataset):
     """
     Dataset that generates sequences on the fly.
+
+    X is drawn from the weather/environmental grid, y from the binary
+    is_burning label grid, so inputs and targets are separate arrays.
     """
-    def __init__(self, data_grid, input_steps, horizon):
+    def __init__(self, feature_grid, label_grid, input_steps, horizon):
         """
         Inputs:
-            data_grid (np.ndarray): [n_timesteps, height, width, n_features]
+            feature_grid (np.ndarray): [n_timesteps, height, width, n_features]
+            label_grid (np.ndarray): [n_timesteps, height, width, 1]
             input_steps (int): number of input timesteps
             horizon (int): number of output timesteps
         """
-        self.data = torch.tensor(data_grid, dtype=torch.float32)
+        self.features = torch.tensor(feature_grid, dtype=torch.float32)
+        self.labels = torch.tensor(label_grid, dtype=torch.float32)
         self.input_steps = input_steps
         self.horizon = horizon
 
     def __len__(self):
-        return len(self.data) - self.input_steps - self.horizon + 1
+        return len(self.features) - self.input_steps - self.horizon + 1
 
     def __getitem__(self, idx):
-        X = self.data[idx : idx + self.input_steps]
-        y = self.data[idx + self.input_steps : idx + self.input_steps + self.horizon]
+        X = self.features[idx : idx + self.input_steps]
+        y = self.labels[idx + self.input_steps : idx + self.input_steps + self.horizon]
         return X, y
 
-def create_grid_sequences(data_grid, input_steps, horizon):
+def create_grid_sequences(feature_grid, label_grid, input_steps, horizon):
     """
     Create sliding-window sequences from gridded spatiotemporal data.
-    
-    Inputs:
-        data_grid (np.ndarray): Input grid of shape [n_timesteps, height, width, n_features]
-        input_steps (int): Length of input sequence (lookback window)
-        horizon (int): Number of future timesteps to predict
-    
+
     Outputs:
         tuple: (X, y) where:
-            - X (np.ndarray): Input sequences [n_samples, input_steps, height, width, n_features]
-            - y (np.ndarray): Target sequences [n_samples, horizon, height, width, n_features]
+            - X (np.ndarray): [n_samples, input_steps, height, width, n_features]
+            - y (np.ndarray): [n_samples, horizon, height, width, 1]
     """
-    n_timesteps, height, width, n_features = data_grid.shape
-    
+    n_timesteps, height, width, n_features = feature_grid.shape
+
     max_samples = n_timesteps - input_steps - horizon + 1
-    
     if max_samples <= 0:
         print(f"Not enough timesteps: {n_timesteps} < {input_steps + horizon}")
         return np.array([]), np.array([])
-    
-    # Pre-allocate arrays
+
     X = np.zeros((max_samples, input_steps, height, width, n_features), dtype=np.float32)
-    y = np.zeros((max_samples, horizon, height, width, n_features), dtype=np.float32)
-    
+    y = np.zeros((max_samples, horizon, height, width, 1), dtype=np.float32)
+
     for i in range(max_samples):
-        X[i] = data_grid[i:i + input_steps]
-        y[i] = data_grid[i + input_steps:i + input_steps + horizon]
-    
+        X[i] = feature_grid[i:i + input_steps]
+        y[i] = label_grid[i + input_steps:i + input_steps + horizon]
+
     print(f"  X shape: {X.shape}, y shape: {y.shape}")
-    
     return X, y
 
 def train_one_epoch(model, dataloader, criterion, optimizer, device):
@@ -194,8 +206,8 @@ def predict(model, dataloader, device):
     
     Outputs:
         tuple: (predictions, actuals) where:
-            - predictions (np.ndarray): Model outputs [n_samples, horizon, height, width, n_features]
-            - actuals (np.ndarray): Ground truth targets [n_samples, horizon, height, width, n_features]
+            - predictions (np.ndarray): Fire probabilities [n_samples, horizon, height, width, 1]
+            - actuals (np.ndarray): Binary is_burning targets [n_samples, horizon, height, width, 1]
     """
     model.eval()
     predictions = []
@@ -203,7 +215,7 @@ def predict(model, dataloader, device):
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
             X_batch = X_batch.to(device)
-            preds = model(X_batch).cpu().numpy()
+            preds = model.predict(X_batch).cpu().numpy()
             predictions.append(preds)
             actuals.append(y_batch.numpy())
     return np.concatenate(predictions), np.concatenate(actuals)
@@ -330,24 +342,113 @@ def load_and_format_gridded_data(csv_path, feature_cols=None):
     
     return data_grid
 
+def load_and_format_label_grid(label_csv, weather_csv, grid_shape):
+    """
+    Build a binary is_burning label grid aligned to the weather data.
+
+    Satellite detections are recorded per cell per overpass, with the 12-hour
+    resolution split across the date and daynight columns. Timestamps are
+    reconstructed as date + (daynight * 12h) to match the weather time axis,
+    and cell_x/cell_y are used directly as grid indices since both datasets
+    share the same 5km Victorian grid.
+
+    Inputs:
+        label_csv (str): Path to satellite_detections_within_fires.csv
+        weather_csv (str): Path to the weather CSV, used to rebuild the time axis
+        grid_shape (tuple): (height, width) of the weather grid
+
+    Outputs:
+        np.ndarray: [n_timesteps, height, width, 1] binary labels, dtype=float32
+    """
+    height, width = grid_shape
+
+    # Rebuild the same time axis the weather loader used
+    wt = pd.read_csv(weather_csv, usecols=['datetime'])
+    wt['datetime'] = pd.to_datetime(wt['datetime'])
+    unique_times = sorted(wt['datetime'].unique().tolist())
+    time_to_idx = {t: i for i, t in enumerate(unique_times)}
+
+    # Satellite timestamps: date + daynight (0=AM -> 00:00, 1=PM -> 12:00)
+    sat = pd.read_csv(label_csv)
+    sat['datetime'] = (
+        pd.to_datetime(sat['datetime'])
+        + pd.to_timedelta(sat['daynight'] * 12, unit='h')
+    )
+
+    label_grid = np.zeros((len(unique_times), height, width, 1), dtype=np.float32)
+
+    placed = out_of_window = out_of_bounds = 0
+    for row in sat.itertuples():
+        t_idx = time_to_idx.get(row.datetime)
+        if t_idx is None:
+            out_of_window += 1
+            continue
+        if not (0 <= row.cell_y < height and 0 <= row.cell_x < width):
+            out_of_bounds += 1
+            continue
+        label_grid[t_idx, row.cell_y, row.cell_x, 0] = 1.0
+        placed += 1
+
+    print(f"Label grid: {label_grid.shape}")
+    print(f"  Placed: {placed} | outside time window: {out_of_window} "
+          f"| outside grid: {out_of_bounds}")
+    print(f"  Positive cells: {int(label_grid.sum())}")
+
+    return label_grid
+
+def compute_pos_weight(label_grid, valid_mask):
+    """
+    Compute the negative/positive ratio of the binary is_burning label
+    over valid (land) cells only.
+
+    Fire is extremely rare, so an unweighted loss would be minimised by
+    predicting "no fire" everywhere. The returned value is intended for
+    use as pos_weight in BCEWithLogitsLoss, which scales the loss
+    contribution of positive cells.
+
+    Inputs:
+        label_grid (np.ndarray): [n_timesteps, height, width, 1] binary labels
+        valid_mask (np.ndarray): [height, width] boolean, True where cells are valid
+
+    Outputs:
+        tuple: (pos_weight, positives, negatives, positive_rate)
+    """
+    valid_labels = label_grid[:, valid_mask, :]
+    positives = int(valid_labels.sum())
+    total = valid_labels.size
+    negatives = total - positives
+
+    if positives == 0:
+        print("WARNING: no positive labels found — pos_weight defaulting to 1.0")
+        return 1.0, 0, negatives, 0.0
+
+    pos_weight = negatives / positives
+    positive_rate = positives / total
+
+    print(f"Positive cells: {positives:,} | Negative cells: {negatives:,}")
+    print(f"Positive rate: {positive_rate * 100:.4f}%")
+    print(f"pos_weight (neg/pos): {pos_weight:.1f}")
+
+    return pos_weight, positives, negatives, positive_rate
+
 def main():
     """
     Training pipeline for ConvLSTM on gridded spatiotemporal data.
     
     Workflow:
-    1. Load gridded data or format csv into needed format [n_timesteps, height, width, n_features]
-    2. Split into train/val/test in time order
-    3. Fit scaler on training data
-    4. Append land mask
-    5. Create sliding-window sequences
+    1. Load gridded weather features and the binary is_burning label grid
+    2. Split both into train/val/test in time order
+    3. Fit scaler on training features only (labels are never scaled)
+    4. Derive land mask from the weather grid
+    5. Create sliding-window sequences (X from features, y from labels)
     6. Create DataLoaders
-    7. Initialise convLSTM model
-    8. Train ConvLSTM
+    7. Initialise ConvLSTM with single-channel output at horizon 1
+    8. Compute class imbalance ratio and train
     9. Load best model
-    10. Evaluate
-    11. Save trained model and scaler
+    10. Evaluate (pending — classification metrics not yet implemented)
+    11. Save trained model, scaler and inference metadata
     """
-    os.makedirs("models", exist_ok=True)
+    os.makedirs("src/models/bushfire/checkpoints", exist_ok=True)
     print("Using device:", DEVICE)
     
     print("STEP 1: Load Gridded Data")
@@ -373,12 +474,33 @@ def main():
     total_cells = grid_height * grid_width
     valid_cells = valid_mask.sum()
     print(f"Valid cells: {valid_cells} / {total_cells} ({valid_cells/total_cells*100:.1f}%)")
+    
+    print("STEP 1b: Load Fire Label Grid")
+
+    if os.path.exists(LABEL_CACHE):
+        print("Found cached label grid, loading...")
+        label_grid = np.load(LABEL_CACHE)
+        print(f"Loaded label grid: {label_grid.shape}")
+    else:
+        print("No cache found, building label grid from CSV...")
+        label_grid = load_and_format_label_grid(
+            LABEL_PATH, DATA_PATH, (grid_height, grid_width)
+        )
+        np.save(LABEL_CACHE, label_grid)
+        print(f"Label grid saved to {LABEL_CACHE}")
+
+    assert label_grid.shape[:3] == data_grid.shape[:3], \
+        f"Grid mismatch: labels {label_grid.shape} vs weather {data_grid.shape}"
  
     print("STEP 2: Split Data into Train/Val/Test")
     
     split_idx = int(len(data_grid) * TRAIN_VAL_RATIO)
     train_val_grid = data_grid[:split_idx]
     test_grid = data_grid[split_idx:]
+    
+    # Split labels on the same index so they stay aligned with the features
+    train_val_labels = label_grid[:split_idx]
+    test_labels      = label_grid[split_idx:]
     
     print(f"Train/Val: {len(train_val_grid)} timesteps")
     print(f"Test: {len(test_grid)} timesteps")
@@ -412,14 +534,17 @@ def main():
 
     print("STEP 4: Create Datasets with Sliding Window")
 
-    # Split train_val into train/val
+    # Split train_val features and labels into train/val
     val_split_idx = int(len(train_val_scaled) * 0.85)
     train_grid = train_val_scaled[:val_split_idx]
     val_grid   = train_val_scaled[val_split_idx:]
+    
+    train_labels = train_val_labels[:val_split_idx]
+    val_labels   = train_val_labels[val_split_idx:]
 
-    train_dataset = GriddedTimeSeriesDataset(train_grid, INPUT_STEPS, HORIZON)
-    val_dataset   = GriddedTimeSeriesDataset(val_grid, INPUT_STEPS, HORIZON)
-    test_dataset  = GriddedTimeSeriesDataset(test_scaled, INPUT_STEPS, HORIZON)
+    train_dataset = GriddedTimeSeriesDataset(train_grid, train_labels, INPUT_STEPS, HORIZON)
+    val_dataset   = GriddedTimeSeriesDataset(val_grid, val_labels, INPUT_STEPS, HORIZON)
+    test_dataset  = GriddedTimeSeriesDataset(test_scaled, test_labels, INPUT_STEPS, HORIZON)
 
     print(f"train_val timesteps: {len(train_val_scaled)}")
     print(f"train timesteps: {val_split_idx}")
@@ -445,7 +570,7 @@ def main():
     config = ForecasterConfig(
         input_channels=n_features,
         horizon=HORIZON,
-        output_channels=n_features,
+        output_channels=1,
         hidden_size_1=32,
         hidden_size_2=16,
         dropout=0.2
@@ -464,6 +589,11 @@ def main():
     print("STEP 7: Train Model")
     
     valid_mask_tensor = torch.tensor(valid_mask, dtype=torch.bool)
+    
+    # Class imbalance ratio for the loss function (training split only, to avoid leaking val/test distribution).
+    # Not yet consumed — the masked BCEWithLogitsLoss that uses it needs to be added.
+    pos_weight, _, _, _ = compute_pos_weight(train_labels, valid_mask)
+    
     criterion = MaskedMSELoss(valid_mask_tensor).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     
@@ -509,34 +639,39 @@ def main():
     
     print("STEP 9: Evaluate on Test Set")
     
-    y_pred_scaled, y_true_scaled = predict(model, test_loader, DEVICE)
+    # TODO: Regression metrics removed — the model now outputs a single fire-probability channel, so MAE/RMSE/R2
+    # and the scaler inverse-transform no longer apply. To be replaced with classification metrics
+    # (precision, recall, F1, ROC-AUC, PR-AUC) once the masked BCE loss lands.
     
-    # Reshape for inverse scaling
-    y_pred_flat = y_pred_scaled.reshape(-1, n_features)
-    y_true_flat = y_true_scaled.reshape(-1, n_features)
     
-    # Inverse transform
-    y_pred_original = scaler.inverse_transform(y_pred_flat)
-    y_true_original = scaler.inverse_transform(y_true_flat)
+    # y_pred_scaled, y_true_scaled = predict(model, test_loader, DEVICE)
+    
+    # # Reshape for inverse scaling
+    # y_pred_flat = y_pred_scaled.reshape(-1, n_features)
+    # y_true_flat = y_true_scaled.reshape(-1, n_features)
+    
+    # # Inverse transform
+    # y_pred_original = scaler.inverse_transform(y_pred_flat)
+    # y_true_original = scaler.inverse_transform(y_true_flat)
 
-    pred_spatial = y_pred_original.reshape(y_pred_scaled.shape)
-    true_spatial = y_true_original.reshape(y_true_scaled.shape)
+    # pred_spatial = y_pred_original.reshape(y_pred_scaled.shape)
+    # true_spatial = y_true_original.reshape(y_true_scaled.shape)
     
-    mask_expanded = valid_mask[np.newaxis, np.newaxis, :, :, np.newaxis]
-    mask_tiled = np.broadcast_to(mask_expanded, pred_spatial.shape)
+    # mask_expanded = valid_mask[np.newaxis, np.newaxis, :, :, np.newaxis]
+    # mask_tiled = np.broadcast_to(mask_expanded, pred_spatial.shape)
  
-    pred_valid = pred_spatial[mask_tiled].reshape(-1, n_features)
-    true_valid = true_spatial[mask_tiled].reshape(-1, n_features)
+    # pred_valid = pred_spatial[mask_tiled].reshape(-1, n_features)
+    # true_valid = true_spatial[mask_tiled].reshape(-1, n_features)
     
-    print(f"\nPer-feature Test Metrics:")
-    print(f"  {'Feature':<40} {'MAE':<12} {'RMSE':<12} {'R2':<10}")
-    print("-" * 80)
+    # print(f"\nPer-feature Test Metrics:")
+    # print(f"  {'Feature':<40} {'MAE':<12} {'RMSE':<12} {'R2':<10}")
+    # print("-" * 80)
     
-    for i, feature in enumerate(FEATURES):
-        feature_mae  = mean_absolute_error(true_valid[:, i], pred_valid[:, i])
-        feature_rmse = np.sqrt(mean_squared_error(true_valid[:, i], pred_valid[:, i]))
-        feature_r2   = r2_score(true_valid[:, i], pred_valid[:, i])
-        print(f"  {feature:<40} {feature_mae:<12.4f} {feature_rmse:<12.4f} {feature_r2:<10.4f}")
+    # for i, feature in enumerate(FEATURES):
+    #     feature_mae  = mean_absolute_error(true_valid[:, i], pred_valid[:, i])
+    #     feature_rmse = np.sqrt(mean_squared_error(true_valid[:, i], pred_valid[:, i]))
+    #     feature_r2   = r2_score(true_valid[:, i], pred_valid[:, i])
+    #     print(f"  {feature:<40} {feature_mae:<12.4f} {feature_rmse:<12.4f} {feature_r2:<10.4f}")
     
     print("STEP 11: Save Model and Scaler")
     
@@ -545,16 +680,22 @@ def main():
     joblib.dump(
         {
             "scaler": scaler,
-            "features": FEATURES,
+            # Key name changed to "weather_features" as the inference module 
+            # reads bundle.metadata["weather_features"] to validate the incoming feature count
+            "weather_features": FEATURES,
             "input_steps": INPUT_STEPS,
             "horizon": HORIZON,
             "grid_shape": (grid_height, grid_width),
+            # Provisional. Inference falls back to 0.5 if absent, so this is written
+            # explicitly to make the value a recorded decision rather than a default.
+            # To be set from validation once classification metrics land.
+            "fire_threshold": FIRE_THRESHOLD,
         },
         SCALER_SAVE_PATH
     )
     
-    print(f"Saved model: models/convlstm_forecaster.pth")
-    print(f"Saved scaler: models/scaler.pkl")
+    print(f"Saved model: src/models/bushfire/checkpoints/convlstm_forecaster.pth")
+    print(f"Saved scaler: src/models/bushfire/checkpoints/convlstm_scaler.pkl")
     
     print("TRAINING COMPLETE")
 
