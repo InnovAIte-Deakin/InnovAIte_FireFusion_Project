@@ -15,8 +15,8 @@
 
 The **AI Modelling API** is a FastAPI-based REST service that exposes machine learning models for:
 - **Misinformation Detection**: Binary classification of social media posts using DeBERTa v3-large
-- **Bushfire Forecasting**: Time-series prediction of environmental variables using ConvLSTM
-- **Bushfire Risk Classification**: Multi-step risk classification using TCN (Temporal Convolutional Networks)
+- **Bushfire Fire Prediction**: Spatiotemporal fire-occurrence probability per grid cell using a single ConvLSTM (5-D in, 5-D out)
+- **Bushfire Risk Classification (deprecated)**: TCN classifier, retired by the single-ConvLSTM refactor
 
 The API uses a **YAML-driven model registry** to manage checkpoints, scalers, and metadata, enabling easy addition of new models without code changes.
 
@@ -47,7 +47,7 @@ api/
 │   ├── __init__.py
 │   ├── misinformation.py            # DeBERTa inference adapter
 │   ├── bushfire_forecaster.py       # ConvLSTM forecasting adapter
-│   └── bushfire_classifier.py       # TCN classification adapter
+│   └── bushfire_classifier.py       # TCN classification adapter (deprecated)
 │
 ├── schemas/
 │   ├── bushfire.py                  # GeoJSON timeseries Pydantic schemas
@@ -72,7 +72,7 @@ api/
 | `routers/predict.py` | Module | `POST /predict/*` endpoints for inference |
 | `inference/misinformation.py` | Module | DeBERTa text classification logic |
 | `inference/bushfire_forecaster.py` | Module | ConvLSTM time-series forecasting adapter |
-| `inference/bushfire_classifier.py` | Module | TCN risk classification & orchestration |
+| `inference/bushfire_classifier.py` | Module | TCN risk classification & orchestration — **deprecated** by the single-ConvLSTM refactor |
 | `schemas/bushfire.py` | Module | Pydantic models for GeoJSON I/O validation |
 | `schemas/misinformation.py` | Module | Pydantic models for post input/output |
 | `examples/bushfire_input.geojson` | Data | Example forecast input payload |
@@ -103,12 +103,12 @@ api/
    - Pads/truncates to input_steps (default 60)
    - Builds gridded or batch tensor
    - Applies scaler
-   - Runs bundle.model.predict()
+   - Runs bundle.model.predict() -> 5-D fire probability grid
    - Postprocesses to GeoJSON FeatureCollection
    ↓
 5. FastAPI serializes response to JSON
    ↓
-6. Client receives FeatureCollection with forecast arrays
+6. Client receives FeatureCollection with fire_probability per cell
 ```
 
 ## API Endpoints
@@ -234,10 +234,10 @@ Classify a single social media post for misinformation.
 
 ---
 
-### Bushfire Forecasting
+### Bushfire Fire Prediction
 
 #### `POST /predict/bushfire/forecast`
-Forecast environmental variables for the next N timesteps (default N=2).
+Predict fire-occurrence probability per grid cell for the next timestep (`horizon = 1`).
 
 **Request Body (GeoJSON FeatureCollection):**
 ```json
@@ -252,6 +252,8 @@ Forecast environmental variables for the next N timesteps (default N=2).
       },
       "properties": {
         "id": "cell-001",
+        "grid_row": 3,
+        "grid_col": 7,
         "observations": [
           [20.5, 15.2, 100.3, 50.1, 22.1, 2.5, 1.3],
           [21.0, 15.5, 105.2, 52.0, 23.0, 2.4, 1.2],
@@ -263,9 +265,26 @@ Forecast environmental variables for the next N timesteps (default N=2).
 }
 ```
 
-**Features:**
-- `observations`: [seq_len, n_features] array (e.g., 60 timesteps × 7 features)
-- Features: `[skin_temperature_c, soil_temperature_level_1_c, surface_solar_radiation_downwards, surface_thermal_radiation_downwards, temperature_2m_c, u_component_of_wind_10m, v_component_of_wind_10m]`
+**Input properties:**
+
+| Property | Required | Description |
+|---|---|---|
+| `observations` | yes | `[seq_len, n_features]` array (e.g. 60 timesteps × 7 features). Padded/truncated to the checkpoint's `input_steps`. |
+| `id` | no | Cell identifier, echoed in the response and used to join forecaster → classifier output. |
+| `timestamps` | no | ISO-8601 timestamps, must be the same length as `observations`. |
+| `grid_row`, `grid_col` | no | Position of the cell in the model grid. Must be supplied **together**. |
+
+**Channel order** (`feature_names`, defaults to `DEFAULT_FEATURE_NAMES`):
+`[skin_temperature_c, soil_temperature_level_1_c, surface_solar_radiation_downwards, surface_thermal_radiation_downwards, temperature_2m_c, u_component_of_wind_10m, v_component_of_wind_10m]`
+
+**Gridded vs batched input:** the ConvLSTM is spatiotemporal — it expects
+`[batch, seq_len, height, width, n_features]`. When every cell carries `grid_row`/`grid_col`
+**and** the checkpoint's scaler bundle declares `grid_shape`, the adapter reassembles the real
+grid so neighbouring cells inform each other. Otherwise each cell is processed as a
+degenerate 1×1 grid (`[n_samples, seq_len, 1, 1, n_features]`) and spatial context is lost —
+functional, but not what the model was trained on. Cells inside `grid_shape` that are not
+supplied are filled with the training mean (0 after scaling), matching
+`ts_convlstm_forecaster_train.scale_and_fill`.
 
 **Query Parameters:**
 - `model_id` (optional): Specific forecaster model
@@ -280,53 +299,59 @@ Forecast environmental variables for the next N timesteps (default N=2).
       "geometry": {...},
       "properties": {
         "id": "cell-001",
-        "forecast": [
-          [20.8, 15.3, 102.5, 51.2, 22.5, 2.4, 1.25],
-          [21.2, 15.6, 107.8, 53.5, 23.5, 2.3, 1.15]
-        ],
-        "model_id": "bushfire-forecaster-v1"
+        "fire_probability": [0.85],
+        "is_burning_predicted": [true],
+        "fire_threshold": 0.5,
+        "risk_score": 0.85,
+        "risk_levels": [4],
+        "risk_labels": ["HIGH"],
+        "forecast": [[0.85]],
+        "horizon": 1,
+        "n_output_channels": 1,
+        "grid_row": 3,
+        "grid_col": 7,
+        "model_id": "bushfire-convlstm-v1"
       }
     }
   ]
 }
 ```
 
-### Bushfire Risk Classification
+**Output properties:**
 
-#### `POST /predict/bushfire/classify`
-Classify risk for each forecasted timestep (pipeline: forecaster → classifier).
+| Property | Description |
+|---|---|
+| `fire_probability` | Fire-occurrence probability in `[0, 1]`, one entry per horizon step. Primary output. |
+| `is_burning_predicted` | `fire_probability > fire_threshold`, one entry per horizon step |
+| `fire_threshold` | The threshold used for `is_burning_predicted` |
+| `risk_score` | Mean `fire_probability` across the horizon |
+| `risk_levels`, `risk_labels` | Discrete level `0..4` and its label, one entry per horizon step |
+| `forecast` | `[horizon, n_output_channels]` raw model output — one **row** per horizon step. For the fire-probability model each row is `[p]`. Kept so a multi-channel checkpoint can still be served. |
+| `horizon` | Number of predicted timesteps returned (1 for the current model) |
+| `n_output_channels` | Values per predicted timestep (1 for the current model) |
+| `grid_row`, `grid_col` | Echoed grid position, so a gridded response can be reassembled by the caller |
 
-**Request Body:** Same as `/predict/bushfire/forecast`
+All per-horizon-step fields (`fire_probability`, `is_burning_predicted`, `risk_levels`,
+`risk_labels`, `forecast`) are validated to have the same length.
 
-**Query Parameters:**
-- `classifier_id` (optional): Specific classifier model
-- `forecaster_id` (optional): Specific forecaster model
+### Bushfire Risk Classification (deprecated)
 
-**Response:**
-```json
-{
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {...},
-      "properties": {
-        "id": "cell-001",
-        "risk_probabilities": [0.15, 0.32],
-        "risk_levels": [0, 1],
-        "model_id": "bushfire-classifier-v1"
-      }
-    }
-  ]
-}
-```
+> **Deprecated.** The architecture has been reduced from two models (ConvLSTM forecaster →
+> TCN classifier) to a single ConvLSTM that predicts fire probability directly. The TCN
+> classifier and `POST /predict/bushfire/classify` are being retired — use
+> `POST /predict/bushfire/forecast`, which now returns `fire_probability` per cell.
 
-**Risk Level Mapping (from probability):**
-- `p < 0.2` → level `0` (Low)
-- `0.2 ≤ p < 0.4` → level `1` (Medium-Low)
-- `0.4 ≤ p < 0.6` → level `2` (Medium)
-- `0.6 ≤ p < 0.8` → level `3` (Medium-High)
-- `p ≥ 0.8` → level `4` (High)
+**Risk Level Mapping (from fire probability):**
+
+| Probability | Level | Label |
+|---|---|---|
+| `p < 0.2` | 0 | `LOW` |
+| `0.2 ≤ p < 0.4` | 1 | `MEDIUM_LOW` |
+| `0.4 ≤ p < 0.6` | 2 | `MEDIUM` |
+| `0.6 ≤ p < 0.8` | 3 | `MEDIUM_HIGH` |
+| `p ≥ 0.8` | 4 | `HIGH` |
+
+Thresholds live in one place — `prob_to_risk_level()` in `api/schemas/bushfire.py`.
 
 ## Contributing
 
