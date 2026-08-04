@@ -1,9 +1,15 @@
 """
-Fine-tune DeBERTa on a JSON list with ``claim`` and ``label`` (0 or 1).
+Train the DeBERTa misinformation classifier.
 
-From ``ai-modelling/``:
+The training data must be a CSV or JSON file containing:
+- claim: text to classify
+- label: 0 for non_misinformation or 1 for misinformation
 
-  python src/training/train_deberta.py --train data/train.json --output-dir checkpoints/misinfo-deberta
+Example:
+
+python src/training/deberta_train.py \
+    --train data/train.json \
+    --output-dir checkpoints/misinfo-deberta
 """
 
 from __future__ import annotations
@@ -23,84 +29,379 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import get_linear_schedule_with_warmup
 
+
 _ROOT = Path(__file__).resolve().parents[2]
+
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
+
 
 from src.models.misinformation.deberta import (
     DebertaMisinfoTrainConfig,
     TextClsDataset,
     build_fresh_classifier,
     collate_text_cls_batch,
+    load_classifier_from_checkpoint,
     load_table,
 )
 
 
 def set_seed(seed: int) -> None:
+    """Set random seeds for reproducible training."""
+
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
 
 @torch.no_grad()
-def evaluate_classification(model: Any, loader: Any, device: torch.device) -> dict[str, float]:
+def evaluate_model(
+    model: Any,
+    data_loader: DataLoader,
+    device: torch.device,
+) -> dict[str, float]:
+    """Calculate validation loss and classification metrics."""
+
     model.eval()
-    ys: list[int] = []
-    preds: list[int] = []
-    for batch in loader:
-        labels = batch["labels"].tolist()
-        batch = {k: v.to(device) for k, v in batch.items()}
-        logits = model(**batch).logits
-        pred = torch.argmax(logits, dim=-1).tolist()
-        ys.extend(labels)
-        preds.extend(pred)
-    y = np.asarray(ys, dtype=int)
-    p = np.asarray(preds, dtype=int)
-    acc = float(accuracy_score(y, p))
-    prf = precision_recall_fscore_support(y, p, average="binary", pos_label=1, zero_division=0)
-    macro = precision_recall_fscore_support(y, p, average="macro", zero_division=0)
+
+    total_loss = 0.0
+    total_examples = 0
+    labels: list[int] = []
+    predictions: list[int] = []
+
+    for batch in data_loader:
+        batch = {
+            key: value.to(device)
+            for key, value in batch.items()
+        }
+
+        output = model(**batch)
+        batch_size = batch["labels"].size(0)
+
+        total_loss += output.loss.item() * batch_size
+        total_examples += batch_size
+
+        predicted_labels = torch.argmax(
+            output.logits,
+            dim=-1,
+        )
+
+        labels.extend(
+            batch["labels"].cpu().tolist()
+        )
+
+        predictions.extend(
+            predicted_labels.cpu().tolist()
+        )
+
+    if total_examples == 0:
+        raise ValueError("Validation dataset is empty.")
+
+    accuracy = accuracy_score(
+        labels,
+        predictions,
+    )
+
+    precision, recall, f1, _ = (
+        precision_recall_fscore_support(
+            labels,
+            predictions,
+            average="binary",
+            pos_label=1,
+            zero_division=0,
+        )
+    )
+
+    _, _, macro_f1, _ = (
+        precision_recall_fscore_support(
+            labels,
+            predictions,
+            labels=[0, 1],
+            average="macro",
+            zero_division=0,
+        )
+    )
+
     return {
-        "accuracy": acc,
-        "f1_binary_pos1": float(prf[2]),
-        "precision_binary_pos1": float(prf[0]),
-        "recall_binary_pos1": float(prf[1]),
-        "macro_f1": float(macro[2]),
+        "loss": float(total_loss / total_examples),
+        "accuracy": float(accuracy),
+        "precision": float(precision),
+        "recall": float(recall),
+        "f1": float(f1),
+        "macro_f1": float(macro_f1),
     }
 
-OUTPUT_DIR = "src/models/misinformation/checkpoints/misinfo-deberta"
-TRAIN_DIR = "src/data/misinformation/kaggle1_5k.json"
+
+def train_epoch(
+    model: Any,
+    data_loader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    scheduler: Any,
+    scaler: Any,
+    device: torch.device,
+    grad_accum: int,
+    max_grad_norm: float,
+    use_amp: bool,
+    epoch: int,
+    total_epochs: int,
+) -> float:
+    """Train the model for one epoch."""
+
+    model.train()
+    optimizer.zero_grad(set_to_none=True)
+
+    total_loss = 0.0
+    total_examples = 0
+    total_batches = len(data_loader)
+
+    progress = tqdm(
+        data_loader,
+        desc=f"Training epoch {epoch}/{total_epochs}",
+    )
+
+    for step, batch in enumerate(
+        progress,
+        start=1,
+    ):
+        batch = {
+            key: value.to(device)
+            for key, value in batch.items()
+        }
+
+        # Use the real size of the final accumulation group
+        incomplete_group_size = total_batches % grad_accum
+
+        if (
+            incomplete_group_size
+            and step > total_batches - incomplete_group_size
+        ):
+            accumulation_size = incomplete_group_size
+        else:
+            accumulation_size = grad_accum
+
+        with torch.amp.autocast(
+            device_type=device.type,
+            enabled=use_amp,
+        ):
+            output = model(**batch)
+            raw_loss = output.loss
+            loss = raw_loss / accumulation_size
+
+        scaler.scale(loss).backward()
+
+        batch_size = batch["labels"].size(0)
+
+        total_loss += raw_loss.item() * batch_size
+        total_examples += batch_size
+
+        should_update = (
+            step % grad_accum == 0
+            or step == total_batches
+        )
+
+        if should_update:
+            scaler.unscale_(optimizer)
+
+            torch.nn.utils.clip_grad_norm_(
+                model.parameters(),
+                max_grad_norm,
+            )
+
+            scaler.step(optimizer)
+            scaler.update()
+
+            optimizer.zero_grad(set_to_none=True)
+
+            # Update the scheduler after every optimiser step
+            scheduler.step()
+
+        average_loss = total_loss / total_examples
+
+        progress.set_postfix(
+            train_loss=f"{average_loss:.4f}"
+        )
+
+    return total_loss / total_examples
+
+
+def parse_arguments() -> argparse.Namespace:
+    """Read command-line arguments."""
+
+    parser = argparse.ArgumentParser(
+        description=(
+            "Train DeBERTa for binary misinformation "
+            "classification."
+        )
+    )
+
+    parser.add_argument(
+        "--train",
+        type=Path,
+        required=True,
+        help="Training CSV or JSON file.",
+    )
+
+    parser.add_argument(
+        "--val",
+        type=Path,
+        default=None,
+        help="Optional validation CSV or JSON file.",
+    )
+
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        required=True,
+        help="Directory used to save the checkpoint.",
+    )
+
+    parser.add_argument(
+        "--hf-model-id",
+        type=str,
+        default=DebertaMisinfoTrainConfig.hf_model_id,
+    )
+
+    parser.add_argument(
+        "--test-size",
+        type=float,
+        default=0.1,
+    )
+
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+    )
+
+    parser.add_argument(
+        "--max-len",
+        type=int,
+        default=DebertaMisinfoTrainConfig.max_len,
+    )
+
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=4,
+    )
+
+    parser.add_argument(
+        "--grad-accum",
+        type=int,
+        default=1,
+    )
+
+    parser.add_argument(
+        "--epochs",
+        type=int,
+        default=4,
+    )
+
+    parser.add_argument(
+        "--lr",
+        type=float,
+        default=2e-5,
+    )
+
+    parser.add_argument(
+        "--weight-decay",
+        type=float,
+        default=0.01,
+    )
+
+    parser.add_argument(
+        "--warmup-ratio",
+        type=float,
+        default=0.06,
+    )
+
+    parser.add_argument(
+        "--max-grad-norm",
+        type=float,
+        default=1.0,
+    )
+
+    parser.add_argument(
+        "--early-stopping-patience",
+        type=int,
+        default=2,
+    )
+
+    parser.add_argument(
+        "--min-delta",
+        type=float,
+        default=1e-4,
+    )
+
+    parser.add_argument(
+        "--num-workers",
+        type=int,
+        default=0,
+    )
+
+    parser.add_argument(
+        "--gradient-checkpointing",
+        action="store_true",
+    )
+
+    return parser.parse_args()
+
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description="Fine-tune DeBERTa for binary misinformation (claim + label JSON).")
-    ap.add_argument("--train", type=Path, required=True)
-    ap.add_argument("--val", type=Path, default=None)
-    ap.add_argument("--output-dir", type=Path, required=True)
-    ap.add_argument("--hf-model-id", type=str, default=DebertaMisinfoTrainConfig.hf_model_id)
-    ap.add_argument("--test-size", type=float, default=0.1)
-    ap.add_argument("--seed", type=int, default=42)
-    ap.add_argument("--max-len", type=int, default=DebertaMisinfoTrainConfig.max_len)
-    ap.add_argument("--batch-size", type=int, default=4)
-    ap.add_argument("--grad-accum", type=int, default=1)
-    ap.add_argument("--epochs", type=int, default=4)
-    ap.add_argument("--lr", type=float, default=2e-5)
-    ap.add_argument("--weight-decay", type=float, default=0.01)
-    ap.add_argument("--warmup-ratio", type=float, default=0.06)
-    ap.add_argument("--max-grad-norm", type=float, default=1.0)
-    ap.add_argument("--early-stopping-patience", type=int, default=2)
-    ap.add_argument("--min-delta", type=float, default=1e-4)
-    ap.add_argument("--num-workers", type=int, default=0)
-    ap.add_argument("--gradient-checkpointing", action="store_true")
-    args = ap.parse_args()
+    args = parse_arguments()
+
+    if args.batch_size < 1:
+        raise ValueError("--batch-size must be at least 1.")
+
+    if args.grad_accum < 1:
+        raise ValueError("--grad-accum must be at least 1.")
+
+    if args.epochs < 1:
+        raise ValueError("--epochs must be at least 1.")
+
+    if not 0 < args.test_size < 1:
+        raise ValueError("--test-size must be between 0 and 1.")
 
     set_seed(args.seed)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_df = load_table(args.train, "claim", "label")
+    device = torch.device(
+        "cuda"
+        if torch.cuda.is_available()
+        else "cpu"
+    )
+
+    print(f"Using device: {device}")
+
+    train_df = load_table(
+        args.train,
+        "claim",
+        "label",
+    )
+
     if args.val is not None:
-        val_df = load_table(args.val, "claim", "label")
+        val_df = load_table(
+            args.val,
+            "claim",
+            "label",
+        )
+
+        split_method = "separate_validation_file"
+
     else:
+        label_counts = train_df["label"].value_counts()
+
+        if (
+            len(label_counts) != 2
+            or label_counts.min() < 2
+        ):
+            raise ValueError(
+                "A stratified split needs both labels "
+                "and at least two examples of each label."
+            )
+
         train_df, val_df = train_test_split(
             train_df,
             test_size=args.test_size,
@@ -108,24 +409,46 @@ def main() -> None:
             stratify=train_df["label"],
         )
 
-    tokenizer, model = build_fresh_classifier(args.hf_model_id)
+        split_method = "stratified_split"
+
+    train_df = train_df.reset_index(drop=True)
+    val_df = val_df.reset_index(drop=True)
+
+    tokenizer, model = build_fresh_classifier(
+        args.hf_model_id
+    )
+
     model.to(device)
+
     if args.gradient_checkpointing:
         model.gradient_checkpointing_enable()
         model.config.use_cache = False
 
-    train_ds = TextClsDataset(train_df["text"].tolist(), train_df["label"].tolist(), tokenizer, args.max_len)
-    val_ds = TextClsDataset(val_df["text"].tolist(), val_df["label"].tolist(), tokenizer, args.max_len)
+    train_dataset = TextClsDataset(
+        train_df["text"].tolist(),
+        train_df["label"].tolist(),
+        tokenizer,
+        args.max_len,
+    )
+
+    val_dataset = TextClsDataset(
+        val_df["text"].tolist(),
+        val_df["label"].tolist(),
+        tokenizer,
+        args.max_len,
+    )
+
     train_loader = DataLoader(
-        train_ds,
+        train_dataset,
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=args.num_workers,
         collate_fn=collate_text_cls_batch,
         pin_memory=device.type == "cuda",
     )
+
     val_loader = DataLoader(
-        val_ds,
+        val_dataset,
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.num_workers,
@@ -133,83 +456,218 @@ def main() -> None:
         pin_memory=device.type == "cuda",
     )
 
-    optim = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    total_steps = int(np.ceil(len(train_loader) / args.grad_accum)) * args.epochs
-    warmup_steps = int(total_steps * args.warmup_ratio)
-    sched = get_linear_schedule_with_warmup(
-        optim, num_warmup_steps=warmup_steps, num_training_steps=max(1, total_steps)
+    optimizer = torch.optim.AdamW(
+        model.parameters(),
+        lr=args.lr,
+        weight_decay=args.weight_decay,
+    )
+
+    steps_per_epoch = int(
+        np.ceil(
+            len(train_loader) / args.grad_accum
+        )
+    )
+
+    total_steps = max(
+        1,
+        steps_per_epoch * args.epochs,
+    )
+
+    warmup_steps = int(
+        total_steps * args.warmup_ratio
+    )
+
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer,
+        num_warmup_steps=warmup_steps,
+        num_training_steps=total_steps,
     )
 
     use_amp = device.type == "cuda"
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
 
-    best_f1 = -1.0
-    best_state: dict[str, torch.Tensor] | None = None
+    scaler = torch.amp.GradScaler(
+        device=device.type,
+        enabled=use_amp,
+    )
+
+    args.output_dir.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    best_macro_f1 = -1.0
+    best_epoch = 0
+    best_metrics: dict[str, float] = {}
+    history: list[dict[str, float | int]] = []
+
     patience = 0
+    epochs_completed = 0
 
-    for epoch in range(args.epochs):
-        model.train()
-        running_loss = 0.0
-        optim.zero_grad(set_to_none=True)
-        pbar = tqdm(train_loader, desc=f"train epoch {epoch + 1}/{args.epochs}")
-        for step, batch in enumerate(pbar, start=1):
-            batch = {k: v.to(device) for k, v in batch.items()}
-            with torch.cuda.amp.autocast(enabled=use_amp):
-                out = model(**batch)
-                loss = out.loss / args.grad_accum
-            scaler.scale(loss).backward()
-            running_loss += float(loss.detach().item()) * args.grad_accum
+    for epoch in range(1, args.epochs + 1):
+        epochs_completed = epoch
 
-            if step % args.grad_accum == 0:
-                scaler.unscale_(optim)
-                torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
-                scaler.step(optim)
-                scaler.update()
-                optim.zero_grad(set_to_none=True)
-                sched.step()
-
-            pbar.set_postfix(loss=f"{running_loss / step:.4f}")
-
-        if len(train_loader) % args.grad_accum != 0:
-            scaler.unscale_(optim)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
-            scaler.step(optim)
-            scaler.update()
-            optim.zero_grad(set_to_none=True)
-
-        metrics = evaluate_classification(model, val_loader, device)
-        print(
-            f"epoch {epoch + 1}: val_acc={metrics['accuracy']:.4f} "
-            f"val_macro_f1={metrics['macro_f1']:.4f} val_f1_pos1={metrics['f1_binary_pos1']:.4f}"
+        train_loss = train_epoch(
+            model=model,
+            data_loader=train_loader,
+            optimizer=optimizer,
+            scheduler=scheduler,
+            scaler=scaler,
+            device=device,
+            grad_accum=args.grad_accum,
+            max_grad_norm=args.max_grad_norm,
+            use_amp=use_amp,
+            epoch=epoch,
+            total_epochs=args.epochs,
         )
 
-        if metrics["macro_f1"] > best_f1 + args.min_delta:
-            best_f1 = metrics["macro_f1"]
-            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+        val_metrics = evaluate_model(
+            model,
+            val_loader,
+            device,
+        )
+
+        history.append(
+            {
+                "epoch": epoch,
+                "train_loss": train_loss,
+                **val_metrics,
+            }
+        )
+
+        print(
+            f"Epoch {epoch}/{args.epochs} | "
+            f"train_loss={train_loss:.4f} | "
+            f"val_loss={val_metrics['loss']:.4f} | "
+            f"accuracy={val_metrics['accuracy']:.4f} | "
+            f"macro_f1={val_metrics['macro_f1']:.4f} | "
+            f"precision={val_metrics['precision']:.4f} | "
+            f"recall={val_metrics['recall']:.4f}"
+        )
+
+        improved = (
+            val_metrics["macro_f1"]
+            > best_macro_f1 + args.min_delta
+        )
+
+        if improved:
+            best_macro_f1 = val_metrics["macro_f1"]
+            best_epoch = epoch
+            best_metrics = dict(val_metrics)
             patience = 0
+
+            model.save_pretrained(args.output_dir)
+            tokenizer.save_pretrained(args.output_dir)
+
+            print(
+                f"Saved best checkpoint to "
+                f"{args.output_dir}"
+            )
+
         else:
             patience += 1
+
         if patience >= args.early_stopping_patience:
-            print("early stopping")
+            print("Early stopping triggered.")
             break
 
-    if best_state is not None:
-        model.load_state_dict(best_state)
+    if best_epoch == 0:
+        raise RuntimeError(
+            "Training finished without saving a checkpoint."
+        )
+    # Free memory before checking the saved model
+    del optimizer
+    del scheduler
+    del scaler
+    del model
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    model.save_pretrained(args.output_dir)
-    tokenizer.save_pretrained(args.output_dir)
-    meta = {
-        "hf_model_id": args.hf_model_id,
-        "max_len": args.max_len,
-        "best_val_macro_f1": best_f1,
-        "n_train": int(len(train_df)),
-        "n_val": int(len(val_df)),
-        "text_field_train": "claim",
-        "label_field_train": "label",
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    # Reload the checkpoint to confirm that it works
+    _, reloaded_model = load_classifier_from_checkpoint(
+        args.output_dir
+    )
+
+    if reloaded_model.config.num_labels != 2:
+        raise RuntimeError(
+            "Reloaded checkpoint has an incorrect "
+            "number of labels."
+        )
+
+    reloaded_model.to(device)
+
+    final_metrics = evaluate_model(
+        reloaded_model,
+        val_loader,
+        device,
+    )
+
+    label_mapping = {
+        str(key): value
+        for key, value
+        in reloaded_model.config.id2label.items()
     }
-    (args.output_dir / "training_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
-    print(f"saved model to {args.output_dir}")
+
+    metadata = {
+        "hf_model_id": args.hf_model_id,
+        "checkpoint_reload_verified": True,
+        "label_mapping": label_mapping,
+        "data": {
+            "train_path": str(args.train),
+            "validation_path": (
+                str(args.val)
+                if args.val is not None
+                else None
+            ),
+            "split_method": split_method,
+            "text_field": "claim",
+            "label_field": "label",
+            "train_size": len(train_df),
+            "validation_size": len(val_df),
+        },
+        "training_settings": {
+            "seed": args.seed,
+            "max_len": args.max_len,
+            "batch_size": args.batch_size,
+            "gradient_accumulation_steps": args.grad_accum,
+            "effective_batch_size": (
+                args.batch_size * args.grad_accum
+            ),
+            "epochs_requested": args.epochs,
+            "epochs_completed": epochs_completed,
+            "learning_rate": args.lr,
+            "weight_decay": args.weight_decay,
+            "warmup_ratio": args.warmup_ratio,
+            "gradient_checkpointing": (
+                args.gradient_checkpointing
+            ),
+            "device": str(device),
+        },
+        "best_epoch": best_epoch,
+        "best_validation": best_metrics,
+        "final_validation": final_metrics,
+        "history": history,
+    }
+
+    metadata_path = (
+        args.output_dir / "training_meta.json"
+    )
+
+    metadata_path.write_text(
+        json.dumps(metadata, indent=2),
+        encoding="utf-8",
+    )
+
+    print("Checkpoint reload verification: passed")
+
+    print(
+        f"Final validation | "
+        f"loss={final_metrics['loss']:.4f} | "
+        f"accuracy={final_metrics['accuracy']:.4f} | "
+        f"macro_f1={final_metrics['macro_f1']:.4f}"
+    )
+
+    print(f"Saved model to: {args.output_dir}")
+    print(f"Saved metadata to: {metadata_path}")
 
 
 if __name__ == "__main__":
