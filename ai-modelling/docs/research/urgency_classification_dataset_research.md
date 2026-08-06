@@ -74,33 +74,39 @@ The selected fields could be converted into a simple FireFusion format:
 ```text
 claim
 urgency_label
+```
 
 Example:
+
+```json
 {
   "claim": "Residents near the fire zone must evacuate immediately.",
   "urgency_label": "critical"
 }
+```
 
+A numerical label mapping could be:
+
+```text
 0 = low
 1 = medium
 2 = high
 3 = critical
+```
 
+## Dataset Exploration
 
+The following dataset exploration checks were completed:
 
-## Dataset Exploration Plan
-
-After obtaining access to the dataset, the following checks should be completed:
-
-- identify the available files and formats
-- display the number of records
-- review the column names
-- check for missing values
-- calculate the number of posts in each priority class
-- display sample posts from each urgency level
-- identify wildfire-related events
-- check whether the classes are balanced
-- review whether the text requires cleaning
+- identified the available files and formats
+- displayed the number of records
+- reviewed the column names
+- checked for missing values
+- calculated the number of posts in each priority class
+- displayed sample posts from each urgency level
+- identified wildfire-related records
+- reviewed whether the classes are balanced
+- checked whether the text requires cleaning
 
 ## Strengths
 
@@ -116,17 +122,10 @@ After obtaining access to the dataset, the following checks should be completed:
 - The posts may contain spelling errors, abbreviations and informal language.
 - Some original social media posts may need to be downloaded using their post IDs.
 - The dataset includes events from different countries and is not limited to Victoria.
-- The four priority classes may be imbalanced.
+- The four priority classes are imbalanced, with far fewer Critical records than Low records.
 - The label definitions must be checked carefully before combining different TREC-IS versions.
 - Access and usage conditions must be confirmed before including the data in FireFusion.
 
-## Recommendation
-
-TREC Incident Streams is the recommended dataset for the FireFusion urgency classification feature.
-
-It is more suitable than CrisisLexT26 because it directly provides priority labels that match the purpose of urgency classification. It also contains wildfire events and emergency-information categories that are relevant to FireFusion.
-
-The next step is to obtain the available TREC-IS data, inspect its structure and complete a small Python exploration of the priority-label distribution.
 
 ## Dataset Exploration Results
 
@@ -170,7 +169,7 @@ The urgency labels are distributed as follows:
 
 The dataset is imbalanced because most records belong to the Low class, while the Critical class is much smaller.
 
-### Event Types
+### Event Type Distribution
 
 The dataset includes several emergency types, including:
 
@@ -191,9 +190,17 @@ There are 9,427 wildfire and fire-related tweets, which makes the dataset releva
 
 ### Exploration Conclusion
 
-The dataset is suitable for urgency classification because it contains direct priority labels and a large number of crisis-related messages.
+The dataset is suitable for urgency classification because it contains direct priority labels, a large number of crisis-related messages and 9,427 wildfire or fire-related tweets.
 
-Before training, the dataset should be cleaned by:
+The main issues are missing text and class imbalance, especially the small number of Critical records compared with Low records.
+
+## Recommendation
+
+TREC Incident Streams is recommended for the FireFusion urgency classification feature.
+
+It is more suitable than CrisisLexT26 because it directly provides priority labels that match the purpose of urgency classification. It also contains wildfire and fire-related events and emergency-information categories that are relevant to FireFusion.
+
+The dataset has now been obtained and explored using a Python script. Before future model development, the data should be cleaned by:
 
 - removing records with missing text
 - removing the two Unknown priority labels
