@@ -167,13 +167,18 @@ def calculate_metrics(
     true_labels: Sequence[int],
     predicted_labels: Sequence[int],
 ) -> dict[str, Any]:
-    """Calculate the requested binary and macro evaluation metrics."""
+    """Calculate overall, per-class, and detailed classification metrics."""
     if len(true_labels) != len(predicted_labels):
         raise ValueError("true_labels and predicted_labels must have the same length")
     if not true_labels:
         raise ValueError("Cannot calculate metrics for an empty test dataset")
 
-    matrix = confusion_matrix(true_labels, predicted_labels, labels=LABEL_IDS)
+    matrix = confusion_matrix(
+        true_labels,
+        predicted_labels,
+        labels=LABEL_IDS,
+    )
+
     report = classification_report(
         true_labels,
         predicted_labels,
@@ -183,16 +188,24 @@ def calculate_metrics(
         zero_division=0,
     )
 
-    metrics = {
+    readable_report = classification_report(
+        true_labels,
+        predicted_labels,
+        labels=LABEL_IDS,
+        target_names=TARGET_NAMES,
+        zero_division=0,
+    )
+
+    overall_metrics = {
         "accuracy": accuracy_score(true_labels, predicted_labels),
-        "precision": precision_score(
+        "binary_precision": precision_score(
             true_labels,
             predicted_labels,
             pos_label=1,
             average="binary",
             zero_division=0,
         ),
-        "recall": recall_score(
+        "binary_recall": recall_score(
             true_labels,
             predicted_labels,
             pos_label=1,
@@ -206,6 +219,20 @@ def calculate_metrics(
             average="binary",
             zero_division=0,
         ),
+        "macro_precision": precision_score(
+            true_labels,
+            predicted_labels,
+            labels=LABEL_IDS,
+            average="macro",
+            zero_division=0,
+        ),
+        "macro_recall": recall_score(
+            true_labels,
+            predicted_labels,
+            labels=LABEL_IDS,
+            average="macro",
+            zero_division=0,
+        ),
         "macro_f1_score": f1_score(
             true_labels,
             predicted_labels,
@@ -213,9 +240,26 @@ def calculate_metrics(
             average="macro",
             zero_division=0,
         ),
+    }
+
+    per_class_metrics = {
+        class_name: {
+            "precision": report[class_name]["precision"],
+            "recall": report[class_name]["recall"],
+            "f1_score": report[class_name]["f1-score"],
+            "support": report[class_name]["support"],
+        }
+        for class_name in TARGET_NAMES
+    }
+
+    metrics = {
+        "overall_metrics": overall_metrics,
+        "per_class_metrics": per_class_metrics,
         "confusion_matrix": matrix,
         "classification_report": report,
+        "classification_report_text": readable_report,
     }
+
     return make_json_serializable(metrics)
 
 
@@ -335,13 +379,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     results = evaluate(args)
 
     metrics = results["metrics"]
+    overall = metrics["overall_metrics"]
+
     LOGGER.info(
-        "Accuracy=%.4f | Precision=%.4f | Recall=%.4f | Binary F1=%.4f | Macro F1=%.4f",
-        metrics["accuracy"],
-        metrics["precision"],
-        metrics["recall"],
-        metrics["binary_f1_score"],
-        metrics["macro_f1_score"],
+        "Accuracy=%.4f | Binary Precision=%.4f | Binary Recall=%.4f | "
+        "Binary F1=%.4f | Macro Precision=%.4f | Macro Recall=%.4f | "
+        "Macro F1=%.4f",
+        overall["accuracy"],
+        overall["binary_precision"],
+        overall["binary_recall"],
+        overall["binary_f1_score"],
+        overall["macro_precision"],
+        overall["macro_recall"],
+        overall["macro_f1_score"],
+    )
+
+    LOGGER.info(
+        "Classification report:\n%s",
+        metrics["classification_report_text"],
     )
     return 0
 
