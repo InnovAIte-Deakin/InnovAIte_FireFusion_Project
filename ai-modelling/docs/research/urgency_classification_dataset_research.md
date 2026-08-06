@@ -1,89 +1,209 @@
 # Urgency Classification Dataset Research
 
-## Purpose
+## Objective
 
-This document investigates suitable datasets for training an urgency classification model for the FireFusion project. The model will classify bushfire-related information into urgency levels such as urgent, not urgent, and not useful.
+The objective of this research is to identify and evaluate suitable datasets for urgency classification that could be integrated into the FireFusion misinformation detection system. The selected dataset should help classify how urgent a social media post or message is during emergency events such as bushfires.
 
-The research focuses on publicly available datasets, possible label structures, dataset limitations, and whether synthetic or manually annotated data may be required.
+## Urgency Classification
 
-## Classification Requirements
+Urgency classification is the process of assigning a priority level to a crisis-related message. It helps identify which posts may require immediate attention and which posts are less urgent.
 
-The proposed urgency classification model should assign each bushfire-related text item to one of the following categories:
+For FireFusion, urgency classification could help prioritise messages such as evacuation requests, immediate danger reports, missing-person information, emergency warnings and requests for assistance.
 
-- **Urgent:** Information that requires immediate attention or action, such as an active fire threat, evacuation warning, trapped people, injuries, or immediate danger.
-- **Not Urgent:** Relevant bushfire information that does not require immediate action, such as general updates, recovery information, or reports about past events.
-- **Not Useful:** Information that is unrelated, unclear, duplicated, promotional, or does not provide useful information for emergency response.
+## Dataset Candidates
 
-The dataset should contain short text samples such as social media posts, emergency messages, public reports, or news-style statements. Each sample should have one urgency label.
+I reviewed two crisis-related datasets that could support this task:
 
-## Candidate Datasets
+1. TREC Incident Streams
+2. CrisisLexT26
 
-### 1. TREC Incident Streams Dataset
+TREC Incident Streams is more suitable for urgency classification because it already includes a priority label for each crisis-related post. CrisisLexT26 contains useful crisis tweets, but its main labels focus on informativeness, information type and source rather than urgency.
 
-The TREC Incident Streams dataset is the most relevant option for this task. It contains social media posts collected during emergency and crisis events. The posts are labelled by information type and priority or criticality for emergency response.
+## Selected Dataset: TREC Incident Streams
 
-This dataset could support the FireFusion urgency classifier because its priority labels are closely related to the proposed urgent and not urgent categories. However, the original labels would need to be reviewed and converted into the three FireFusion labels: urgent, not urgent, and not useful.
+The selected dataset is TREC Incident Streams, also known as TREC-IS.
 
-The full TREC Incident Streams collection contains more than 136,000 annotated posts from 98 crisis events. It includes different emergencies rather than only bushfires, so bushfire-related samples may need to be filtered or supplemented with additional data.
+TREC-IS contains social media posts collected during different emergency events, including wildfires, floods, earthquakes, hurricanes, explosions and other incidents.
 
-Source: https://www.nist.gov/publications/incident-streams-2021-deep-end-deeper-annotations-and-evaluations-twitter
+The dataset was created to help emergency-response systems identify useful and important information from social media. Each post includes information-type annotations and a priority label showing how important the message may be for an emergency responder.
 
-### 2. HumAID Dataset
+## Priority Labels
 
-The HumAID dataset contains approximately 77,000 human-labelled tweets collected from 19 natural disaster events between 2016 and 2019. These events include wildfires, floods, hurricanes, and earthquakes.
+The dataset uses four priority labels:
 
-The dataset includes useful categories such as requests or urgent needs, injured or dead people, displaced people and evacuations, infrastructure damage, caution and advice, other relevant information, and not humanitarian.
+- Critical
+- High
+- Medium
+- Low
 
-For FireFusion, posts about urgent needs, evacuations, injuries, and immediate danger could be mapped to the urgent category. General disaster updates could be mapped to not urgent, while not humanitarian or unclear posts could be mapped to not useful.
+Critical posts may include immediate danger, urgent requests for rescue or evacuation, or serious threats to life.
 
-A limitation is that the dataset covers several disaster types and does not directly provide the exact three urgency labels required by FireFusion. Therefore, its existing labels would need to be filtered and converted.
+High-priority posts may contain important warnings, reports of injuries or major damage.
 
-Source: https://crisisnlp.qcri.org/humaid_dataset.html
+Medium-priority posts may provide useful situation updates that do not require immediate action.
 
-### 3. CrisisLexT26 Dataset
+Low-priority posts may contain general discussion, advice, opinions or less important information.
 
-The CrisisLexT26 dataset contains social media posts collected from 26 crisis events that occurred during 2012 and 2013. Around 1,000 posts from each event were manually labelled for informativeness, information type, and information source.
+## Relevant Information Types
 
-This dataset could help identify content that belongs in the not useful category. Posts labelled as not informative or unrelated could be mapped to not useful. Informative posts could then be further reviewed and divided into urgent and not urgent categories.
+TREC-IS also includes information categories that may be useful for FireFusion, such as:
 
-A limitation is that CrisisLexT26 does not directly include urgency labels. It also contains different types of disasters rather than focusing only on bushfires. Therefore, additional manual labelling would be required before using it to train the FireFusion urgency classifier.
+- search and rescue requests
+- requests for assistance
+- affected individuals
+- infrastructure damage
+- evacuation information
+- warnings
+- location information
+- official updates
 
-Source: https://www.crisislex.org/data-collections.html
+These categories could help the model understand why a post has been assigned a particular urgency level.
 
-## Proposed Label Mapping
+## Suitability for FireFusion
 
-The existing dataset labels will need to be converted into the three FireFusion urgency classes.
+TREC-IS is suitable for FireFusion because the project needs to identify urgent information during bushfire emergencies.
 
-| FireFusion Label | Possible Source Labels or Content |
-|---|---|
-| **Urgent** | Evacuation warnings, people trapped, injuries, deaths, missing people, immediate requests for help, active fire threats, and critical infrastructure damage |
-| **Not Urgent** | General fire updates, recovery information, completed evacuations, damage reports without immediate danger, safety advice, and background information |
-| **Not Useful** | Unrelated content, advertisements, jokes, duplicated posts, unclear messages, rumours without useful details, and non-informative content |
+For example, a post requesting immediate evacuation assistance should receive a higher priority than a post containing general discussion about bushfire conditions.
 
-Some source labels may not clearly fit into one FireFusion class. These samples should be manually reviewed to ensure consistent and accurate labelling.
+The dataset could be used to add an urgency classification output to the current DeBERTa system while keeping misinformation detection as a separate task.
 
-## Dataset Limitations
+## Proposed FireFusion Data Format
 
-The available datasets do not exactly match the FireFusion urgency classification requirements. Most crisis datasets include labels for information type, humanitarian relevance, or informativeness rather than the exact urgent, not urgent, and not useful classes.
+The selected fields could be converted into a simple FireFusion format:
 
-Another limitation is that many datasets contain multiple disaster types, including floods, earthquakes, hurricanes, and wildfires. The language used in these events may be different from Australian bushfire-related communication.
+```text
+claim
+urgency_label
 
-Social media data may also contain spelling mistakes, abbreviations, duplicated posts, incomplete information, and informal language. Some older datasets may have missing posts because the original social media content was deleted or made unavailable.
+Example:
+{
+  "claim": "Residents near the fire zone must evacuate immediately.",
+  "urgency_label": "critical"
+}
 
-Because of these limitations, the selected data will require filtering, label conversion, manual checking, and possibly additional synthetic or manually annotated bushfire examples.
+0 = low
+1 = medium
+2 = high
+3 = critical
 
-## Recommended Approach
 
-The recommended approach is to use the TREC Incident Streams dataset as the main starting point because it already includes information about the priority or criticality of crisis-related posts.
 
-HumAID can be used as a secondary dataset because it contains useful categories related to evacuations, injuries, urgent needs, warnings, and other humanitarian information. CrisisLexT26 can help identify informative and non-informative posts, especially for the not useful category.
+## Dataset Exploration Plan
 
-The datasets should not be combined without reviewing their labels. A common FireFusion labelling guide should first be created. Selected samples should then be converted into the urgent, not urgent, and not useful classes.
+After obtaining access to the dataset, the following checks should be completed:
 
-Additional Australian bushfire examples may be manually collected or synthetically created to improve the relevance of the final dataset. These examples should include evacuation warnings, emergency alerts, fire updates, community information, unrelated posts, and misleading or unclear messages.
+- identify the available files and formats
+- display the number of records
+- review the column names
+- check for missing values
+- calculate the number of posts in each priority class
+- display sample posts from each urgency level
+- identify wildfire-related events
+- check whether the classes are balanced
+- review whether the text requires cleaning
 
-## Conclusion
+## Strengths
 
-No single public dataset fully matches the FireFusion urgency classification task. TREC Incident Streams is the most suitable starting point because it includes crisis-related priority information. HumAID and CrisisLexT26 can provide additional useful and non-useful examples.
+- Contains real crisis-related social media posts.
+- Includes direct priority labels.
+- Covers wildfires and several other disaster types.
+- Includes useful emergency-information categories.
+- Supports multi-class urgency classification.
+- Can be adapted for a future multi-task DeBERTa model.
 
-The final dataset should be created by filtering relevant crisis posts, converting the original labels into the three FireFusion classes, manually reviewing unclear samples, and adding Australian bushfire-specific examples where required.
+## Limitations
+
+- The posts may contain spelling errors, abbreviations and informal language.
+- Some original social media posts may need to be downloaded using their post IDs.
+- The dataset includes events from different countries and is not limited to Victoria.
+- The four priority classes may be imbalanced.
+- The label definitions must be checked carefully before combining different TREC-IS versions.
+- Access and usage conditions must be confirmed before including the data in FireFusion.
+
+## Recommendation
+
+TREC Incident Streams is the recommended dataset for the FireFusion urgency classification feature.
+
+It is more suitable than CrisisLexT26 because it directly provides priority labels that match the purpose of urgency classification. It also contains wildfire events and emergency-information categories that are relevant to FireFusion.
+
+The next step is to obtain the available TREC-IS data, inspect its structure and complete a small Python exploration of the priority-label distribution.
+
+## Dataset Exploration Results
+
+The selected TREC Incident Streams dataset was explored using a Python script.
+
+The dataset contains:
+
+- 71 crisis events
+- 97,577 labelled tweets
+- 9 available fields
+- 9,427 wildfire or fire-related tweets
+
+The main fields are:
+
+- `postText`
+- `postPriority`
+- `postCategories`
+- `eventType`
+- `eventID`
+- `postID`
+
+### Missing Values
+
+The exploration found:
+
+- 21,118 records with missing `postText`
+- 54 records with missing `postCategories`
+- 52,017 records with missing `multipleJudgements`
+
+The missing `multipleJudgements` values are less important because this field is not required for urgency classification. However, records with missing `postText` should be removed before model training.
+
+### Priority Label Distribution
+
+The urgency labels are distributed as follows:
+
+- Low: 64,090
+- Medium: 20,487
+- High: 11,413
+- Critical: 1,585
+- Unknown: 2
+
+The dataset is imbalanced because most records belong to the Low class, while the Critical class is much smaller.
+
+### Event Types
+
+The dataset includes several emergency types, including:
+
+- wildfire
+- fire
+- flood
+- earthquake
+- typhoon
+- shooting
+- bombing
+- explosion
+- storm
+- tornado
+- pandemic
+- hostage incidents
+
+There are 9,427 wildfire and fire-related tweets, which makes the dataset relevant to FireFusion.
+
+### Exploration Conclusion
+
+The dataset is suitable for urgency classification because it contains direct priority labels and a large number of crisis-related messages.
+
+Before training, the dataset should be cleaned by:
+
+- removing records with missing text
+- removing the two Unknown priority labels
+- checking duplicate posts
+- reviewing class imbalance
+- considering class weights or balanced sampling
+- selecting wildfire-related records for FireFusion-focused experiments
+
+## References
+
+- TREC Incident Streams: https://www.dcs.gla.ac.uk/~richardm/TREC_IS/
+- TREC-IS task information: https://www.dcs.gla.ac.uk/~richardm/TREC_IS/2020/participate.html
+- CrisisLex datasets: https://crisislex.org/data-collections.html
