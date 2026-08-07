@@ -4,70 +4,95 @@
 
 **Authors:** Rishu Kumar Dube and Andres Gomez Perez
 
-**Date:** 31 July 2026
+**Update Date:** 31 July 2026
 
 ---
 
 ## Purpose
 
-This document evaluates Bidirectional Long Short-Term Memory (BiLSTM) networks as a potential additional layer for the existing ConvLSTM model used in the bushfire forecasting component of FireFusion. It examines the potential functionality BiLSTM could provide, its strengths and weaknesses within this context, possible integration with the current architecture, and an evaluation strategy for determining whether a hybrid ConvLSTM–BiLSTM model offers measurable benefits over the existing forecasting pipeline.
+This document evaluates BiLSTM as a potential additional layer for the existing ConvLSTM model used in FireFusion's bushfire forecasting component. It examines its potential functionality, strengths, weaknesses, integration requirements, and evaluation strategy.
+
+Since the existing ConvLSTM operates with 5D spatiotemporal data, the investigation also considers the dimensional implications of integrating BiLSTM, which requires a transition from 5D to 3D. As an alternative, BiConvLSTM is evaluated as an additional layer that can preserve the 5D spatial-temporal representation. Both approaches are considered to determine which provides the most suitable extension to the current forecasting architecture.
 
 ---
 
 ## BiLSTM Overview
 
-Bidirectional Long Short-Term Memory (BiLSTM) is an extension of the traditional Long Short-Term Memory (LSTM) network designed to improve sequence modelling by processing temporal data in both forward and backward directions. Unlike a conventional LSTM, which learns dependencies only from past observations, a BiLSTM combines information from both directions to produce a more comprehensive representation of temporal patterns. This enables the network to capture long-range dependencies and complex sequential relationships that may not be fully represented using a single-directional model.
+Bidirectional Long Short-Term Memory (BiLSTM) is an extension of the traditional Long Short-Term Memory (LSTM) network designed to improve sequence modelling by processing temporal data in both forward and backward directions. Unlike a conventional LSTM, which learns dependencies only from past observations, a BiLSTM combines information from both directions to produce a more comprehensive representation of temporal patterns. This enables the network to capture long-range dependencies and complex sequential relationships that may not be fully represented using a single-directional model. A standard BiLSTM expects 3D input data, typically structured as (batch, time steps, features).
 
 BiLSTM has been successfully applied to a wide range of sequence modelling tasks, including natural language processing, speech recognition, environmental forecasting, and time-series prediction. More recently, it has been incorporated into hybrid deep learning architectures, where convolutional models extract spatial features while BiLSTM refines temporal representations. This combination has shown promising results in spatiotemporal forecasting applications by leveraging the strengths of both spatial and sequential feature learning.
 
 For FireFusion, BiLSTM is considered as a potential enhancement rather than a replacement for the existing ConvLSTM model. The motivation is to investigate whether incorporating bidirectional temporal learning can complement ConvLSTM's spatial-temporal feature extraction, leading to a richer representation of environmental dynamics and potentially improving bushfire forecasting performance. The effectiveness of this approach, however, should be validated through experimental evaluation within the FireFusion framework.
 
 ---
+## Strategy Approach
+
+The original strategy proposes adding a BiLSTM layer after the existing ConvLSTM, rather than replacing the current model. FireFusion uses 5D tensors (batch, time, height, width, channels), while a standard BiLSTM operates on 3D tensors (batch, time, features).
+
+Therefore, the ConvLSTM output must be reshaped from 5D to 3D before entering the BiLSTM and reconstructed to the required 5D output afterwards. Although reshaping preserves the values, the explicit spatial structure is no longer available to the BiLSTM and may produce large feature vectors.
+
+As an alternative, adding a BiConvLSTM layer after the existing ConvLSTM will also be considered. This approach can maintain the 5D spatiotemporal representation, avoiding the 5D-to-3D transition while preserving explicit spatial structure.
+
+---
 
 ## Evidence from Recent Research
 
-Recent studies indicate that hybrid deep learning architectures are becoming increasingly effective for spatiotemporal forecasting. A comprehensive review by **Andrianarivony and Akhloufi (2024)** identifies ConvLSTM and other hybrid neural networks as among the most effective approaches for wildfire spread prediction due to their ability to capture both spatial and temporal dependencies. The review also highlights hybrid architectures as a promising direction for improving prediction accuracy and robustness in complex wildfire environments.
+Within wildfire forecasting, Marjani et al. (2024) demonstrated that combining convolutional spatial feature extraction with BiLSTM temporal modelling can effectively predict wildfire spread using spatiotemporal environmental data.
 
-Within the wildfire domain, **Marjani, Mahdianpari and Mohammadimanesh (2024)** proposed a CNN–BiLSTM architecture that improved near-real-time wildfire spread prediction by effectively learning spatial features and long-term temporal dependencies from environmental data. Beyond wildfire applications, **Li et al. (2025)** demonstrated that a hybrid SSA–ConvLSTM–BiLSTM architecture enhanced forecasting performance in a complex spatiotemporal prediction task, providing further evidence that combining ConvLSTM and BiLSTM can improve temporal feature learning across different environmental forecasting domains. These findings support investigating a similar hybrid architecture within FireFusion while recognising that its effectiveness must be validated using the project's own datasets.
+Recent studies provide evidence supporting the two architectural strategies considered for FireFusion. Li et al. (2025) developed an SSA–ConvLSTM–BiLSTM model in which ConvLSTM extracts spatiotemporal features and BiLSTM provides additional bidirectional temporal learning. Their architecture used two ConvLSTM and two BiLSTM layers and outperformed standalone ConvLSTM, supporting the potential value of adding BiLSTM after the existing model. However, the study does not explicitly describe the dimensional transformation between these layers.
+
+For the alternative strategy, Mohammad et al. (2023) investigated ConvLSTM and BiConvLSTM encoder-decoder architectures for spatiotemporal energy-demand forecasting. BiConvLSTM extends ConvLSTM by processing temporal information bidirectionally while retaining convolutional operations for spatial feature learning. This provides relevant evidence for investigating BiConvLSTM as an additional layer after FireFusion's existing ConvLSTM, particularly because it can preserve spatial-temporal structure rather than converting the representation for a standard BiLSTM.
 
 ---
 
 ## Potential Functionality in FireFusion
 
-Integrating BiLSTM into FireFusion has the potential to enhance the existing ConvLSTM model by improving temporal feature learning from sequential environmental data. A hybrid ConvLSTM–BiLSTM architecture could provide a richer representation of wildfire dynamics by capturing more complex temporal relationships while preserving ConvLSTM's spatial modelling capabilities. This may improve the model's ability to analyse environmental variables such as weather conditions, vegetation, and historical fire progression. Recent studies have shown that hybrid deep learning architectures can effectively model these complex spatiotemporal relationships, making BiLSTM a promising enhancement for future investigation within FireFusion.
+Both BiLSTM and BiConvLSTM could enhance the existing FireFusion ConvLSTM model through bidirectional temporal learning, but with different roles.
+
+Adding a BiLSTM layer would primarily provide temporal refinement. The existing ConvLSTM would continue extracting spatial-temporal features, while BiLSTM would focus on learning more complex temporal dependencies from those extracted features.
+
+Adding a BiConvLSTM layer would instead provide additional spatial-temporal refinement. Because convolutional operations remain within the recurrent structure, the model could continue learning spatial relationships while also processing temporal information bidirectionally.
+
+Therefore, the two approaches represent different enhancement strategies: BiLSTM focuses mainly on temporal refinement after ConvLSTM feature extraction, while BiConvLSTM continues refining spatial and temporal information together. Their effectiveness within FireFusion should be determined experimentally.
 
 ---
 
 ## Strengths
 
-- **Enhanced temporal learning:** BiLSTM captures sequential dependencies in both forward and backward directions, providing a richer representation of temporal patterns than a standard LSTM.
+### ConvLSTM → BiLSTM
 
-- **Complementary to ConvLSTM:** While ConvLSTM extracts spatial-temporal features, BiLSTM can further refine temporal information without replacing the existing architecture.
+- **Enhanced temporal learning:** BiLSTM processes the extracted features in both forward and backward directions, potentially capturing more complex temporal dependencies.
+- **Clear division of responsibilities:** ConvLSTM performs spatial-temporal feature extraction, while BiLSTM focuses mainly on temporal refinement.
+- **Lower architectural redundancy:** BiLSTM introduces a different type of processing rather than adding another convolutional recurrent layer.
+- **Lower computational complexity:** Generally requires fewer computational resources than adding a BiConvLSTM, although this depends on the size of the reshaped feature vector.
+- **Research support:** Li et al. (2025) demonstrated improved forecasting performance using a ConvLSTM–BiLSTM architecture compared with standalone ConvLSTM.
 
-- **Improved modelling of environmental dynamics:** BiLSTM is well suited for learning relationships between evolving variables such as weather conditions, vegetation, and historical fire behaviour.
+### ConvLSTM → BiConvLSTM
 
-- **Automatic temporal representation learning:** Reduces dependence on manually engineered lag features and rolling window statistics.
+- **Maintains 5D data format:** BiConvLSTM can process the ConvLSTM output while maintaining the 5D `(batch, time, height, width, channels)` structure.
+- **Preserves spatial-temporal structure:** The additional layer can continue processing spatial grids without converting them into standard sequential feature vectors.
+- **Continued spatial-temporal refinement:** Spatial and temporal representations can be further learned together.
+- **Bidirectional temporal processing:** Provides forward and backward temporal learning while retaining convolutional spatial operations.
 
-- **Native multivariate sequence processing:** Multiple environmental variables can be processed simultaneously as parallel input features.
-
-- **Flexible integration:** BiLSTM integrates naturally with convolutional architectures, making it suitable as an additional layer rather than a replacement.
-
-- **Strong research support:** Recent studies have demonstrated promising results using hybrid ConvLSTM–BiLSTM architectures across multiple spatiotemporal forecasting applications.
 
 
 ## Weaknesses
 
-- **Higher computational cost:** Adding a BiLSTM layer increases the number of model parameters, resulting in greater computational and memory requirements during training and inference.
+### ConvLSTM → BiLSTM
 
-- **Longer training time:** The additional network complexity may increase training time, particularly when working with large spatiotemporal datasets.
+- **Requires dimensional transformation:** The 5D ConvLSTM output must be reshaped into the 3D format required by BiLSTM and later reconstructed to the required 5D output.
+- **Loss of explicit spatial structure:** Although reshaping preserves the numerical values, the BiLSTM no longer directly represents spatial relationships between neighbouring locations.
+- **Potentially large feature vectors:** Combining height, width, and channels into a single feature dimension can significantly increase the BiLSTM input size.
+- **Risk of overfitting:** The additional recurrent layer increases model capacity and may require further regularisation.
+- **Additional computational cost:** Training and inference become more expensive compared with the current ConvLSTM baseline.
 
-- **Risk of overfitting:** More complex architectures require sufficient training data and appropriate regularisation to prevent overfitting.
+### ConvLSTM → BiConvLSTM
 
-- **No spatial awareness:** BiLSTM models temporal dependencies only. Spatial relationships are still learned by the ConvLSTM layer.
-
-- **Experimental validation required:** Although hybrid architectures have shown promising results in previous studies, their effectiveness within FireFusion must be validated using the project's datasets and evaluation metrics before adoption.
-
-- **Additional implementation complexity:** Integrating an extra recurrent layer increases the overall model complexity and computational requirements.
+- **Higher computational complexity:** Bidirectional convolutional recurrent operations can significantly increase training and inference costs.
+- **Higher memory requirements:** Maintaining spatial feature maps throughout bidirectional recurrent processing requires additional memory.
+- **Potential architectural redundancy:** Both ConvLSTM and BiConvLSTM perform spatial-temporal feature learning, so the additional layer may partially repeat features already captured by the existing model.
+- **Higher risk of overfitting:** The additional convolutional recurrent capacity may be difficult to justify if the available training dataset is limited.
+- **More complex implementation:** BiConvLSTM introduces additional convolutional recurrent parameters and may require more extensive integration and hyperparameter tuning.
 
 ---
 
@@ -86,7 +111,7 @@ Environmental Data
  Data Preprocessing
         │
         ▼
-    ConvLSTM
+     ConvLSTM
         │
         ▼
  Bushfire Prediction
@@ -98,65 +123,166 @@ Environmental Data
  Backend / Frontend
 ```
 
-### Proposed ConvLSTM–BiLSTM Architecture
+**There are two models to evalute and define which model is more suitable for our project**
 
-The proposed architecture extends the current FireFusion forecasting pipeline by introducing a **BiLSTM layer after the ConvLSTM module**. ConvLSTM continues to learn spatial-temporal features from sequential environmental data, while the BiLSTM refines the extracted temporal representations by processing sequence information in both forward and backward directions. This hybrid architecture preserves the strengths of the existing ConvLSTM model while enhancing its ability to capture complex temporal dependencies before generating the final bushfire prediction.
+### Option 1: ConvLSTM → BiLSTM
+
+The first strategy adds a **BiLSTM layer after the existing ConvLSTM** to provide additional bidirectional temporal learning. Since FireFusion operates with 5D spatiotemporal data while BiLSTM requires 3D sequential input, a dimensional transformation is required before the BiLSTM and the prediction must later be reconstructed into the required 5D output format.
 
 ```text
-              Proposed FireFusion Pipeline
+              Proposed ConvLSTM → BiLSTM Pipeline
 
-         Environmental Data
-                 │
-                 ▼
-        Data Preprocessing
-                 │
-                 ▼
-            ConvLSTM Layer
-      (Spatial + Temporal Features)
-                 │
-                 ▼
-            BiLSTM Layer
-    (Temporal Feature Refinement)
-                 │
-                 ▼
-          Dense / Output Layer
-                 │
-                 ▼
-        Bushfire Prediction
-                 │
-                 ▼
-             FastAPI API
-                 │
-                 ▼
-       Backend / Frontend
+                  Environmental Data
+                          │
+                          ▼
+                   Data Preprocessing
+                          │
+                          ▼
+                    5D Input Tensor
+        (batch, time, height, width, channels)
+                          │
+                          ▼
+                  Existing ConvLSTM
+             (Spatial + Temporal Learning)
+                          │
+                          ▼
+                   5D Feature Tensor
+        (batch, time, height, width, features)
+                          │
+                          ▼
+                        Reshape
+                     5D → 3D
+                          │
+                          ▼
+                    3D Sequence
+       (batch, time, height × width × features)
+                          │
+                          ▼
+                       BiLSTM
+          (Bidirectional Temporal Refinement)
+                          │
+                          ▼
+                  Output Projection
+                          │
+                          ▼
+                  Reshape to 5D
+                          │
+                          ▼
+                 Bushfire Prediction
+ (batch, horizon, height, width, output_channels)
+                          │
+                          ▼
+                     FastAPI API
+                          │
+                          ▼
+                  Backend / Frontend
 ```
 
-The proposed architecture should be considered an experimental enhancement rather than a replacement for the existing forecasting model. Its effectiveness should be determined through controlled experiments using FireFusion's datasets and benchmarked against the current ConvLSTM implementation before any production adoption.
+The reshape preserves the numerical values produced by ConvLSTM, but the explicit spatial organisation is no longer available to the BiLSTM. Combining the spatial dimensions can also produce a large feature vector, increasing computational requirements.
+
+### Option 2: ConvLSTM → BiConvLSTM
+
+The second strategy adds a **BiConvLSTM layer after the existing ConvLSTM**. Unlike the BiLSTM option, BiConvLSTM can continue processing the spatial-temporal representation without converting it from 5D to 3D. This allows the additional layer to perform bidirectional temporal learning while maintaining explicit spatial information.
+
+```text
+           Proposed ConvLSTM → BiConvLSTM Pipeline
+
+                  Environmental Data
+                          │
+                          ▼
+                   Data Preprocessing
+                          │
+                          ▼
+                    5D Input Tensor
+        (batch, time, height, width, channels)
+                          │
+                          ▼
+                  Existing ConvLSTM
+             (Spatial + Temporal Learning)
+                          │
+                          ▼
+                   5D Feature Tensor
+        (batch, time, height, width, features)
+                          │
+                          ▼
+                     BiConvLSTM
+       (Bidirectional Spatial + Temporal Refinement)
+                          │
+                          ▼
+                  Output Projection
+                          │
+                          ▼
+                 Bushfire Prediction
+ (batch, horizon, height, width, output_channels)
+                          │
+                          ▼
+                     FastAPI API
+                          │
+                          ▼
+                  Backend / Frontend
+```
+
+This approach maintains the 5D representation throughout the recurrent processing, avoiding the 5D-to-3D transformation required by BiLSTM. However, it introduces additional convolutional recurrent operations, resulting in greater computational and memory requirements and potential overlap with features already learned by the existing ConvLSTM.
 
 ---
+### Architectural Comparison
 
+Both strategies extend the existing ConvLSTM but introduce different architectural implications.
+
+| Aspect | ConvLSTM → BiLSTM | ConvLSTM → BiConvLSTM |
+|---|---|---|
+| **Input to additional layer** | Requires 5D → 3D transformation | Maintains 5D representation |
+| **Spatial structure** | Not explicitly available within BiLSTM after reshape | Preserved throughout recurrent processing |
+| **Temporal learning** | Focuses mainly on bidirectional temporal refinement | Bidirectional temporal learning with spatial context |
+| **Spatial learning** | Primarily handled by the existing ConvLSTM | Continues in the additional BiConvLSTM layer |
+| **Architectural redundancy** | Lower, as the layers have more distinct roles | Higher potential overlap with existing ConvLSTM |
+| **Computational complexity** | Generally lower, but depends on reshaped feature size | Generally higher due to bidirectional convolutional operations |
+| **Memory requirements** | Generally lower | Higher due to continued spatial processing |
+| **Overfitting risk** | Increased compared with baseline | Potentially higher due to greater model capacity |
+| **5D compatibility** | Requires reconstruction to 5D output | Naturally maintains the 5D spatiotemporal format |
+
+Neither approach can be considered superior without experimental validation. Their performance should therefore be compared against the existing ConvLSTM baseline using the same FireFusion data and evaluation conditions.
+
+---
 ## Model Evaluation
 
-The proposed ConvLSTM–BiLSTM model should be evaluated against the current ConvLSTM baseline using the same training and testing datasets. Performance should be assessed using regression metrics such as **Mean Squared Error (MSE)**, **Root Mean Squared Error (RMSE)**, and **Mean Absolute Error (MAE)** to measure prediction accuracy.
+The two proposed architectures should be evaluated against the **existing ConvLSTM baseline** under the same experimental conditions:
 
-Computational performance should also be considered by comparing training time, inference time, memory usage, and model complexity. The hybrid model should only be considered for adoption if it demonstrates a meaningful improvement in forecasting performance while maintaining acceptable computational efficiency.
+1. **Current ConvLSTM**
+2. **ConvLSTM → BiLSTM**
+3. **ConvLSTM → BiConvLSTM**
 
+The evaluation should consider both **forecasting performance and computational efficiency**. Prediction accuracy should be assessed using the existing regression metrics, including **Mean Squared Error (MSE), Root Mean Squared Error (RMSE), and Mean Absolute Error (MAE)**.
+
+Computational performance should also be compared using:
+
+- Training time
+- Inference time
+- Memory usage
+- Number of trainable parameters
+- Model complexity
+
+In addition, the evaluation should verify that each architecture produces the required **5D FireFusion output format**.
+
+The additional layers should only be considered beneficial if they provide a consistent improvement over the current ConvLSTM while maintaining acceptable computational cost, generalisation performance, and dimensional compatibility.
+
+---
 ### Expected Benefits and Trade-offs
 
-| Aspect | Current ConvLSTM | Proposed ConvLSTM–BiLSTM |
-|---|---|---|
-| Spatial feature learning | Strong | Strong |
-| Temporal feature learning | Good | Potentially improved through bidirectional sequence modelling |
-| Model complexity | Lower | Higher |
-| Training time | Lower | Higher |
-| Inference cost | Lower | Higher |
-| Memory requirements | Lower | Higher |
-| Overfitting risk | Lower | Higher, given the limited dataset |
-| Forecasting performance | Baseline | Potential improvement, subject to experimental validation |
+| Aspect | Current ConvLSTM | ConvLSTM → BiLSTM | ConvLSTM → BiConvLSTM |
+|---|---|---|---|
+| **Spatial feature learning** | Strong | Primarily handled by ConvLSTM | Continued spatial refinement |
+| **Temporal feature learning** | Baseline | Bidirectional temporal refinement | Bidirectional temporal refinement with spatial context |
+| **Data dimensionality** | Maintains 5D | Requires 5D → 3D → 5D transformation | Maintains 5D |
+| **Spatial structure after additional layer** | Preserved | Not explicitly preserved within BiLSTM | Preserved |
+| **Model complexity** | Lower | Higher | Highest |
+| **Computational cost** | Lower | Moderate, depending on feature size | Higher |
+| **Memory requirements** | Lower | Moderate | Higher |
+| **Architectural redundancy** | Baseline | Lower | Potentially higher |
+| **Overfitting risk** | Lower | Increased | Potentially higher |
+| **Expected benefit** | Current benchmark | Stronger temporal modelling | Stronger spatial-temporal refinement |
 
-Based on the current literature, integrating a BiLSTM layer appears technically promising. However, the available evidence is not sufficient to justify replacing the existing ConvLSTM model without experimental validation using the FireFusion dataset and benchmarking against the current baseline.
 
-The additional model capacity is the principal risk. The proposed hybrid introduces a substantial number of parameters into a model already trained on a limited record of Victorian fire seasons. Therefore, any improvement in validation performance must be assessed against the possibility that the model is fitting the training distribution more closely rather than generalising better.
 
 ### Controlled Evaluation Strategy
 
@@ -174,18 +300,22 @@ The proposed ConvLSTM–BiLSTM model should be evaluated against the current Con
 
 ## Conclusion and Recommendation
 
-The literature reviewed in this investigation indicates that BiLSTM is a promising enhancement for spatiotemporal forecasting, particularly when integrated with convolutional architectures. Recent studies have demonstrated that hybrid models can improve temporal feature learning and forecasting performance in wildfire and other environmental prediction tasks, supporting the investigation of similar approaches within FireFusion.
+## Conclusion and Recommendation
 
-Based on the current evidence, integrating a BiLSTM layer into FireFusion's existing ConvLSTM pipeline represents a technically sound direction for future development. However, adoption should only be considered after experimental validation demonstrates a meaningful improvement over the current ConvLSTM model using the project's datasets and evaluation strategy.
+The literature reviewed in this investigation indicates that both **BiLSTM and BiConvLSTM are promising enhancements for spatiotemporal forecasting** when integrated with convolutional recurrent architectures. Recent studies have demonstrated that hybrid models can improve temporal learning and forecasting performance in wildfire and other environmental prediction tasks, supporting the investigation of similar approaches within FireFusion.
 
-If the hybrid architecture improves forecasting performance while maintaining acceptable computational efficiency and generalisation, it could become a valuable enhancement to FireFusion's bushfire forecasting system.
+The **ConvLSTM → BiLSTM** approach provides specialised bidirectional temporal refinement but requires transforming the 5D ConvLSTM output into 3D and later reconstructing the required 5D prediction. In contrast, **ConvLSTM → BiConvLSTM** preserves the 5D spatial-temporal representation but introduces greater computational complexity and potential architectural redundancy.
+
+Based on the current evidence, both approaches represent technically sound directions for future development. However, adoption should only be considered after experimental validation demonstrates a meaningful improvement over the existing ConvLSTM baseline using FireFusion's datasets.
+
+If either architecture improves forecasting performance while maintaining acceptable computational efficiency, generalisation, and 5D output compatibility, it could become a valuable enhancement to FireFusion's bushfire forecasting system.
 
 ---
 
 ## References
 
-Andrianarivony HS and Akhloufi MA (2024) ‘Machine learning and deep learning for wildfire spread prediction: a review’, *Fire*, 7(12):482, doi:10.3390/fire7120482
-
 Li W, Zhu H, Yang F, Wen C, Shi S, Zhao D, He C and Li Z (2025) ‘Storm-time ionospheric model over Yunnan-Sichuan area of China based on the SSA-ConvLSTM-BiLSTM algorithm’, *GPS Solutions*, 29(2):77, doi:10.1007/s10291-025-01836-6
 
 Marjani M, Mahdianpari M and Mohammadimanesh F (2024) ‘CNN-BiLSTM: a novel deep learning model for near-real-time daily wildfire spread prediction’, *Remote Sensing*, 16(8):1467, doi:10.3390/rs16081467
+
+Mohammad, F, Kang, D-K, Ahmed, MA & Kim, Y-C (2023), ‘Energy demand load forecasting for electric vehicle charging stations network based on ConvLSTM and BiConvLSTM architectures’, *IEEE*, vol. 11, pp. 67350–67369, doi:10.1109/ACCESS.2023.3274657.
