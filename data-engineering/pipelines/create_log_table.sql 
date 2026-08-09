@@ -1,0 +1,15 @@
+-- Run this once in the Supabase SQL editor to create the table that
+-- run_all.py logs each pipeline run into.
+
+create table if not exists pipeline_run_log (
+    id bigint generated always as identity primary key,
+    pipeline_name text not null,
+    success boolean not null,
+    started_at timestamptz not null,
+    finished_at timestamptz not null,
+    output text,
+    created_at timestamptz default now()
+);
+
+create index if not exists idx_pipeline_run_log_name_time
+    on pipeline_run_log (pipeline_name, started_at desc);

@@ -1,0 +1,154 @@
+"""
+FireFusion — Daily Pipeline Orchestrator
+
+Runs every extraction pipeline under /pipelines/<source_name>/ in sequence,
+captures the result of each, and writes a run log to Supabase so the team
+can see (from the dashboard or a query) whether last night's run succeeded.
+
+How it finds pipelines
+-----------------------
+Each data source lives in its own folder under /pipelines (matching the
+repo structure in the README), e.g.:
+
+    pipelines/
+        open_meteo/run.py
+        nasa_firms/run.py
+        historical_fire/run.py
+
+This script looks for a file called run.py inside every direct
+subfolder of /pipelines and executes it as a subprocess. If your
+entrypoint is named differently (main.py, extract.py, etc.), either
+rename it to run.py or add it to ENTRYPOINT_NAMES below.
+
+Environment variables required (set as GitHub Actions secrets, or in
+a local .env when running manually)
+-----------------------------------
+    SUPABASE_URL       Project URL, e.g. https://xxxx.supabase.co
+    SUPABASE_KEY        Service role or anon key, whichever the pipelines use
+Any pipeline-specific keys (NASA_API_KEY etc.) should already be read by
+the individual pipeline scripts themselves — this orchestrator does not
+touch those, it just runs the scripts and lets them read their own env.
+
+Usage
+-----
+    python pipelines/run_all.py
+
+Exit code is non-zero if any pipeline fails, so GitHub Actions marks
+the run as failed and the team gets notified.
+"""
+
+import os
+import sys
+import subprocess
+import datetime
+from pathlib import Path
+
+try:
+    from supabase import create_client
+except ImportError:
+    create_client = None
+
+ENTRYPOINT_NAMES = ["run.py", "main.py", "extract.py"]
+PIPELINES_DIR = Path(__file__).resolve().parent
+LOG_TABLE = "pipeline_run_log"
+
+
+def find_pipeline_scripts():
+    """Return a list of (pipeline_name, script_path) for every subfolder
+    under /pipelines that contains a recognised entrypoint file."""
+    found = []
+    for entry in sorted(PIPELINES_DIR.iterdir()):
+        if not entry.is_dir() or entry.name.startswith((".", "__")):
+            continue
+        for name in ENTRYPOINT_NAMES:
+            script = entry / name
+            if script.exists():
+                found.append((entry.name, script))
+                break
+    return found
+
+
+def run_script(script_path):
+    """Run one pipeline script as a subprocess. Returns (success, output)."""
+    try:
+        result = subprocess.run(
+            [sys.executable, str(script_path)],
+            capture_output=True,
+            text=True,
+            timeout=1800,  # 30 min safety cap per pipeline
+        )
+        success = result.returncode == 0
+        output = result.stdout[-4000:] + "\n" + result.stderr[-4000:]
+        return success, output
+    except subprocess.TimeoutExpired:
+        return False, "Timed out after 30 minutes"
+    except Exception as exc:
+        return False, f"Failed to launch: {exc}"
+
+
+def get_supabase_client():
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_KEY")
+    if not url or not key or create_client is None:
+        return None
+    return create_client(url, key)
+
+
+def log_run(client, pipeline_name, success, output, started_at, finished_at):
+    if client is None:
+        return
+    try:
+        client.table(LOG_TABLE).insert({
+            "pipeline_name": pipeline_name,
+            "success": success,
+            "started_at": started_at.isoformat(),
+            "finished_at": finished_at.isoformat(),
+            "output": output[:8000],
+        }).execute()
+    except Exception as exc:
+        print(f"  [warn] could not write log to Supabase: {exc}")
+
+
+def main():
+    client = get_supabase_client()
+    if client is None:
+        print("[warn] SUPABASE_URL / SUPABASE_KEY not set, or supabase-py "
+              "not installed — pipelines will still run, but results won't "
+              "be logged to Supabase.\n")
+
+    scripts = find_pipeline_scripts()
+    if not scripts:
+        print(f"No pipeline scripts found under {PIPELINES_DIR}. "
+              f"Expected one of {ENTRYPOINT_NAMES} in each subfolder.")
+        sys.exit(1)
+
+    print(f"Found {len(scripts)} pipeline(s): "
+          f"{', '.join(name for name, _ in scripts)}\n")
+
+    any_failed = False
+    for name, script in scripts:
+        print(f"--- Running {name} ({script.relative_to(PIPELINES_DIR)}) ---")
+        started_at = datetime.datetime.utcnow()
+        success, output = run_script(script)
+        finished_at = datetime.datetime.utcnow()
+
+        status = "OK" if success else "FAILED"
+        duration = (finished_at - started_at).total_seconds()
+        print(f"  {status} in {duration:.1f}s")
+        if not success:
+            any_failed = True
+            print(output[-1000:])
+
+        log_run(client, name, success, output, started_at, finished_at)
+        print()
+
+    if any_failed:
+        print("One or more pipelines failed — see logs above and in "
+              f"the {LOG_TABLE} table.")
+        sys.exit(1)
+
+    print("All pipelines completed successfully.")
+
+
+if __name__ == "__main__":
+    main()
