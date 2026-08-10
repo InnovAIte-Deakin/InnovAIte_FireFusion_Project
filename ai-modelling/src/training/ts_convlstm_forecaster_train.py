@@ -52,43 +52,77 @@ FEATURES = [
     "v_component_of_wind_10m"
 ]
 
-class MaskedMSELoss(nn.Module):
+class MaskedTverskyLoss(nn.Module):
     """
-    MSE loss that only considers valid (land) cells.
- 
-    Invalid cells (ocean, out-of-bounds) are excluded from both the
-    numerator and denominator, so they don't influence gradients and
-    the reported loss reflects true performance on real data.
- 
+    Tversky loss for binary bushfire classification using a spatial mask.
+
+    Converts raw logits to probabilities and applies a spatial mask so that
+    only relevant Victorian cells contribute to the loss, while ocean and
+    NSW cells are excluded.
+
     Inputs:
-        valid_mask (Tensor): Boolean [H, W] tensor — True where cells are valid.
-    
-    Note: retained as a placeholder from the regression architecture. The model
-    now outputs raw logits for binary classification, so this is not an
-    appropriate training objective — to be replaced with a masked
-    BCEWithLogitsLoss using the computed pos_weight.
+        valid_mask (Tensor): Boolean [H, W] tensor — True where cells should contribute to the loss.
+        alpha (float): Weight applied to false positives.
+        beta (float): Weight applied to false negatives.
+        smooth (float): Small value added for numerical stability.
     """
-    def __init__(self, valid_mask: torch.Tensor) -> None:
+
+    def __init__(
+        self,
+        valid_mask: torch.Tensor,
+        alpha: float = 0.3,
+        beta: float = 0.7,
+        smooth: float = 1e-6
+    ) -> None:
         super().__init__()
+
+        self.alpha = alpha
+        self.beta = beta
+        self.smooth = smooth
+
         self.register_buffer(
-            'mask',
+            "mask",
             valid_mask.float().unsqueeze(0).unsqueeze(0).unsqueeze(-1)
         )
- 
-    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+
+    def forward(
+        self,
+        pred: torch.Tensor,
+        target: torch.Tensor
+    ) -> torch.Tensor:
         """
         Inputs:
-            pred   (Tensor): [B, horizon, H, W, F]
-            target (Tensor): [B, horizon, H, W, F]
- 
-        Outputs:
-            Tensor: scalar masked MSE loss
-        """
-        squared_error = (pred - target) ** 2
-        masked = squared_error * self.mask
+            pred   (Tensor): [B, horizon, H, W, F] raw logits
+            target (Tensor): [B, horizon, H, W, F] binary targets
 
-        n_valid = self.mask.sum() * pred.shape[0] * pred.shape[1] * pred.shape[-1]
-        return masked.sum() / n_valid
+        Outputs:
+            Tensor: scalar masked Tversky loss
+        """
+
+        prob = torch.sigmoid(pred)
+
+        true_positive = (
+            self.mask * prob * target
+        ).sum()
+
+        false_positive = (
+            self.mask * prob * (1 - target)
+        ).sum()
+
+        false_negative = (
+            self.mask * (1 - prob) * target
+        ).sum()
+
+        tversky_index = (
+            true_positive + self.smooth
+        ) / (
+            true_positive
+            + self.alpha * false_positive
+            + self.beta * false_negative
+            + self.smooth
+        )
+
+        return 1 - tversky_index 
 
 class GriddedTimeSeriesDataset(Dataset):
     """
@@ -151,7 +185,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
     Inputs:
         model (nn.Module): The neural network model to train
         dataloader (DataLoader): Training dataloader with (X, y) batches
-        criterion (nn.Module): Loss function (e.g., MSELoss)
+        criterion (nn.Module): Loss function (Tversky)
         optimizer (torch.optim.Optimizer): Optimizer for parameter updates (e.g., Adam)
         device (torch.device): Device to run training on (cuda or cpu)
     
@@ -178,7 +212,7 @@ def evaluate(model, dataloader, criterion, device):
     Inputs:
         model (nn.Module): The neural network model to evaluate
         dataloader (DataLoader): Validation/test dataloader with (X, y) batches
-        criterion (nn.Module): Loss function to compute (e.g., MSELoss)
+        criterion (nn.Module): Loss function to compute (Tversky)
         device (torch.device): Device to run evaluation on (cuda or cpu)
     
     Outputs:
@@ -594,7 +628,7 @@ def main():
     # Not yet consumed — the masked BCEWithLogitsLoss that uses it needs to be added.
     pos_weight, _, _, _ = compute_pos_weight(train_labels, valid_mask)
     
-    criterion = MaskedMSELoss(valid_mask_tensor).to(DEVICE)
+    criterion = MaskedTverskyLoss(valid_mask_tensor, alpha=0.3, beta=0.7).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     
     best_val_loss = float("inf")
@@ -603,7 +637,7 @@ def main():
     patience_counter = 0
     
     print(f"Training config:")
-    print(f"Loss: MSELoss")
+    print(f"Loss: Tversky")
     print(f"Learning Rate: {LEARNING_RATE}")
     print(f"Epochs: {EPOCHS}")
     print(f"Early stopping patience: {patience}")
