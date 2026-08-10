@@ -196,8 +196,6 @@ def batch_process_json_files(
     input_dir: str | Path,
     output_dir: str | Path,
     prompt_template: str,
-    *,
-    mode: Literal["cluster", "generate"] = "generate",
 ) -> dict[str, Any]:
     """
     Process each JSON file in a folder and write one output JSON per input file.
@@ -224,23 +222,14 @@ def batch_process_json_files(
         try:
             payload = json.loads(file_path.read_text(encoding="utf-8"))
 
-            if mode == "cluster":
-                if isinstance(payload, dict) and "posts" in payload:
-                    posts = payload["posts"]
-                elif isinstance(payload, list):
-                    posts = payload
-                else:
-                    raise ValueError("Cluster mode expects list or {'posts': [...]} JSON")
-                result = cluster_narratives(client, posts, prompt_template, strict_json=True)
-            else:
-                prompt = render_prompt(
-                    prompt_template,
-                    {
-                        "record_json": payload,
-                        "task": "misinformation_data_generation",
-                    },
-                )
-                result = client.generate_json(prompt)
+            prompt = render_prompt(
+                prompt_template,
+                {
+                    "record_json": payload,
+                    "task": "misinformation_data_generation",
+                },
+            )
+            result = client.generate_json(prompt)
 
             out_file = out_dir / file_path.name
             out_file.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")

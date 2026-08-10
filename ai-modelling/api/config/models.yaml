@@ -17,10 +17,18 @@ models:
     domain: misinformation
     kind: deberta_sequence_binary
     enabled: true
-    checkpoint: src/models/misinformation/checkpoints/misinfo-deberta
+    checkpoint: src/models/misinformation/checkpoints/deberta
 
-  - id: bushfire-risk-v1
+  - id: bushfire-forecaster-v1
     domain: bushfire
-    kind: placeholder
-    enabled: false
-    checkpoint: null
+    kind: bushfire_forecaster
+    enabled: true
+    checkpoint: src/models/bushfire/checkpoints/convlstm_forecaster.pth
+    scaler_checkpoint: src/models/bushfire/checkpoints/convlstm_scaler.pkl
+
+  - id: bushfire-classifier-v1
+    domain: bushfire
+    kind: bushfire_classifier
+    enabled: true
+    checkpoint: src/models/bushfire/checkpoints/tcn_classifier.pth
+    scaler_checkpoint: null

@@ -4,6 +4,7 @@ Load Hugging Face checkpoints declared in ``api/config/models.yaml``.
 Extend ``_load_one`` when adding new ``kind`` values (e.g. bushfire torch checkpoints).
 """
 import json
+import joblib
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -11,6 +12,7 @@ from typing import Any
 
 import torch
 import yaml
+from api.schemas.bushfire import DEFAULT_FEATURE_NAMES
 
 _API_DIR = Path(__file__).resolve().parent
 _AI_MODELLING_ROOT = _API_DIR.parent
@@ -36,6 +38,8 @@ class LoadedModel:
     device: torch.device
     max_len: int
     checkpoint_path: Path
+    scaler: Any = None  # For bushfire
+    metadata: dict | None = None  # For bushfire config
 
 
 _REGISTRY: dict[str, LoadedModel] = {}
@@ -92,6 +96,20 @@ def _load_one(entry: dict[str, Any]) -> LoadedModel | None:
         if ckpt is None:
             raise ValueError(f"model '{model_id}': deberta_sequence_binary requires checkpoint")
         return _load_deberta_sequence_binary(model_id, domain, ckpt)
+    
+    if kind == "bushfire_forecaster":
+        ckpt = _resolve_checkpoint(entry.get("checkpoint"))
+        if ckpt is None:
+            raise ValueError(f"model '{model_id}': bushfire_forecaster requires checkpoint")
+        scaler_ckpt = _resolve_checkpoint(entry.get("scaler_checkpoint"))
+        return _load_bushfire_forecaster(model_id, domain, ckpt, scaler_ckpt)
+
+    if kind == "bushfire_classifier":
+        ckpt = _resolve_checkpoint(entry.get("checkpoint"))
+        if ckpt is None:
+            raise ValueError(f"model '{model_id}': bushfire_classifier requires checkpoint")
+        scaler_ckpt = _resolve_checkpoint(entry.get("scaler_checkpoint"))
+        return _load_bushfire_classifier(model_id, domain, ckpt, scaler_ckpt)
 
     raise ValueError(f"model '{model_id}': unknown kind '{kind}'")
 
@@ -123,6 +141,118 @@ def load_models(config_path: Path | None = None) -> dict[str, LoadedModel]:
             _LOAD_ERRORS.append(f"{entry.get('id', '?')}: {e}")
 
     return _REGISTRY.copy()
+
+
+def _load_bushfire_forecaster(model_id: str, domain: str, ckpt: Path, scaler_path: Path | None = None) -> LoadedModel:
+    if not ckpt.is_file():
+        raise FileNotFoundError(f"Forecaster checkpoint not found for '{model_id}': {ckpt}")
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Load forecaster checkpoint
+    from src.models.bushfire.ts_convlstm_forecaster import MultivariateTSForecaster
+    model = MultivariateTSForecaster.load(str(ckpt), map_location=str(device))
+    model.to(device)
+    model.eval()
+    
+    # Load scaler if provided
+    scaler = None
+    scaler_data = None
+    if scaler_path:
+        scaler_path = Path(scaler_path)
+        if scaler_path.is_file():
+            scaler_data = joblib.load(scaler_path)
+            if isinstance(scaler_data, dict):
+                scaler = scaler_data.get("scaler", scaler_data)
+            else:
+                scaler = scaler_data
+    
+    # Extract metadata from scaler or set defaults
+    metadata = {}
+    if scaler_data and isinstance(scaler_data, dict):  # <-- Now safe
+        metadata = {
+            "features": scaler_data.get("features", DEFAULT_FEATURE_NAMES),
+            "input_steps": scaler_data.get("input_steps", 60),
+            "horizon": scaler_data.get("horizon", 2),
+            "grid_shape": scaler_data.get("grid_shape"),
+        }
+    else:
+        metadata = {
+            "features": DEFAULT_FEATURE_NAMES,
+            "input_steps": 60,
+            "horizon": 2,
+            "grid_shape": None,
+        }
+    
+    return LoadedModel(
+        model_id=model_id,
+        domain=domain,
+        kind="bushfire_forecaster",
+        tokenizer=None,
+        model=model,
+        device=device,
+        max_len=None,
+        checkpoint_path=ckpt,
+        scaler=scaler,
+        metadata=metadata,
+    )
+
+
+def _load_bushfire_classifier(model_id: str, domain: str, ckpt: Path, scaler_path: Path | None = None) -> LoadedModel:
+    if not ckpt.is_file():
+        raise FileNotFoundError(f"Classifier checkpoint not found for '{model_id}': {ckpt}")
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Load PyTorch checkpoint
+    checkpoint = torch.load(ckpt, map_location=str(device), weights_only=False)
+    
+    # Reconstruct model from config
+    if "config" in checkpoint:
+        from src.models.bushfire.tcn_classifier import TCNClassifier, ClassifierConfig
+        config = checkpoint.get("config")
+        model = TCNClassifier(config=config)
+        model.load_state_dict(checkpoint["model_state_dict"])
+    else:
+        # Fallback: load directly if checkpoint is just state dict
+        from src.models.bushfire.tcn_classifier import TCNClassifier, ClassifierConfig
+        config = ClassifierConfig()
+        model = TCNClassifier(config=config)
+        model.load_state_dict(checkpoint)
+    
+    model.to(device)
+    model.eval()
+    
+    # Load scaler if provided
+    scaler = None
+    if scaler_path:
+        scaler_path = Path(scaler_path)
+        if scaler_path.is_file():
+            scaler_data = joblib.load(scaler_path)
+            if isinstance(scaler_data, dict):
+                scaler = scaler_data.get("scaler", scaler_data)
+            else:
+                scaler = scaler_data
+    
+    # Build metadata dict
+    metadata = {
+        "lookback_steps": config.lookback_steps if "config" in checkpoint else 60,
+        "n_features": config.n_features if "config" in checkpoint else 7,
+        "feature_names": DEFAULT_FEATURE_NAMES,
+    }
+    
+    return LoadedModel(
+        model_id=model_id,
+        domain=domain,
+        kind="bushfire_classifier",
+        tokenizer=None,
+        model=model,
+        device=device,
+        max_len=None,
+        checkpoint_path=ckpt,
+        scaler=scaler,
+        metadata=metadata,
+    )
 
 
 def get_model(model_id: str) -> LoadedModel:

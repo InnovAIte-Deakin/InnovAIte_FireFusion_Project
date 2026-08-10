@@ -1,0 +1,621 @@
+/* Misinformation monitor — Screen 1 (Figma) */
+
+.misinfo-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.misinfo-monitor-root--figma {
+  /* Same design tokens as Screen 2 `.misinfo-content-area` (misinfo.css) */
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-surface: #f1f5f9;
+  --text-primary: #0f172b;
+  --text-secondary: #45556c;
+  --text-tertiary: #62748e;
+  --text-muted: #90a1b9;
+  --border-light: #e2e8f0;
+  --border-mid: #cad5e2;
+  --red-bg: #fef2f2;
+  --red-text: #c10007;
+  --red-accent: #e7000b;
+  --amber-bg: #fff7ed;
+  --amber-text: #ca3500;
+  --green-bg: #dcfce7;
+  --green-text: #008236;
+  --blue-bg: #eff6ff;
+  --blue-text: #155dfc;
+  --purple-bg: #f3e8ff;
+  --purple-text: #8200db;
+
+  --misinfo-page-bg: var(--bg-page);
+  --misinfo-card: var(--bg-card);
+  --misinfo-border: var(--border-light);
+  --misinfo-text: var(--text-primary);
+  --misinfo-muted: var(--text-tertiary);
+
+  background: var(--misinfo-page-bg);
+  margin: 0;
+  padding: 1.35rem 1.75rem 2rem;
+  min-height: calc(100vh - 24px);
+  box-sizing: border-box;
+  max-width: none;
+}
+
+/* Match Screen 2 / misinfo review typography (Inter + body scale) */
+.misinfo-screen1-type {
+  /* Body copy: matches feed-placeholder-header (14px) on Screen 2 */
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.misinfo-screen1-type .misinfo-kpi-card__label,
+.misinfo-screen1-type .misinfo-active-incidents-figma__label,
+.misinfo-screen1-type .misinfo-tab-figma,
+.misinfo-screen1-type .misinfo-platform-select-figma,
+.misinfo-screen1-type .misinfo-sort-figma {
+  font-family: inherit;
+}
+
+.misinfo-figma-page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 480px) auto;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 1100px) {
+  .misinfo-figma-page-header {
+    grid-template-columns: 1fr;
+  }
+}
+
+.misinfo-figma-title-block {
+  min-width: 0;
+}
+
+.misinfo-figma-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #dc2626;
+}
+
+.misinfo-figma-page-header .fusion-search-bar {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  grid-column: auto;
+}
+
+.misinfo-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.misinfo-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--misinfo-border);
+  background: var(--misinfo-card);
+  color: #475569;
+  cursor: pointer;
+}
+
+.misinfo-icon-btn:hover {
+  background: #f1f5f9;
+}
+
+.misinfo-updated-label {
+  font-size: 0.875rem;
+  color: var(--misinfo-muted);
+  white-space: nowrap;
+}
+
+.misinfo-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--misinfo-border);
+  background: var(--misinfo-card);
+  color: #475569;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.misinfo-figma-h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--misinfo-text);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.misinfo-figma-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #dc2626;
+}
+
+.misinfo-narrative-overview {
+  margin-bottom: 1.5rem;
+}
+
+.misinfo-narrative-overview__label {
+  /* Match Screen 2 `.panel-section-title` rhythm */
+  margin: 0 0 0.65rem;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.misinfo-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 900px) {
+  .misinfo-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.misinfo-kpi-card {
+  background: var(--misinfo-card);
+  border: 1px solid var(--misinfo-border);
+  border-radius: 14px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.misinfo-kpi-card__label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--misinfo-muted);
+  margin-bottom: 0.35rem;
+}
+
+.misinfo-kpi-card__num {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--misinfo-text);
+}
+
+.misinfo-kpi-card__num--critical {
+  color: #dc2626;
+}
+
+.misinfo-kpi-card__num--high {
+  color: #ea580c;
+}
+
+.misinfo-kpi-card__num--resolved {
+  color: #16a34a;
+}
+
+/* Active incidents */
+.misinfo-active-incidents-figma {
+  margin-bottom: 1.5rem;
+}
+
+.misinfo-active-incidents-figma__label {
+  margin: 0 0 0.75rem;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.misinfo-active-incidents-figma__row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .misinfo-active-incidents-figma__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.misinfo-incident-card-figma {
+  background: var(--misinfo-card);
+  border: 1px solid var(--misinfo-border);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.misinfo-incident-card-figma__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--misinfo-text);
+}
+
+.misinfo-incident-card-figma__flags {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--misinfo-muted);
+}
+
+.misinfo-incident-card-figma__breakdown {
+  margin: 0 0 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.misinfo-incident-card-figma__crit {
+  color: #dc2626;
+}
+
+.misinfo-incident-card-figma__high {
+  color: #ea580c;
+}
+
+.misinfo-incident-card-figma__med {
+  color: #64748b;
+}
+
+.misinfo-incident-card-figma__sep {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.misinfo-incident-card-figma__threat {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #475569;
+}
+
+/* Feed toolbar */
+.misinfo-narrative-feed-figma {
+  background: transparent;
+}
+
+.misinfo-feed-toolbar-figma {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 1rem;
+  justify-content: space-between;
+}
+
+.misinfo-feed-toolbar-figma__mid {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 160px;
+}
+
+.misinfo-tabs-figma {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--misinfo-border);
+  padding-bottom: 2px;
+}
+
+.misinfo-tab-figma {
+  border: 0;
+  background: transparent;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--misinfo-muted);
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+}
+
+.misinfo-tab-figma:hover {
+  color: var(--misinfo-text);
+}
+
+.misinfo-tab-figma--on {
+  color: var(--misinfo-text);
+  background: var(--misinfo-card);
+  border: 1px solid var(--misinfo-border);
+  border-bottom-color: var(--misinfo-card);
+  margin-bottom: -1px;
+  box-shadow: 0 -1px 0 var(--misinfo-card);
+}
+
+.misinfo-platform-select-figma {
+  height: 40px;
+  padding: 0 2rem 0 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--misinfo-text);
+  background: var(--misinfo-card);
+  border: 1px solid var(--misinfo-border);
+  border-radius: 10px;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.misinfo-sort-figma {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--misinfo-muted);
+  white-space: nowrap;
+}
+
+/* Narrative cards */
+.misinfo-narrative-list-figma {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.misinfo-narrative-card-figma {
+  border-radius: 14px;
+  background: var(--misinfo-card);
+  border: 1px solid var(--misinfo-border);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.misinfo-narrative-card-figma--critical {
+  border-left: 5px solid #dc2626;
+}
+
+.misinfo-narrative-card-figma--high {
+  border-left: 5px solid #ea580c;
+}
+
+.misinfo-narrative-card-figma--medium {
+  border-left: 5px solid #94a3b8;
+}
+
+.misinfo-narrative-card-figma__inner {
+  padding: 1.1rem 1.2rem 1.15rem;
+}
+
+.misinfo-narrative-card-figma__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.65rem;
+  margin-bottom: 0.65rem;
+}
+
+.misinfo-sev-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  text-transform: capitalize;
+}
+
+.misinfo-sev-pill--critical {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.misinfo-sev-pill--high {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.misinfo-sev-pill--medium {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.misinfo-narrative-card-figma__incident {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.misinfo-ai-tag {
+  /* Match Screen 2 `.ai-tag` (misinfo.css) */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--purple-text);
+  background: var(--purple-bg);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 0;
+}
+
+.misinfo-ai-tag--with-title {
+  flex-shrink: 0;
+  line-height: 1.25;
+  margin-top: 0.12em;
+}
+
+.misinfo-narrative-card-figma__top-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.misinfo-narrative-card-figma__posts {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--misinfo-muted);
+}
+
+.misinfo-narrative-card-figma__time {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.misinfo-narrative-card-figma__headline-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.5rem 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.misinfo-narrative-card-figma__headline {
+  margin: 0;
+  flex: 1 1 200px;
+  /* Match Screen 2 `.narrative-summary-title` */
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-primary);
+  letter-spacing: normal;
+}
+
+.misinfo-narrative-card-figma__snippets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.misinfo-snippet {
+  background: var(--bg-surface);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+
+.misinfo-snippet__handle {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.misinfo-snippet__q {
+  font-style: normal;
+  color: var(--text-primary);
+}
+
+.misinfo-narrative-card-figma__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.misinfo-narrative-card-figma__metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.misinfo-narrative-card-figma__platforms {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.misinfo-narrative-card-figma__shares {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--misinfo-muted);
+}
+
+.misinfo-narrative-card-figma__warn-ico {
+  flex-shrink: 0;
+  color: #dc2626;
+}
+
+.misinfo-trend--hot {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.misinfo-trend--muted {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.misinfo-btn-review-narrative {
+  border: 0;
+  border-radius: 10px;
+  padding: 0.55rem 1.25rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  background: #0f172a;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.misinfo-btn-review-narrative:hover {
+  background: #1e293b;
+}
+
+/* Loading */
+.misinfo-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2.5rem 1rem;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.misinfo-state__spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  animation: misinfo-spin 0.8s linear infinite;
+}
+
+@keyframes misinfo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.muted {
+  color: #6b7280;
+}

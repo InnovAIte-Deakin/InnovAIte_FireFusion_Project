@@ -1,0 +1,1827 @@
+asset_id,location_id,original_latitude,original_longitude,facility_name,risk_category,suburb
+1,207599,-37.7838388,145.3525525,3C Kidz Care - Edinburgh College,CAT 3,Lilydale
+2,284431,-37.7969199,145.3601868,3C Kidz Care MECS,CAT 3,Montrose
+3,444490,-37.0517301,143.731823,A G Leech Kindergarten,CAT 3,Maryborough
+4,322953,-38.2975007,145.1850163,Advance College of Education Incorporated - Hastings Hub,CAT 3,Hastings
+5,409245,-36.6618283,144.3345358,After The Bell Aus- Huntly Primary School,CAT 3,Huntly
+6,431639,-36.7351988,144.1356861,After The Bell Aus- Marong Primary School,CAT 3,Marong
+7,3473,-38.456597,144.1099002,Aireys Inlet Primary School,CAT 2,Aireys Inlet
+8,104874,-37.4477349,144.5315813,Alice Miller School,CAT 2,Macedon
+9,122999,-37.3720541,144.6851863,Alice Miller School - Candlebark,CAT 3,Romsey
+10,289169,-37.781972,145.6109684,All Saints Preschool Yarra Junction Inc,CAT 3,Yarra Junction
+11,397955,-36.7351911,146.9630225,Alpine View Children's Centre,CAT 3,Bright
+12,331107,-37.9503594,147.6585617,Al-Taqwa Camp - Camp,CAT 3,Banksia Penninsula
+13,409388,-37.1843787,143.3992987,Amphitheatre Primary School,CAT 3,Amphitheatre
+14,355727,-37.9126423,144.2547091,Anakie Primary School,CAT 3,Anakie
+15,355727,-37.9126423,144.2547091,Anakie Primary School Council Out of School Care,CAT 3,Anakie
+16,254557,-37.7491623,145.2079645,Andersons Creek Primary School,CAT 1,Warrandyte
+17,254557,-37.7491623,145.2079645,Andersons Creek PS TheirCare,CAT 1,Warrandyte
+18,355094,-38.4100332,144.1839239,Anglesea Community House,CAT 3,Anglesea
+19,355094,-38.4096504,144.1851872,Anglesea Kindergarten,CAT 3,Anglesea
+20,355026,-38.3958385,144.1908522,Anglesea Primary School,CAT 2,Anglesea
+21,355026,-38.3958385,144.1908522,Anglesea PS TheirCare,CAT 2,Anglesea
+22,274006,-37.8151851,145.2062098,Antonio Park Primary School,CAT 3,Mitcham
+23,452240,-36.9740814,141.0816085,Apsley Primary School,CAT 3,Apsley
+24,445398,-37.2748655,142.9404223,Ararat North Kinder Care,CAT 3,Ararat
+25,445398,-37.2748655,142.9404223,Ararat North Primary School,CAT 3,Ararat
+26,130918,-37.578879,145.2025972,Arthurs Creek Primary School,CAT 3,Arthurs Creek
+27,277794,-38.0452931,145.6763573,Ashwood School - Garfield North Outdoor Education Centre,CAT 1,Garfield North
+28,74819,-36.7771637,144.3036589,Aspire Early Education and Kindergarten Bendigo,CAT 3,Kennington
+29,403908,-36.8039442,144.3608238,Assisi Kindergarten Strathfieldsaye,CAT 3,Strathfieldsaye
+30,446591,-37.4207636,143.8863107,Aussie Kindies Early Learning Creswick,CAT 3,Creswick
+31,347254,-37.9146804,145.4750055,Avonsleigh Kindergarten,CAT 3,Avonsleigh
+32,147372,-37.6802,145.5332723,Badger Creek CommunityOSH,CAT 3,Badger Creek
+33,147372,-37.6805745,145.5322225,Badger Creek Preschool,CAT 3,Healesville
+34,147372,-37.6801999,145.5332723,Badger Creek Primary School,CAT 3,Healesville
+35,296081,-38.2747026,145.0314953,Balcombe Grammar School,CAT 3,Mt Martha
+36,296081,-38.2723277,145.0287557,Balcombe Preschool,CAT 3,Mount Martha
+37,180510,-38.7364395,143.3040894,Ballarat Clarendon College - Yuulong Campus,CAT 2,Yuulong
+38,448712,-37.640756,143.8617949,Ballarat Rudolf Steiner Kindergarten,CAT 3,Mount Helen
+39,448712,-37.640756,143.8617949,Ballarat Steiner School,CAT 3,Mt Helen
+40,270132,-37.7953859,144.4147326,Balliang East Primary School,CAT 3,Balliang East
+41,462556,-38.3741508,145.1254217,Balnarring Community Child Care Incorporated,CAT 3,Balnarring
+42,462556,-38.3753568,145.1241832,Balnarring Preschool,CAT 3,Balnarring
+43,462556,-38.3761006,145.1227773,Balnarring Primary School,CAT 3,Balnarring
+44,209937,-36.1795232,146.9468082,Baranduda Community Centre,CAT 3,Baranduda
+45,209937,-36.1802838,146.9485429,Baranduda Primary School,CAT 3,Baranduda
+46,209937,-36.1802838,146.9485429,Baranduda PS TheirCare,CAT 3,Baranduda
+47,329730,-38.2944716,146.1058371,Baringa Special School - Baringa Homestead,CAT 3,Childers
+48,167549,-36.0160252,144.9609765,Barmah Occasional Care,CAT 3,Barmah Town
+49,167549,-36.0160252,144.9609765,Barmah Outreach Kindergarten,CAT 3,Barmah Town
+50,214922,-36.1011105,146.6754035,Barnawartha Out of School Hours Care,CAT 3,Barnawartha
+51,214922,-36.1011105,146.6754035,Barnawartha Primary School,CAT 3,Barnawartha
+52,375320,-38.1781231,145.5701367,Bayles Kindergarten,CAT 3,Bayles
+53,324158,-38.1775753,145.1657428,Bayside Christian College,CAT 3,Langwarrin South
+54,324158,-38.1774595,145.1626915,Bayside Christian College Early Learning Centre,CAT 3,Langwarrin South
+55,2581,-37.9956131,145.4153746,Beaconsfield Upper Primary School,CAT 2,Beaconsfield Upper
+56,2581,-37.9956131,145.4153746,Beaconsfield Upper PS TheirCare,CAT 2,Beaconsfield Upper
+57,439309,-36.7898181,143.5518266,Bealiba Primary School,CAT 3,Bealiba
+58,388774,-36.371548,146.6952981,Beechworth Community Early Years Learning Centre INC,CAT 3,Beechworth
+59,388774,-36.3715746,146.695533,Beechworth Kindergarten Inc.,CAT 3,Beechworth
+60,388773,-36.3673335,146.6927728,Beechworth Montessori,CAT 3,Beechworth
+61,388773,-36.3673335,146.6927728,Beechworth Montessori School,CAT 3,Beechworth
+62,388276,-36.3552503,146.6932209,Beechworth Primary School,CAT 3,Beechworth
+63,388276,-36.3552503,146.6932209,Beechworth PS TheirCare,CAT 3,Beechworth
+64,388276,-36.3475703,146.6914244,Beechworth Secondary College,CAT 3,Beechworth
+65,207614,-37.9190864,145.3458862,Belgrave Heights Christian School,CAT 3,Belgrave Heights
+66,207614,-37.9190864,145.3458862,Belgrave Heights Christian School Early Learning Centre,CAT 3,Belgrave Heights
+67,207613,-37.9107581,145.3549706,Belgrave Preschool,CAT 3,Belgrave
+68,286320,-37.9307486,145.3582054,Belgrave South OSHClub,CAT 3,Belgrave South
+69,286320,-37.9307486,145.3582054,Belgrave South Primary School,CAT 3,Belgrave South
+70,391197,-38.3334967,144.2623629,Bellbrae Primary School,CAT 3,Bellbrae
+71,391197,-38.3334967,144.2623629,Bellbrae PS TheirCare,CAT 3,Bellbrae
+72,178388,-38.6677426,143.6959726,Belmont High School - Tanybryn Camp,CAT 1,Tanybryn
+73,88320,-36.4762513,145.9478567,Benalla P-12 College - Lake Nillacoote Camp,CAT 3,Benalla
+74,152344,-36.7287347,144.2793294,Bendigo and District Aboriginal Cooperative Kindergarten,CAT 2,North Bendigo
+75,390178,-36.3804483,145.4063685,Berry Street Victoria Inc - Berry Street School - Shepparton Campus,CAT 3,Shepparton
+76,206665,-36.1205087,147.0954444,Bethanga Primary School,CAT 3,Bethanga
+77,282609,-35.9446451,142.4185471,Beulah Outreach Preschool,CAT 3,Beulah
+78,282609,-35.9446451,142.4185471,Beulah Primary School,CAT 3,Beulah
+79,33078,-38.2814468,141.6141043,Big Childcare - Bolwarra PS OSHC,CAT 3,Bolwarra
+80,183554,-36.8303672,144.242139,Big Hill Primary School,CAT 3,Big Hill
+81,183554,-36.8303672,144.242139,Big Hill PS TheirCare,CAT 3,Big Hill
+82,208240,-37.8256344,145.3381467,Billanook Primary School,CAT 3,Montrose
+83,208240,-37.8256344,145.3381467,Billanook PS TheirCare,CAT 3,Montrose
+84,289160,-37.7796002,145.369269,Birmingham Primary School,CAT 3,Mount Evelyn
+85,289160,-37.7796002,145.369269,Birmingham PS TheirCare,CAT 3,Mount Evelyn
+86,292471,-37.8294956,145.1659221,Blackburn Lake Primary School,CAT 3,Blackburn
+87,295513,-38.2180158,145.3393107,Blind Bight Community Centre,CAT 3,Blind Bight
+88,33078,-38.2814468,141.6141043,Bolwarra Primary School,CAT 3,Bolwarra
+89,375054,-38.2107592,145.9599162,Bona Vista Primary School,CAT 3,Bona Vista
+90,373822,-38.3815387,146.2725336,Boolarra Kindergarten,CAT 3,Boolarra
+91,373822,-38.3814469,146.2706253,Boolarra Primary School,CAT 3,Boolarra
+92,326947,-36.108895,143.727716,Boort District P-12 School,CAT 3,Boort
+93,327069,-36.1164205,143.7269535,Boort Preschool,CAT 3,Boort
+94,403907,-36.8045058,144.356538,Brady Bunch Early Learning Centre Bendigo,CAT 3,Strathfieldsaye
+95,30581,-37.3646362,144.5758947,Braemar College - Braemar College - Mt Macedon Campus,CAT 2,Woodend
+96,89275,-37.3459139,144.5655454,Braemar College - Braemar College - Woodend Campus,CAT 3,Woodend
+97,191889,-37.1916832,142.6090393,Brauer Secondary College - Dunkeld Annexe,CAT 2,Dunkeld
+98,197007,-36.138181,146.8988388,Bright beginnings learning centre wodonga Pty Ltd,CAT 3,Wodonga
+99,397955,-36.7309972,146.9611959,Bright P-12 College,CAT 3,Bright
+100,426755,-36.7371405,146.9585639,Bright P-12 College TheirCare,CAT 3,Bright
+101,255504,-37.6771654,145.1277723,Brightminds Early Learning,CAT 3,Diamond Creek
+102,447251,-37.5518191,143.8952511,Brown Hill Kindergarten,CAT 3,Brown Hill
+103,263004,-37.7056572,147.8319812,Bruthen Boorai Uniting Early Learning,CAT 3,Bruthen
+104,263004,-37.7038021,147.8330051,Bruthen Primary School,CAT 3,Bruthen
+105,263004,-37.7056572,147.8319812,Bruthen Uniting Kindergarten,CAT 3,Bruthen
+106,156261,-37.3639388,143.174975,Buangor Primary School,CAT 3,Buangor
+107,156261,-37.3639388,143.174975,Buangor Primary School Council,CAT 3,Buangor
+108,124541,-37.4973588,148.1810669,Buchan Primary School,CAT 3,Buchan
+109,124541,-37.4959521,148.1747251,Buchan Uniting Early Learning,CAT 3,Buchan
+110,67196,-37.353237,144.5327721,Bug-A-Lugs OSHC,CAT 3,Woodend
+111,114305,-37.4054481,144.2184977,Bullarto Primary School,CAT 1,Bullarto
+112,451078,-37.6705874,143.9293559,Buninyong Primary School - Scotsburn Primary School,CAT 3,Scotsburn
+113,366164,-38.0998264,145.7130477,Bunyip OSHClub,CAT 3,Bunyip
+114,366164,-38.0998264,145.7130477,Bunyip Primary School,CAT 3,Bunyip
+115,265321,-37.739593,145.268782,Burch Family Memorial Preschool,CAT 3,Wonga Park
+116,246707,-37.074658,144.204502,Busy Bees at Castlemaine,CAT 3,Castlemaine
+117,94155,-37.421252,145.7096965,Buxton Primary School,CAT 3,Buxton
+118,94155,-37.421252,145.7096965,Buxton Primary School OSHC,CAT 3,Buxton
+119,183543,-36.7329098,144.2501466,California Gully Primary School,CAT 3,California Gully
+120,296081,-38.2747026,145.0314953,Camp Australia - Balcombe Grammar OSHC,CAT 3,Mount Martha
+121,324158,-38.1775753,145.1657428,Camp Australia - Bayside Christian College OSHC,CAT 3,Langwarrin South
+122,207614,-37.9190864,145.3458862,Camp Australia - Belgrave Heights Christian School OSHC,CAT 3,Belgrave Heights
+123,183543,-36.7329098,144.2501466,Camp Australia - California Gully Primary School OSHC,CAT 3,California Gully
+124,322830,-38.3601878,145.2014266,Camp Australia - Crib Point Primary School OSHC,CAT 3,Crib Point
+125,247554,-37.6715028,145.1523772,Camp Australia - Diamond Creek Primary School OSHC,CAT 3,Diamond Creek
+126,322933,-38.115678,145.1806027,Camp Australia - Flinders Christian College OSHC,CAT 3,Carrum Downs
+127,109467,-37.6574079,145.5165918,Camp Australia - Healesville Primary School OSHC,CAT 3,Healesville
+128,420865,-36.7699933,144.3100691,Camp Australia - Kennington Primary School OSHC,CAT 3,Kennington
+129,347249,-37.9107337,145.3664202,Camp Australia - Selby Primary School OSHC,CAT 2,Selby
+130,183546,-36.7613413,144.2482234,Camp Australia - Specimen Hill Primary School OSHC,CAT 3,Golden Square
+131,411922,-36.7935281,144.2839586,Camp Australia - Spring Gully Primary School OSHC,CAT 3,Spring Gully
+132,294507,-38.19713,145.1017576,Camp Australia - St Thomas More Primary School OSHC,CAT 3,Mount Eliza
+133,324167,-38.2605591,145.1654714,Camp Australia - Tyabb Primary School OSHC,CAT 3,Tyabb
+134,247557,-37.6685936,145.1822946,Camp Australia - Wattle Glen Primary School OSHC,CAT 3,Wattle Glen
+135,243049,-37.0930164,144.2046752,Campbells Creek Primary School,CAT 3,Campbells Creek
+136,184855,-37.1518671,144.1657556,Campbells Creek Primary School - Guildford Campus,CAT 3,Guildford
+137,161638,-37.5700097,149.1538681,Cann River P-12 College,CAT 2,Cann River
+138,295057,-37.9523476,147.6733757,Carey Camp Toonallook,CAT 3,Banksia Peninsula
+139,444497,-37.0521562,143.8199095,Carisbrook Primary School,CAT 3,Carisbrook
+140,174495,-38.5639178,143.3952149,Carlisle River Primary School,CAT 3,Carlisle River
+141,259448,-37.0437671,144.2270598,Castlemaine Secondary College - Junior Campus,CAT 3,Castlemaine
+142,243047,-37.0772095,144.2095138,Castlemaine Secondary College - Senior Campus,CAT 3,Castlemaine
+143,205128,-37.081546,144.1571904,Castlemaine Steiner Kindergarten,CAT 3,Muckleford
+144,205128,-37.0815461,144.1571904,Castlemaine Steiner School & Kindergarten - Castlemaine Steiner School,CAT 3,Muckleford
+145,420868,-36.772618,144.3561788,Catherine McAuley College - Catherine McAuley College Coolock Campus,CAT 3,Bendigo/Junortoun
+146,259372,-37.7103024,145.1451182,Catholic Ladies' College Ltd,CAT 3,Eltham
+147,269965,-37.7962234,145.6512724,Caulfield Grammar School - Yarra Junction Campus,CAT 3,Yarra Junction
+148,450593,-37.5292409,142.0396654,Cavendish Kindergarten,CAT 3,Cavendish
+149,450593,-37.5308353,142.0407125,Cavendish Primary School,CAT 3,Cavendish
+150,431467,-36.8953057,147.0646733,Chabad Youth Holiday Program - Harrietville,CAT 2,Harrietville
+151,138354,-37.860675,142.6435167,Chatsworth Occasional Child Care,CAT 3,Chatsworth
+152,152384,-37.0823876,144.26111,Chewton Primary School,CAT 2,Chewton
+153,165395,-37.7924866,145.3883113,Children's House of Early Learning,CAT 3,Mount Evelyn
+154,220515,-36.1470479,146.6043233,Chiltern Primary School,CAT 3,Chiltern
+155,220515,-36.1470479,146.6043233,Chiltern Primary School Outside of Hours Care,CAT 3,Chiltern
+156,109448,-37.6531313,145.3044055,Christmas Hills Primary School,CAT 1,Christmas Hills
+157,87539,-36.358375,146.3261259,Christopher Robin Kindergarten,CAT 3,Wangaratta
+158,131773,-37.6055601,145.488711,Chum Creek Primary School,CAT 0,Chum Creek
+159,131773,-37.6055601,145.488711,Chum Creek Primary School OSHC,CAT 0,Chum Creek
+160,165670,-37.7647872,145.3806833,Cire Children’s Services Mount Evelyn,CAT 3,Mount Evelyn
+161,289169,-37.7861991,145.6180072,Cire Children's Centre Yarra Junction,CAT 3,Yarra Junction
+162,208232,-37.757157,145.343977,Cire Community School | Cire Training - Administration Centre,CAT 3,Lilydale
+163,345371,-37.8562979,145.4517658,Cire Community School | Cire Training - Cire Community School - Monbulk,CAT 2,Monbulk
+164,165393,-37.772817,145.382662,Cire Community School | Cire Training - Mt Evelyn Campus,CAT 3,Mount Evelyn
+165,289169,-37.7861991,145.6180072,Cire Community School | Cire Training - Yarra Junction campus,CAT 3,Yarra Junction
+166,262990,-37.7020424,147.659928,Clifton Creek Primary School,CAT 2,Clifton Creek
+167,447110,-37.5431455,143.8954455,Club 1878,CAT 2,Nerrina
+168,323697,-37.9399389,145.49249,Cockatoo Community Childcare Centre,CAT 3,Cockatoo
+169,323770,-37.935102,145.4839862,Cockatoo Kinder,CAT 3,Cockatoo
+170,323697,-37.939332,145.495676,Cockatoo Primary School,CAT 2,Cockatoo
+171,323697,-37.939332,145.495676,Cockatoo Primary School Council OSHC,CAT 2,Cockatoo
+172,130786,-37.6137424,144.4783846,Coimadai OSHClub,CAT 3,Coimadai
+173,130786,-37.6137424,144.4783846,Coimadai Primary School,CAT 3,Coimadai
+174,183546,-36.7618266,144.2463148,Community Kids Golden Square Early Education Centre,CAT 3,Golden Square
+175,443623,-37.0495344,142.8224339,Concongella Primary School,CAT 3,Concongella
+176,314253,-38.1490553,145.243874,Cranbourne South Primary School,CAT 3,Cranbourne South
+177,314255,-38.1709853,145.2411761,Cranbourne South PS TheirCare,CAT 3,Cranbourne South
+178,446782,-37.4229491,143.8908365,Creswick & District Preschool,CAT 3,Creswick
+179,452106,-37.4086229,143.8912303,Creswick North OSHC,CAT 3,Creswick
+180,452106,-37.4086229,143.8912303,Creswick North Primary School,CAT 3,Creswick
+181,322831,-38.3673131,145.2035469,Crib Point Preschool,CAT 3,Hmas Cerberus
+182,322830,-38.3601878,145.2014266,Crib Point Primary School,CAT 3,Crib Point
+183,151505,-37.7896607,145.5212066,Croydon Community School - Woori Yallock Farm School Campus,CAT 3,Woori Yallock
+184,448709,-37.6115613,143.8685497,Damascus College,CAT 3,Mount Clear
+185,156719,-37.9128998,145.3266475,Dandenong Ranges Child Care Centre,CAT 3,Upwey
+186,394451,-37.959736,145.3883602,Dandenong Ranges Steiner School - Crystal Brook Campus,CAT 3,Emerald
+187,158599,-37.9209768,145.4066422,Dandenong Ranges Steiner School - School Road Campus,CAT 3,Menzies Creek
+188,158599,-37.9209768,145.4066422,Dandenong Ranges Steiner School Kindergarten,CAT 3,Menzies Creek
+189,394451,-37.959736,145.3883602,Dandenong Ranges Steiner School Outside Hours School Care,CAT 3,Emerald
+190,123117,-37.4003074,144.8936518,Darraweit Guim Primary School,CAT 3,Darraweit Guim
+191,135349,-37.92058160000001,141.2790965,Dartmoor Children's Centre,CAT 3,Dartmoor
+192,176814,-37.9235936,141.2762394,Dartmoor Primary School,CAT 3,Dartmoor
+193,67161,-37.3423505,144.1380118,Daylesford Community Child Care,CAT 3,Daylesford
+194,67164,-37.3436727,144.1661641,Daylesford Dharma School,CAT 3,Daylesford
+195,67162,-37.3434716,144.1413039,Daylesford Preschool,CAT 3,Daylesford
+196,67162,-37.3450689,144.1412599,Daylesford Primary School,CAT 3,Daylesford
+197,89239,-37.3360085,144.1524938,Daylesford Secondary College,CAT 3,Daylesford
+198,169046,-38.3996146,143.8853378,Deans Marsh Primary School,CAT 3,Deans Marsh
+199,403204,-36.4693575,147.0148745,Dederang Primary School,CAT 3,Dederang
+200,403204,-36.4693575,147.0148745,Dederang Primary School Care,CAT 3,Dederang
+201,403204,-36.4693575,147.0148745,Dederang Primary School OSHC,CAT 3,Dederang
+202,139193,-37.9401706,143.2170531,Derrinallum P-12 College,CAT 3,Derrinallum
+203,247554,-37.674328,145.1556774,Diamond Creek Community Centre,CAT 3,Diamond Creek
+204,247555,-37.6735451,145.1650588,Diamond Creek East Primary School,CAT 3,Diamond Creek
+205,247555,-37.6735451,145.1650588,Diamond Creek East PS TheirCare,CAT 3,Diamond Creek
+206,258899,-37.6775754,145.1632219,Diamond Creek Memorial Kindergarten,CAT 3,Diamond Creek
+207,247554,-37.6724621,145.1493731,Diamond Creek Memorial Preschool,CAT 3,Diamond Creek
+208,247554,-37.6715028,145.1523772,Diamond Creek Primary School,CAT 3,Diamond Creek
+209,247555,-37.6725506,145.1663948,Diamond Valley College,CAT 3,Diamond Creek
+210,252772,-37.688262,145.1100526,Diamond Valley SDS TheirCare,CAT 3,Greensborough
+211,252772,-37.688262,145.1100526,Diamond Valley Special Developmental School,CAT 3,Greensborough
+212,338655,-36.4491659,142.0368718,Dimboola Memorial Secondary College,CAT 3,Dimboola
+213,277995,-37.7599495,145.5860176,Don Valley Primary School,CAT 3,Don Valley
+214,277995,-37.7599495,145.5860176,Don Valley Primary School OSHC,CAT 3,Don Valley
+215,276720,-37.7727895,145.1937127,Donvale Christian College,CAT 3,Donvale
+216,276723,-37.7683515,145.2340492,Donvale Christian College - Donvale Christian College Hall Road Campus,CAT 3,Warrandyte South
+217,276720,-37.7727895,145.1937127,Donvale Christian College OSHClub,CAT 3,Donvale
+218,156670,-37.6061979,145.1463626,Doreen Primary School,CAT 3,Doreen
+219,304148,-38.3432107,145.0118828,Dromana Secondary College,CAT 3,Dromana
+220,369595,-38.2459914,145.8405004,Drouin Secondary College - Blackwood Annexe,CAT 2,Hallora
+221,448245,-37.6391603,142.34001,Dunkeld Consolidated School,CAT 3,Dunkeld
+222,154618,-37.6507025,142.3452441,Dunkeld Kindergarten,CAT 3,Dunkeld
+223,437460,-36.8601395,143.7296417,Dunolly Kindergarten,CAT 3,Dunolly
+224,431725,-36.8511513,143.7334674,Dunolly Primary School,CAT 3,Dunolly
+225,431725,-36.8511513,143.7334674,Dunolly PS TheirCare,CAT 3,Dunolly
+226,414162,-36.707409,144.23727,Eaglehawk North Primary School,CAT 3,Eaglehawk
+227,410425,-36.7200835,144.2629975,Eaglehawk Secondary College,CAT 3,Eaglehawk
+228,414162,-36.7077415,144.2390287,Early Learning Victoria Nyernilang Lar,CAT 3,Sailors Gully
+229,167663,-38.3801371,142.912512,Ecklin Hall,CAT 3,Ecklin South
+230,207599,-37.7838388,145.3525525,Edinburgh College,CAT 3,Lilydale
+231,207599,-37.7850009,145.3518536,Edinburgh College - Edinburgh College (Primary Campus),CAT 3,Lilydale
+232,207601,-37.796471,145.3583076,Edinburgh Early Learning Centre,CAT 3,Lilydale
+233,95769,-37.1048412,144.3324877,Elphinstone Primary School,CAT 3,Elphinstone
+234,252503,-37.6979327,145.1955011,Eltham College - Kangaroo Ground,CAT 3,Kangaroo Ground
+235,252503,-37.7014263,145.1926276,Eltham College - Main Campus,CAT 3,Research
+236,252503,-37.7014263,145.1926276,Eltham College Early Learning Centre,CAT 3,Research
+237,252503,-37.7014263,145.1926276,Eltham College OSHC,CAT 3,Research
+238,252499,-37.7032132,145.1529519,Eltham North P.S Outside School Hours Care,CAT 3,Eltham
+239,252499,-37.6956509,145.1485345,Eltham North Primary School,CAT 3,Eltham North
+240,255138,-37.7252306,145.1517045,Eltham Primary School,CAT 3,Eltham
+241,255138,-37.7253464,145.1481374,Eltham PS TheirCare,CAT 3,Eltham
+242,255138,-37.7278349,145.1491971,Eltham South Preschool,CAT 3,Eltham
+243,462556,-38.3761006,145.1227773,Elysium OSHC - Balnarring,CAT 3,Balnarring
+244,294181,-38.295475,145.172677,Elysium OSHC - Wallaroo,CAT 3,Hastings
+245,311851,-37.932171,145.4430232,Emerald Preschool,CAT 3,Emerald
+246,311852,-37.9337659,145.4423595,Emerald Primary School,CAT 3,Emerald
+247,311852,-37.9337659,145.4423595,Emerald PS TheirCare,CAT 3,Emerald
+248,461770,-37.9287642,145.4294761,Emerald Secondary College,CAT 2,Emerald
+249,448709,-37.6117455,143.8719268,Emmaus Catholic Primary School,CAT 3,Mount Clear
+250,67801,-36.8417182,144.3879697,Eppalock Primary School,CAT 3,Axe Creek
+251,414165,-36.7048956,144.3141938,Epsom Primary School,CAT 3,Epsom
+252,378058,-37.9769504,146.3722905,Erica Preschool,CAT 1,Erica
+253,403226,-36.4655581,147.2513798,Eskdale Primary School,CAT 3,Eskdale
+254,421814,-36.8634774,147.2813354,Falls Creek Child Care,CAT 3,Falls Creek
+255,421814,-36.8643952,147.2798811,Falls Creek Primary School,CAT 3,Falls Creek
+256,452225,-37.624671,143.8800749,Federation Children's Centre Mt Helen,CAT 3,Mount Helen
+257,258101,-37.6378907,145.1926967,Ferguson Park Kindergarten,CAT 3,Hurstbridge
+258,258101,-37.6380553,145.192462,Ferguson Park Pre School Banksia Campus,CAT 3,Hurstbridge
+259,337562,-37.8601733,145.3220586,Fernbrook School,CAT 3,The Basin
+260,165393,-37.7762196,145.3836865,Fernhill Preschool,CAT 3,Mount Evelyn
+261,156716,-37.8839538,145.3339807,Ferny Creek Primary School,CAT 2,Ferny Creek
+262,208246,-37.8833413,145.3350807,Ferny Creek PS TheirCare,CAT 2,Ferny Creek
+263,74819,-36.7789851,144.3022271,First Grammar Bendigo,CAT 3,Bendigo
+264,322933,-38.1167367,145.180598,Flinders Christian Community College - Carrum Downs Campus,CAT 3,Carrum Downs
+265,87905,-37.3168272,145.2910106,Flowerdale Primary School,CAT 3,Flowerdale
+266,87905,-37.3168273,145.2910106,Flowerdale Primary School (OSHC),CAT 3,Flowerdale
+267,87905,-37.3168273,145.2910106,Flowerdale Uniting Kindergarten,CAT 3,Flowerdale
+268,173173,-38.5156741,143.7140102,Forrest Learning Centre,CAT 2,Forrest
+269,173173,-38.5156741,143.7140102,Forrest Primary School,CAT 2,Forrest
+270,390175,-36.3795565,145.3514937,Frank R Pullar Childcare Centre,CAT 3,Mooroopna
+271,184889,-37.4777453,144.3046931,Frankston Special Developmental School - Blackwood Special Schools Outdoor Education Centre,CAT 1,Blackwood
+272,389987,-38.2638573,144.2797554,Freshwater Creek Steiner Kindergarten,CAT 3,Freshwater Creek
+273,389987,-38.2638573,144.2797554,Freshwater Creek Steiner School,CAT 3,Freshwater Creek
+274,384475,-37.127266,146.3058654,Geelong Grammar School - Timbertop Campus,CAT 2,Merrijig Via Mansfield
+275,286412,-37.9516258,145.5422536,Gembrook Preschool,CAT 3,Gembrook
+276,286412,-37.9514618,145.5428258,Gembrook Primary School,CAT 3,Gembrook
+277,292379,-37.8293214,145.319442,Ghilgai School,CAT 3,Kilsyth
+278,183644,-37.4978041,144.5856057,Gisborne Secondary College,CAT 3,Gisborne
+279,273352,-37.8205683,145.6507251,Gladysdale Primary School,CAT 3,Gladysdale
+280,452018,-37.5249463,143.9348326,Glen Park Primary School,CAT 3,Glen Park
+281,157117,-38.1730486,142.9577511,Glenormiston Hall,CAT 3,Glenormiston
+282,395867,-36.4674723,146.1880168,Glenrowan Kindergarten,CAT 3,Glenrowan
+283,66444,-36.4602243,146.2232187,Glenrowan Primary School,CAT 3,Glenrowan
+284,66444,-36.4602243,146.2232187,Glenrowan Primary School OSHC,CAT 3,Glenrowan
+285,115413,-37.4532731,144.5985071,Global Village Learning,CAT 3,New Gisborne
+286,295481,-37.926301,145.3528698,Goodstart Early Learning Belgrave Heights,CAT 3,Belgrave Heights
+287,322933,-38.1140825,145.1883071,Goodstart Early Learning Carrum Downs - Arcadia Street,CAT 3,Carrum Downs
+288,183547,-36.773528,144.2486169,Goodstart Early Learning Golden Square,CAT 3,Golden Square
+289,183550,-36.7986168,144.2453325,Goodstart Early Learning Kangaroo Flat,CAT 3,Kangaroo Flat
+290,284431,-37.7973967,145.3596798,Goodstart Early Learning Montrose,CAT 3,Montrose
+291,448707,-37.5970791,143.8674743,Goodstart Early Learning Mount Clear,CAT 3,Mount Clear
+292,452225,-37.6258774,143.8784753,Goodstart Early Learning Mount Helen,CAT 3,Mount Helen
+293,124183,-37.469681,144.5960507,Goodstart Early Learning New Gisborne,CAT 3,New Gisborne
+294,115816,-37.4413207,144.7037312,Goodstart Early Learning Riddells Creek,CAT 3,Riddells Creek
+295,425082,-36.8059019,144.3542311,Goodstart Early Learning Strathfieldsaye,CAT 3,Strathfieldsaye
+296,30577,-37.3604913,144.5324806,Goodstart Early Learning Woodend,CAT 3,Woodend
+297,252294,-36.6168461,144.505233,Goornong OSHClub,CAT 3,Goornong
+298,252294,-36.6168461,144.505233,Goornong Primary School,CAT 3,Goornong
+299,367517,-38.292985,146.7039148,Gormandale And District Primary School,CAT 3,Gormandale
+300,367517,-38.2941618,146.7034474,Gormandale Uniting Kindergarten,CAT 3,Gormandale
+301,452223,-37.6086018,143.873238,Great Beginnings Mt Clear,CAT 3,Mount Clear
+302,188947,-37.1486195,142.8508109,Great Western Primary School,CAT 3,Great Western
+303,252496,-37.6995262,145.1128348,Greenhills Neighbourhood Centre,CAT 3,Greensborough
+304,252496,-37.699617,145.1141673,Greenhills Preschool,CAT 3,Greensborough
+305,87230,-36.6174682,146.2365807,Greta Valley Primary School,CAT 3,Greta South
+306,87230,-36.6174682,146.2365807,Greta Valley Primary School O.S.H.C,CAT 3,Greta South
+307,283644,-37.7518192,145.1760672,Guardian Childcare & Education Doncaster East,CAT 3,Doncaster East
+308,322805,-38.1346047,145.20903,Guardian Childcare & Education Langwarrin North,CAT 3,Langwarrin
+309,322939,-38.1702216,145.1879318,Guardian Childcare & Education Langwarrin South,CAT 3,Langwarrin
+310,183646,-37.5018106,144.6077887,Gumboots Early Learning Gisborne,CAT 3,Gisborne
+311,133179,-36.4006294,145.3939912,Guthrie Street Child Care Centre,CAT 3,Shepparton
+312,133178,-36.3984259,145.3915614,Guthrie Street Primary School Shepparton - Guthrie Street Primary School,CAT 3,Shepparton
+313,133179,-36.4006294,145.3939912,Guthrie Street Primary School Shepparton - Shepparton Deaf Facility,CAT 3,Shepparton
+314,133178,-36.3984259,145.3915614,Guthrie Street PS TheirCare,CAT 3,Shepparton
+315,109467,-37.6595421,145.5127488,Haig Avenue Preschool,CAT 3,Healesville
+316,416230,-37.1375461,142.5172494,Halls Gap Primary School,CAT 2,Halls Gap
+317,294165,-38.1510473,145.173058,Happy Sunshine ELC,CAT 3,Langwarrin
+318,265325,-37.0036776,144.2578998,Harcourt Pre-School,CAT 3,Harcourt
+319,265325,-37.0030548,144.2566765,Harcourt Valley Primary School,CAT 3,Harcourt
+320,295489,-38.0017612,145.3451398,Harkaway Primary School,CAT 2,Harkaway
+321,295489,-38.0017612,145.3451398,Harkaway Primary School (OSHC),CAT 2,Harkaway
+322,440017,-36.8877616,147.0652872,Harrietville Bush Kinder,CAT 2,Harrietville
+323,440017,-36.8877616,147.0652872,Harrietville Primary School,CAT 2,Harrietville
+324,322889,-38.2991983,145.1880884,Hastings Primary School,CAT 3,Hastings
+325,41689,-38.1060912,142.3196162,Hawkesdale and District Family Services Centre,CAT 3,Hawkesdale
+326,41690,-38.1073634,142.3180493,Hawkesdale P12 College,CAT 3,Hawkesdale
+327,151799,-37.6646355,145.5129145,Healesville Early Learning Centre,CAT 3,Healesville
+328,151491,-37.6440315,145.5303768,Healesville High School,CAT 3,Healesville
+329,109467,-37.6574079,145.5165918,Healesville Primary School,CAT 3,Healesville
+330,258790,-36.9243743,144.7071161,Heathcote Primary School,CAT 3,Heathcote
+331,311851,-37.9318557,145.4384841,HEI Schools Emerald Early Learning Centre,CAT 3,Emerald
+332,423234,-36.7627998,144.3142049,Helen Jessen Early Learning Centre,CAT 3,Bendigo
+333,60086,-37.3129824,144.1340011,Hepburn Kindergarten,CAT 3,Hepburn
+334,60086,-37.3103677,144.1322989,Hepburn Primary School,CAT 3,Hepburn
+335,89280,-37.3479146,144.6194041,Hesket Primary School,CAT 2,Hesket
+336,33061,-38.1284381,141.6122197,Heywood Consolidated School,CAT 3,Heywood
+337,33061,-38.1295351,141.6208365,Heywood District Secondary College,CAT 3,Heywood
+338,33183,-38.1308389,141.6262722,Heywood Early Learning Centre,CAT 3,Heywood
+339,33182,-38.1306217,141.6283913,Heywood Kindergarten,CAT 3,Heywood
+340,254465,-37.1009666,147.5939827,High Country Uniting Early Learning,CAT 2,Omeo
+341,345368,-37.8528149,145.3656904,Hills Community Childcare,CAT 2,Olinda
+342,255501,-37.6349397,145.1336209,Hippity Hop Early Learning Yarrambat,CAT 3,Yarrambat
+343,292388,-37.831406,145.5973403,Hoddles Creek Primary School,CAT 3,Hoddles Creek
+344,115412,-37.4569303,144.5974238,Holy Cross Primary School,CAT 3,New Gisborne
+345,247342,-36.9172563,144.7006042,Holy Rosary School,CAT 3,Heathcote
+346,428981,-36.7826482,142.1762636,Horsham College - Mc Kenzie Creek Campus,CAT 3,Mckenzie Creek
+347,409245,-36.6618283,144.3345358,Huntly Primary School,CAT 3,Huntly
+348,265140,-37.6408004,145.1896181,Hurstbridge Children's Centre,CAT 3,Hurstbridge
+349,258101,-37.6354843,145.1984715,Hurstbridge Primary School,CAT 3,Hurstbridge
+350,258101,-37.6354843,145.1984715,Hurstbridge PS TheirCare,CAT 3,Hurstbridge
+351,367518,-38.2942882,146.7019858,In 2 Learn Gormandale,CAT 3,Gormandale
+352,416676,-36.5715894,143.868747,In 2 Learn Inglewood,CAT 3,Inglewood
+353,369935,-38.2981132,146.5416019,In 2 Learn Traralgon South,CAT 3,Traralgon South
+354,315814,-38.0700022,146.1764874,In 2 Learn Willowgrove,CAT 3,Willow Grove
+355,416676,-36.5740261,143.8690002,Inglewood Kindergarten,CAT 3,Inglewood
+356,416676,-36.5735946,143.8707406,Inglewood Primary School,CAT 3,Inglewood
+357,452219,-37.5202422,143.8744314,Invermay Primary School,CAT 3,Invermay
+358,87668,-37.3008423,146.1392562,Jamieson Primary School,CAT 2,Jamieson
+359,424105,-36.7476976,144.2096928,Jenny's Kindergarten Maiden Gully,CAT 3,Maiden Gully
+360,314790,-38.3755483,144.9081772,Jetty Road Childcare and Kindergarten,CAT 3,Rosebud
+361,463689,-38.0280213,145.9013606,Jindivick Primary School,CAT 3,Jindivick
+362,165395,-37.7894057,145.3866302,Joy Avenue Kindergarten,CAT 3,Mount Evelyn
+363,152345,-36.7377646,144.2787295,Kalianna OSHC,CAT 3,North Bendigo
+364,152345,-36.7377646,144.2787295,Kalianna Special School,CAT 3,Bendigo
+365,407099,-36.5546791,144.300568,Kalianna Special School - Whipstick Environment Centre,CAT 3,Neilborough
+366,165683,-37.8843739,145.3708211,Kallista Kindergarten,CAT 2,Kallista
+367,165683,-37.8822686,145.3713226,Kallista OSHClub,CAT 2,Kallista
+368,165683,-37.8822686,145.3713226,Kallista Primary School,CAT 2,Kallista
+369,264563,-37.6902608,145.2136135,Kangaroo Ground Preschool Inc,CAT 3,Kangaroo Ground
+370,264564,-37.6912493,145.2148492,Kangaroo Ground Primary Combined OSHC,CAT 3,Kangaroo Ground
+371,264564,-37.6912493,145.2148492,Kangaroo Ground Primary School,CAT 3,Kangaroo Ground
+372,420865,-36.7699933,144.3100691,Kennington Primary School,CAT 3,Kennington
+373,420865,-36.7699933,144.3100691,Kennington Primary School - Bendigo Deaf Facility,CAT 3,Kennington
+374,406720,-36.532378,147.3736458,Kids on Campus Mitta Mitta,CAT 2,Mitta Mitta
+375,322933,-38.115678,145.1806027,Kinder at Flinders,CAT 3,Carrum Downs
+376,193578,-37.5212792,145.3570785,Kinglake Primary School,CAT 2,Kinglake
+377,193578,-37.5212792,145.3570785,Kinglake Primary School Combined OSHC,CAT 2,Kinglake
+378,103935,-37.4589652,145.3251161,Kinglake Ranges Children's Centre,CAT 2,Kinglake Central
+379,124242,-37.481744,145.2594698,Kinglake West Primary School,CAT 2,Kinglake West
+380,94959,-37.4878507,145.298435,Kinglake West PS TheirCare,CAT 2,Kinglake Central
+381,398833,-35.6358328,144.1293665,Koondrook Preschool,CAT 3,Koondrook
+382,398833,-35.6358328,144.1293665,Koondrook Primary School,CAT 3,Koondrook
+383,229202,-34.2777181,142.0845241,Koorlong Primary School,CAT 3,Koorlong
+384,276725,-37.7741916,145.2570457,Kurboroo Kindergarten,CAT 3,Warranwood
+385,2647,-38.0384128,145.8047396,Labertouche OSHClub,CAT 3,Labertouche
+386,2647,-38.0383491,145.8048095,Labertouche Primary School,CAT 3,Labertouche
+387,275928,-37.8227842,148.1019025,Lake Tyers Early Learning Centre,CAT 3,Lake Tyers
+388,426773,-36.7379729,147.1737279,Lake View Children's Centre,CAT 3,Mount Beauty
+389,253778,-37.6768268,144.0108709,Lal Lal After School Kids,CAT 2,Lal Lal
+390,253778,-37.6768268,144.0108709,Lal Lal Primary School,CAT 2,Lal Lal
+391,77170,-37.2753396,144.7278073,Lancefield Childrens Centre,CAT 3,Lancefield
+392,77171,-37.2771569,144.7403233,Lancefield Early Education Centre,CAT 3,Lancefield
+393,77170,-37.2745843,144.7274093,Lancefield Primary School,CAT 3,Lancefield
+394,449781,-37.0056307,143.1361618,Landsborough Primary School,CAT 3,Landsborough
+395,322939,-38.1688632,145.1876443,Lang Park Early Learning Centre and Kindergarten,CAT 3,Langwarrin
+396,252354,-37.1710964,144.4896629,Langley Primary School,CAT 3,Langley
+397,120862,-37.7811711,145.5672473,Launching Place Preschool,CAT 3,Launching Place
+398,120862,-37.7821527,145.5708853,Launching Place Primary School,CAT 3,Launching Place
+399,120862,-37.7826791,145.5697414,Launching Place PS OSHC - Extend,CAT 3,Launching Place
+400,247554,-37.6739032,145.1512368,Launchpad Diamond Creek,CAT 3,Diamond Creek
+401,66531,-37.2388883,146.2085294,Lauriston Girls' School - Howqua Campus,CAT 3,Howqua
+402,178696,-38.6815925,143.3815983,Lavers Hill and District Preschool,CAT 1,Lavers Hill
+403,178696,-38.6820403,143.3843317,Lavers Hill K-12 College,CAT 1,Lavers Hill
+404,261714,-37.6300858,145.2134387,Learning Co-Operative School,CAT 3,Cottles Bridge
+405,286320,-37.9281627,145.356792,Len Jeffrey Memorial Kindergarten,CAT 3,Belgrave South
+406,431640,-36.7364467,144.2690879,Lightning Reef Primary School,CAT 3,Bendigo
+407,152346,-36.743012,144.2737154,Lightning Reef YMCA Early Learning Centre,CAT 3,North Bendigo
+408,160828,-37.6837693,143.5609319,Linton Primary School,CAT 2,Linton
+409,243893,-37.6382254,145.0959666,Little Assets South Morang Early Learning Centre,CAT 3,South Morang
+410,447110,-37.5431455,143.8954455,Little Bendigo Primary School,CAT 2,Nerrina
+411,68839,-37.0025582,145.0389985,Little Foot Steps,CAT 3,Puckapunyal
+412,285295,-37.9589172,145.3773732,Little Joey's Early Learning,CAT 3,Narre Warren East
+413,387416,-36.3112699,146.8439248,Little Yacks Learning Years (LYLY),CAT 3,Yackandandah
+414,269963,-37.7931176,145.6313743,Little Yarra Steiner Kindergarten,CAT 3,Yarra Junction
+415,269963,-37.7931176,145.6313743,Little Yarra Steiner School,CAT 3,Yarra Junction
+416,272050,-38.0581828,147.5664374,Loch Sport Primary School,CAT 3,Loch Sport
+417,419789,-36.8027658,144.1615096,Lockwood Primary School,CAT 3,Lockwood
+418,419789,-36.8027658,144.1615096,Lockwood PS TheirCare,CAT 3,Lockwood
+419,131085,-36.8514541,144.1547452,Lockwood South Combined Outside School Hours Care,CAT 3,Lockwood South
+420,131084,-36.8416155,144.1571113,Lockwood South Primary School,CAT 3,Lockwood South
+421,303989,-38.1699151,147.088976,Longford Primary School,CAT 3,Longford
+422,303988,-38.1619341,147.0866487,Longford Uniting Kindergarten,CAT 3,Longford
+423,158508,-36.8067764,145.4216849,Longwood Primary School,CAT 3,Longwood
+424,158508,-36.8067764,145.4216849,Longwood Primary School Council,CAT 3,Longwood
+425,48236,-38.5399764,143.9736415,Lorne Kindergarten,CAT 2,Lorne
+426,48236,-38.5365271,143.9732849,Lorne Occasional Child Care,CAT 2,Lorne
+427,48236,-38.5390923,143.9732148,Lorne P-12 College,CAT 2,Lorne
+428,37808,-38.0342846,142.0002851,Macarthur Kindergarten,CAT 3,Macarthur
+429,37808,-38.0309933,142.0007981,Macarthur Primary School,CAT 3,Macarthur
+430,353115,-37.8890827,145.4747589,Macclesfield Primary School,CAT 2,Macclesfield
+431,353115,-37.8890827,145.4747589,Macclesfield PS TheirCare,CAT 2,Macclesfield
+432,113980,-37.4259535,144.5694713,Macedon Early Learning Centre,CAT 3,Macedon
+433,113980,-37.4242484,144.565468,Macedon Kindergarten,CAT 3,Macedon
+434,124779,-37.4189197,144.5629283,Macedon Primary School,CAT 2,Macedon
+435,124779,-37.4189197,144.5629283,Macedon Primary School Combined OSHC,CAT 2,Macedon
+436,96133,-37.4616895,144.6777287,Macedon Ranges Montessori Uniting Kindergarten,CAT 3,Riddells Creek
+437,423407,-36.7441255,144.2105735,Maiden Gully Primary School,CAT 3,Maiden Gully
+438,423407,-36.7441255,144.2105735,Maiden Gully Primary School OSH Care,CAT 3,Maiden Gully
+439,129017,-36.994673,144.069952,Maldon Neighbourhood Centre Childcare,CAT 3,Maldon
+440,129017,-36.9931901,144.0680501,Maldon Preschool Centre,CAT 3,Maldon
+441,129017,-36.9947145,144.0666709,Maldon Primary School,CAT 3,Maldon
+442,186414,-37.5601027,149.7522528,Mallacoota P-12 College,CAT 3,Mallacoota
+443,161689,-37.5594246,149.7524908,Mallacoota Preschool,CAT 3,Mallacoota
+444,360941,-35.262571,141.1801579,Mallee Minors Child Care Centre - Murrayville,CAT 3,Murrayville
+445,346419,-35.0708937,142.3281006,Mallee Minors Child Care Centre - Ouyen,CAT 3,Ouyen
+446,309132,-35.1701845,141.8109878,Mallee Minors Child Care Centre - Underbool,CAT 3,Underbool
+447,283654,-37.1869591,144.3872239,Malmsbury Primary School,CAT 3,Malmsbury
+448,283654,-37.1869591,144.3872239,Malmsbury Primary School (OSHC),CAT 3,Malmsbury
+449,324361,-35.0570973,142.8820266,Manangatang & District Preschool,CAT 3,Manangatang
+450,324361,-35.0562707,142.8851538,Manangatang P-12 College,CAT 3,Manangatang
+451,184905,-37.4850216,144.5812366,Manna Gum Family and Children’s Centre,CAT 3,Gisborne
+452,425927,-36.7240566,144.2175147,Marist College Bendigo,CAT 3,Maiden Gully
+453,291274,-37.7959702,148.5390937,Marlo Primary School,CAT 3,Marlo
+454,172538,-36.6767175,142.8693058,Marnoo Primary School,CAT 3,Marnoo
+455,431639,-36.7351988,144.1356861,Marong Primary School,CAT 3,Marong
+456,188978,-37.4324185,142.8583098,Maroona Primary School,CAT 3,Maroona
+457,171287,-37.0416733,143.7230709,Maryborough Education Centre - Balaclava Road Campus,CAT 3,Maryborough
+458,171287,-37.0416733,143.7230709,Maryborough Education Centre - Beckworth Campus,CAT 3,Maryborough
+459,171287,-37.0416733,143.7230709,Maryborough Education Centre TheirCare,CAT 3,Maryborough
+460,133314,-37.5117599,145.749032,Marysville and District Kindergarten Association Inc,CAT 3,Marysville
+461,133314,-37.5117599,145.749032,Marysville Primary School,CAT 3,Marysville
+462,347249,-37.9121755,145.3603632,Mater Christi College,CAT 3,Belgrave
+463,208249,-37.9058174,145.3412613,Mayfield Early Education Tecoma,CAT 3,Tecoma
+464,440246,-36.9240152,146.2790219,McClelland Secondary College - Camp Mahaikah,CAT 2,Tolmie
+465,295057,-37.9518369,147.6694593,Melbourne Grammar School - Camp Dowd,CAT 3,Banksia Peninsula
+466,124768,-37.418487,144.4386808,Melbourne Grammar School - Robert Knox Camp,CAT 3,Ashbourne
+467,249653,-37.7483908,145.643085,Melbourne High School - Millgrove Outdoor Education Centre,CAT 2,Millgrove
+468,322830,-38.3601878,145.2014266,Melbourne Sports Institute - Crib Point,CAT 3,Crib Point
+469,133314,-37.5117599,145.749032,Melbourne Sports Institute - Marysville,CAT 3,Marysville
+470,158901,-37.9174145,145.3939599,Menzies Creek Primary School,CAT 2,Menzies Creek
+471,158901,-37.9174145,145.3939599,Menzies Creek PS TheirCare,CAT 2,Menzies Creek
+472,448471,-37.7067878,141.5484196,Merino Consolidated School,CAT 3,Merino
+473,55299,-38.3016355,142.5578081,Merri Kindergarten,CAT 3,Purnim West
+474,457982,-37.1030138,146.2571567,Merrijig Primary School,CAT 3,Merrijig
+475,246617,-37.7137313,145.1348768,Meruka Child Care Centre,CAT 3,Eltham
+476,189043,-37.4806113,149.8195386,Methodist Ladies' College - Mallacoota Campus,CAT 1,Mallacoota
+477,353998,-37.882985,147.8528346,Metung Primary School,CAT 2,Metung
+478,196606,-36.156305,146.7251716,Middle Indigo Primary School,CAT 3,Indigo Valley
+479,133278,-37.5051299,145.314645,Middle Kinglake Primary School,CAT 2,Kinglake Central
+480,133278,-37.5055601,145.3157197,Middle Kinglake Primary School Combined OSHC,CAT 2,Kinglake Central
+481,233618,-34.3886015,141.5974202,Shine Bright Millewa Kindergarten,CAT 3,Werrimull
+482,249654,-37.7514554,145.6494853,Millgrove Preschool & Maternal Child Health Centre,CAT 3,Millgrove
+483,249654,-37.7525093,145.6502096,Millwarra Primary School - Millgrove Campus,CAT 3,Millgrove
+484,264592,-37.7419237,145.7355747,Millwarra Primary School - Warburton East Campus,CAT 3,East Warburton
+485,274065,-38.4015717,146.1555584,Mirboo North Early Learning Centre,CAT 3,Mirboo North
+486,274064,-38.3936626,146.1527459,Mirboo North Primary School,CAT 3,Mirboo North
+487,274065,-38.4005713,146.150418,Mirboo North PS TheirCare,CAT 3,Mirboo North
+488,274065,-38.401713,146.1476172,Mirboo North Secondary College,CAT 3,Mirboo North
+489,406721,-36.5330769,147.379461,Mitta Mitta Primary School,CAT 2,Mitta Mitta
+490,158896,-37.8764716,145.4007223,Monbulk Aquatic Centre,CAT 3,Monbulk
+491,337671,-37.8843955,145.4273819,Monbulk College,CAT 2,Monbulk
+492,158594,-37.8764109,145.4104584,Monbulk OSHClub,CAT 3,Monbulk
+493,158594,-37.8758425,145.4095341,Monbulk Preschool,CAT 3,Monbulk
+494,158594,-37.8764109,145.4104584,Monbulk Primary School,CAT 3,Monbulk
+495,278896,-38.3661976,144.9946727,Monterosso Early Learning,CAT 3,Red Hill
+496,208238,-37.809643,145.3426934,Montrose Preschool,CAT 3,Montrose
+497,208238,-37.807752,145.3439732,Montrose Primary School,CAT 3,Montrose
+498,208238,-37.8089809,145.3452473,Montrose PS TheirCare,CAT 3,Montrose
+499,80140,-36.3724075,145.2342372,Mooroopna North Primary School,CAT 3,Mooroopna
+500,80140,-36.3724075,145.2342372,Mooroopna North PS TheirCare,CAT 3,Mooroopna North
+501,64235,-38.0863244,142.8112004,Mortlake College TheirCare,CAT 3,Mortlake
+502,64235,-38.0863244,142.8112004,Mortlake P-12 College,CAT 3,Mortlake
+503,426772,-36.7428223,147.1690719,Mount Beauty Primary School,CAT 3,Mount Beauty
+504,426772,-36.7428223,147.1690719,Mount Beauty Primary School OSHC,CAT 3,Mount Beauty
+505,426772,-36.7414712,147.167311,Mount Beauty Secondary College,CAT 3,Mount Beauty
+506,452223,-37.6072245,143.8769197,Mount Clear College,CAT 2,Mount Clear
+507,448707,-37.596841,143.8677939,Mount Clear Primary School,CAT 3,Mount Clear
+508,292380,-37.8300655,145.362334,Mount Dandenong Primary School,CAT 2,Mount Dandenong
+509,292380,-37.8300655,145.362334,Mount Dandenong Primary School (OSHC),CAT 2,Mount Dandenong
+510,253057,-37.6282894,144.1019888,Mount Edgerton OSHClub,CAT 2,Mount Edgertton
+511,253057,-37.628123,144.1023253,Mount Egerton Primary School,CAT 2,Mount Egerton
+512,294506,-38.18799,145.100165,Mount Eliza North Primary School,CAT 3,Mount Eliza
+513,284431,-37.7993913,145.3676999,Mount Evelyn Christian School Kindergarten,CAT 3,Mount Evelyn
+514,284431,-37.7993913,145.3676999,Mount Evelyn Christian School/Ranges TEC - Mount Evelyn Christian School,CAT 3,Mount Evelyn
+515,165395,-37.7907206,145.3894112,Mount Evelyn Primary School,CAT 3,Mount Evelyn
+516,165395,-37.7907206,145.3894112,Mount Evelyn Primary School Combined OSHC,CAT 3,Mount Evelyn
+517,147382,-37.7762862,145.5318904,Mount Evelyn Primary School Combined OSHC,CAT 3,Woori Yallock
+518,114335,-37.4048101,144.5836461,Mount Macedon Primary School,CAT 1,Mount Macedon
+519,304140,-38.2694317,145.0114971,Mount Martha House Kindergarten,CAT 3,Mount Martha
+520,463590,-38.2678217,145.0189987,Mount Martha Kindergarten,CAT 3,Mount Martha
+521,304140,-38.2755396,145.0140688,Mount Martha Primary School,CAT 3,Mount Martha
+522,136812,-37.3010915,142.767601,Moyston Primary School,CAT 3,Moyston
+523,136812,-37.3010915,142.767601,Moyston Primary School OSHC,CAT 3,Moyston
+524,448708,-37.6075083,143.8682205,Mt Clear Community Kindergarten,CAT 3,Mount Clear
+525,292380,-37.8300655,145.362334,Mt Dandenong Preschool,CAT 2,Mount Dandenong
+526,158886,-37.7815344,145.3933762,Mt Evelyn Early Learning Centre,CAT 3,Mount Evelyn
+527,165672,-37.7846608,145.3792772,Mt Evelyn Memorial Preschool,CAT 3,Mount Evelyn
+528,463595,-38.2747165,145.0178094,Mt Martha Primary School Out of School Hours Care Program,CAT 3,Mount Martha
+529,361884,-35.2665321,141.1760412,Murrayville Community College,CAT 3,Murrayville
+530,426857,-36.7378417,146.3180065,Myrrhee OSH,CAT 1,Myrrhee
+531,426857,-36.7378416,146.3180065,Myrrhee Primary School,CAT 1,Myrrhee
+532,146710,-34.4736,142.3572303,Nangiloc & District Kindergarten,CAT 3,Nangiloc
+533,146710,-34.4742689,142.3579813,Nangiloc Colignan and District Primary School,CAT 3,Nangiloc
+534,146710,-34.4742689,142.3579813,Nangiloc Colignan and District Primary School Council,CAT 3,Nangiloc
+535,374748,-38.2619385,146.2317573,Narracan Primary School,CAT 3,Narracan
+536,449553,-36.942176,143.4682387,Natte Yallock Primary School,CAT 3,Natte Yallock
+537,415395,-36.9004474,143.1139638,Navarre Primary School,CAT 3,Navarre
+538,377466,-37.9219891,145.9506978,Neerim District Rural Primary School,CAT 3,Nayook
+539,247554,-37.6702708,145.1543415,Ness Reserve Pre-school,CAT 3,Diamond Creek
+540,70637,-37.3126556,144.5942731,Newham Primary School,CAT 3,Newham
+541,260793,-37.736141,148.4336134,Newmerella Primary School,CAT 3,Newmerella
+542,129030,-37.1065323,144.0605122,Newstead Preschool,CAT 3,Newstead
+543,129030,-37.1059399,144.0668192,Newstead Primary School,CAT 3,Newstead
+544,291689,-37.8205808,147.7770013,Nicholson Primary School,CAT 3,Nicholson
+545,291687,-37.8161186,147.7481451,Nicholson PS TheirCare,CAT 3,Nicholson
+546,284510,-37.793955,145.1794728,Nido Early School Donvale,CAT 3,Donvale
+547,208238,-37.8095164,145.3442679,Nido Early School Montrose,CAT 3,Montrose
+548,67197,-37.3510761,144.5367094,Nido Early School Woodend,CAT 3,Woodend
+549,337655,-37.8438785,144.2821152,Northern Bay P-12 College - Staughton Vale Outdoor Education Centre,CAT 2,Staughton Vale
+550,351291,-37.8664945,147.8877185,Nungurner Primary School,CAT 2,Nungurner
+551,247554,-37.6749232,145.1543597,Occasional Child Care Centre Diamond Creek,CAT 3,Diamond Creek
+552,345368,-37.8528149,145.3656904,Olinda Primary School,CAT 2,Olinda
+553,243048,-37.0882235,144.2052057,Olivet Christian College,CAT 3,Campbells Creek
+554,254465,-37.1009666,147.5939827,Omeo Primary School,CAT 2,Omeo
+555,322831,-38.3691623,145.2073222,One Tree Defence Childcare Unit Cerberus,CAT 3,Crib Point
+556,186793,-37.0012311,145.0332133,One Tree Defence Childcare Unit Puckapunyal,CAT 3,Puckapunyal
+557,186793,-37.0016289,145.0332139,One Tree Puckapunyal Kindergarten,CAT 3,Puckapunyal
+558,413343,-36.7816332,144.2282227,OneSchool Global Vic - Bendigo Centre,CAT 3,Kangaroo Flat
+559,147382,-37.7770418,145.5296845,Only About Children Woori Yallock,CAT 3,Woori Yallock
+560,379615,-36.3174909,146.8927004,Osbornes Flat Primary School,CAT 2,Osbornes Flat
+561,67162,-37.3450689,144.1412599,OSHC @ DPS,CAT 3,Daylesford
+562,243049,-37.0930164,144.2046752,OSHC Adventures (Campbells Creek),CAT 3,Campbells Creek
+563,67801,-36.8417182,144.3879697,OSHC Adventures (Eppalock PS),CAT 3,Axe Creek
+564,414165,-36.7048956,144.3141938,OSHC Adventures (Epsom),CAT 3,Epsom
+565,152384,-37.0823876,144.26111,OSHC Adventures Chewton,CAT 2,Chewton
+566,265325,-37.0030548,144.2566765,OSHC Adventures Harcourt Valley PS,CAT 3,Harcourt
+567,129017,-36.9947145,144.0666709,OSHC Adventures Maldon,CAT 3,Maldon
+568,360195,-37.9526523,145.551714,OSHClub Gembrook,CAT 3,Gembrook
+569,152349,-36.7742902,144.2786901,OSHClub Quarry Hill,CAT 3,Quarry Hill
+570,284557,-37.141435,144.3510898,OSHClub Taradale,CAT 3,Taradale
+571,178696,-38.6815925,143.3815983,Otway Kids OSHC,CAT 1,Lavers Hill
+572,420826,-36.8039996,147.2251125,Outdoor School - Bogong Campus,CAT 2,Bogong
+573,408363,-36.6737843,146.26101,Outdoor School - Fifteen Mile Creek Campus,CAT 2,Greta South
+574,300173,-35.0651345,142.321055,Ouyen P-12 College,CAT 3,Ouyen
+575,300173,-35.0687612,142.314621,Ouyen Preschool,CAT 3,Ouyen
+576,314790,-38.375047,144.9064175,Padua College - Padua College - Rosebud Campus,CAT 3,Rosebud
+577,265145,-37.6416403,145.2403383,Panton Hill Playhouse,CAT 3,Panton Hill
+578,258105,-37.6407237,145.2399861,Panton Hill Preschool,CAT 3,Panton Hill
+579,258105,-37.6411216,145.239209,Panton Hill Primary School,CAT 3,Panton Hill
+580,258105,-37.6414202,145.2397353,Panton Hill PS TheirCare,CAT 3,Panton Hill
+581,461270,-38.1897848,145.1277219,Paratea Preschool,CAT 3,Frankston
+582,264989,-37.7775433,145.2135843,Park Orchards Community House & Learning Centre,CAT 3,Park Orchards
+583,270039,-37.7894103,145.235687,Park Orchards Kindergarten,CAT 3,Park Orchards
+584,264989,-37.779993,145.2151747,Park Orchards Primary School,CAT 3,Park Orchards
+585,264989,-37.779993,145.2151747,Park Orchards PS TheirCare,CAT 3,Park Orchards
+586,275041,-38.1987006,145.0909635,Peninsula Grammar,CAT 3,Mt Eliza
+587,275041,-38.2012782,145.0933096,Peninsula Grammar School OSHC- Extend,CAT 3,Mount Eliza
+588,306801,-38.3857964,144.9257396,Peninsula Sands Preschool,CAT 3,Rosebud
+589,304148,-38.3415569,145.0110813,Peninsula Specialist College,CAT 3,Dromana
+590,304148,-38.3415569,145.0110813,Peninsula Specialist College TheirCare,CAT 3,Dromana
+591,106300,-37.2223566,145.8603578,Penleigh & Essendon Grammar - Eildon Camp,CAT 3,Eildon
+592,85818,-36.8598466,145.7360024,Peranbin Primary College - Strathbogie Campus,CAT 3,Strathbogie
+593,303436,-38.3832349,145.3330141,Perseverance Primary School,CAT 2,French Island
+594,319624,-38.2735186,144.622329,Point Lonsdale Primary School,CAT 3,Point Lonsdale
+595,414358,-37.2481848,142.7164583,Pomonal Primary School,CAT 2,Pomonal
+596,191889,-37.1923886,142.60872,Pomonal Primary School (OSHC),CAT 2,Pomonal
+597,408821,-36.6994327,146.9114167,Porepunkah Primary School,CAT 3,Porepunkah
+598,176040,-38.6155275,143.002585,Port Campbell Recreation Reserve,CAT 3,Port Campbell
+599,67351,-37.1088263,146.3629009,Princes Hill Secondary College - Mirrimbah Country Centre,CAT 2,Mirrimbah
+600,186793,-37.0024047,145.0358472,Puckapunyal Primary School,CAT 3,Puckapunyal
+601,263715,-37.1239067,144.8581654,Pyalong Preschool,CAT 3,Pyalong
+602,263714,-37.1170228,144.8578049,Pyalong Primary School,CAT 3,Pyalong
+603,263714,-37.1170228,144.8578049,Pyalong Primary School Before & After School Care,CAT 3,Pyalong
+604,152349,-36.7749287,144.2803957,Quarry Hill Primary School,CAT 3,Quarry Hill
+605,138701,-37.6543706,145.5243928,Queens Park Kindergarten,CAT 3,Healesville
+606,280963,-37.9647126,146.393243,Rawson Primary School,CAT 1,Rawson
+607,246706,-37.0687591,144.2015335,Ray Street Children's Centre,CAT 3,Castlemaine
+608,122860,-36.5389886,144.2052543,Raywood Primary School,CAT 3,Raywood
+609,171131,-38.4847508,142.972653,Ready Set Go,CAT 3,Timboon
+610,278896,-38.3671066,144.9963275,Red Hill Consolidated School,CAT 3,Red Hill
+611,278896,-38.3671066,144.9963275,Red Hill Consolidated TheirCare,CAT 3,Red Hill
+612,304151,-38.3698995,145.0121848,Red Hill Memorial Preschool,CAT 3,Red Hill
+613,142072,-37.0194838,144.5304529,Redesdale Mia Mia Primary School,CAT 3,Redesdale
+614,109467,-37.6594853,145.5132499,Robyn Jane Children's Centre Inc,CAT 3,Healesville
+615,444490,-37.0492148,143.7362866,Roseberry House Early Learning Centre Maryborough,CAT 3,Maryborough
+616,314789,-38.3737856,144.908271,Rosebud Early Learning Centre,CAT 3,Rosebud
+617,330402,-37.9032069,145.9219897,Rubicon Outdoor School - Nayook Campus,CAT 1,Nayook
+618,74662,-37.2951816,145.821579,Rubicon Outdoor School - Thornton Campus,CAT 3,Thornton
+619,151706,-36.5878185,145.0156653,Rushworth Kindergarten & Child Care,CAT 3,Rushworth
+620,151706,-36.5846166,145.0155435,Rushworth P-12 College,CAT 2,Rushworth
+621,247555,-37.6723224,145.1591405,Sacred Heart Catholic Primary School - VillageOSHC,CAT 3,Diamond Creek
+622,247555,-37.6723224,145.1591405,Sacred Heart School,CAT 3,Diamond Creek
+623,208238,-37.8090316,145.3383824,Sarah Court Preschool,CAT 3,Montrose
+624,207608,-37.8623726,145.3543006,Sassafras Preschool,CAT 2,Sassafras
+625,207608,-37.8608983,145.3543934,Sassafras Primary School,CAT 2,Sassafras
+626,207608,-37.8608983,145.3543934,Sassafras PS TheirCare,CAT 2,Sassafras
+627,455376,-37.0406212,147.3088417,School for Student Leadership - Alpine School Campus,CAT 1,Dinner Plain
+628,277995,-37.7623111,145.5852716,School for Student Leadership - Don Valley Campus,CAT 3,Don Valley
+629,156484,-38.1583747,142.9534606,School for Student Leadership - Gnurad Gundidj Campus,CAT 3,Noorat
+630,22811,-37.7954964,148.6209657,School for Student Leadership - Snowy River Campus,CAT 2,Marlo
+631,123117,-37.4003074,144.8936518,SchoolsOUT Darraweit Guim,CAT 3,Darraweit Guim
+632,89280,-37.3479146,144.6194041,SchoolsOUT! Hesket Primary,CAT 2,Hesket
+633,115412,-37.4569303,144.5974238,SchoolsOUT! Holy Cross Primary,CAT 3,New Gisborne
+634,77170,-37.2745843,144.7274093,SchoolsOUT! Lancefield Primary,CAT 3,Lancefield
+635,114335,-37.4048101,144.5836461,SchoolsOUT! Mt Macedon,CAT 1,Mount Macedon
+636,70637,-37.3126556,144.5942731,SchoolsOUT! Newham Primary,CAT 3,Newham
+637,56259,-37.3248674,144.4092169,SchoolsOUT! Tylden,CAT 3,Tylden
+638,152413,-37.589567,145.4881755,Scotch College - Chum Creek Campus,CAT 2,Chum Creek
+639,165686,-37.9125504,145.3727716,Selby Community House,CAT 2,Selby
+640,165687,-37.9139236,145.3702064,Selby Preschool,CAT 2,Selby
+641,347249,-37.9107337,145.3664202,Selby Primary School,CAT 2,Selby
+642,276673,-37.7773618,145.4577095,Seville Preschool,CAT 3,Seville
+643,276674,-37.7726581,145.4648691,Seville Primary School,CAT 3,Seville
+644,276674,-37.7726581,145.4648691,Seville PS TheirCare,CAT 3,Seville
+645,207608,-37.8676648,145.3494719,Sherbrooke Community School,CAT 2,Sassafras
+646,156718,-37.9021585,145.3310176,Sherbrooke Family and Children's Centre,CAT 3,Upwey
+647,258790,-36.9226758,144.7080152,Shine Bright Heathcote Kindergarten,CAT 3,Heathcote
+648,409245,-36.6654387,144.3344245,Shine Bright Huntly Kindergarten,CAT 3,Huntly
+649,420865,-36.7727955,144.3083854,Shine Bright Kennington Kindergarten,CAT 3,Bendigo
+650,419237,-36.7591085,144.229863,Shine Bright Maiden Gully Early Years Hub,CAT 3,Maiden Gully
+651,431639,-36.7344447,144.1283752,Shine Bright Marong Kindergarten,CAT 3,Marong
+652,403903,-36.7956436,144.2853483,Shine Bright Spring Gully Kindergarten,CAT 3,Spring Gully
+653,403907,-36.8020006,144.3516649,Shine Bright Strathfieldsaye Kindergarten,CAT 3,Strathfieldsaye
+654,324299,-35.2914249,143.4522562,Shine Bright Woorinen South Kindergarten,CAT 3,Woorinen South
+655,305601,-37.9729282,145.3182294,Sidrah Gardens School,CAT 3,Narre Warren North
+656,155739,-37.8241685,145.4216883,Silvan P.S Outside School Hours Care,CAT 3,Silvan
+657,155739,-37.8241685,145.4216883,Silvan Primary School,CAT 3,Silvan
+658,171811,-38.4990326,143.2090261,Simpson and District Kindergarten,CAT 3,Simpson
+659,171811,-38.4982433,143.2079831,Simpson Primary School,CAT 3,Simpson
+660,255504,-37.6763141,145.1344761,Smartie Pants Early Learning & Development,CAT 3,Diamond Creek
+661,255502,-37.6408335,145.1316689,Smiling Children Early Learning Centre,CAT 3,Yarrambat
+662,324247,-38.3889823,145.1463027,Somers School Camp - Somers Campus,CAT 3,Somers
+663,365299,-38.1656954,146.3410964,Somers School Camp - Woorabinda Campus,CAT 2,Yallourn North
+664,289168,-37.7823294,145.6086522,Songbird Early Learning Centre,CAT 3,Yarra Junction
+665,296935,-38.3413545,144.7391516,Sorrento Preschool,CAT 3,Sorrento
+666,424559,-38.3414427,144.7412046,Sorrento Primary School,CAT 3,Sorrento
+667,424559,-38.3414427,144.7412046,Sorrento PS TheirCare,CAT 3,Sorrento
+668,243047,-37.0768522,144.2085967,South Castlemaine Kindergarten,CAT 3,Castlemaine
+669,243895,-37.6544839,145.0940087,South Morang Preschool Inc - Riverside,CAT 3,South Morang
+670,183546,-36.7613413,144.2482234,Specimen Hill Primary School,CAT 3,Golden Square
+671,411922,-36.7935281,144.2839586,Spring Gully Primary School,CAT 3,Bendigo
+672,116302,-36.8211529,145.809614,St Albans Secondary College - Strathbogie Camp,CAT 3,Creek Junction
+673,30577,-37.3587448,144.5299044,St Ambrose's School,CAT 3,Woodend
+674,131607,-37.5996312,145.2753155,St Andrews Primary School,CAT 1,St Andrews
+675,131606,-37.6021501,145.2698892,St Andrews Primary School Outside School Hours Care,CAT 1,St Andrews
+676,264989,-37.7785768,145.2194931,St Anne's School,CAT 3,Park Orchards
+677,264989,-37.7785768,145.2194931,St Anne's School OSHC Park Orchards,CAT 3,Park Orchards
+678,412059,-36.6143316,143.2580973,St Arnaud Early Learning Centre,CAT 3,St Arnaud
+679,412058,-36.6101462,143.250986,St Arnaud Secondary College,CAT 3,St Arnaud
+680,6919,-38.4794001,144.0258265,St Bernard's College - Santa Monica Camp,CAT 2,Eastern View
+681,109467,-37.6582046,145.5153879,"St Brigid's Outside School Hours Care, Healesville",CAT 3,Healesville
+682,109467,-37.6582046,145.5153879,St Brigid's School,CAT 3,Healesville
+683,239676,-36.1730513,146.9396248,St Francis of Assisi Primary School  Wodonga - St Francis of Assisi Primary School,CAT 3,Baranduda
+684,425082,-36.80523,144.3584552,St Francis of the Fields School,CAT 3,Strathfieldsaye
+685,447448,-37.5606505,143.9023154,St Francis Xavier School,CAT 3,Ballarat East
+686,371617,-36.359929,146.6831907,St Joseph's School,CAT 3,Beechworth
+687,220517,-36.1478813,146.6204237,St Joseph's School,CAT 3,Chiltern
+688,322830,-38.360781,145.2026907,St Joseph's School,CAT 3,Crib Point
+689,424559,-38.3399893,144.7421669,St Joseph's School,CAT 3,Sorrento
+690,269962,-37.7919497,145.6161004,St Joseph's School,CAT 2,Yarra Junction
+691,295057,-37.9507417,147.6711577,St Leonard's College - Camp Ibis,CAT 3,Banksia Peninsula
+692,158886,-37.7874264,145.3998776,St Mary's Mt Evelyn TheirCare,CAT 3,Mount Evelyn
+693,416676,-36.5712761,143.8726726,St Mary's School,CAT 3,Inglewood
+694,77170,-37.2766776,144.732066,St Mary's School,CAT 3,Lancefield
+695,158887,-37.7897892,145.3956041,St Mary's School,CAT 3,Mount Evelyn
+696,151706,-36.5877247,145.0111143,St Mary's School,CAT 3,Rushworth
+697,89239,-37.3361222,144.1546935,St Michael's School,CAT 3,Daylesford
+698,183550,-36.7940268,144.2450197,St Monica's Primary YMCA Outside School Hours Care,CAT 3,Kangaroo Flat
+699,183550,-36.7940268,144.2450197,St Monica's School,CAT 3,Kangaroo Flat
+700,412058,-36.6148438,143.2465584,St Patrick's School,CAT 3,St Arnaud
+701,463103,-37.9674453,145.262858,St Paul Apostle North & Mossgiel Park OSHC,CAT 3,Endeavour Hills
+702,463103,-37.9674453,145.262858,St Paul Apostle North School,CAT 3,Endeavour Hills
+703,158593,-37.8680328,145.4116157,St Paul's School,CAT 3,Monbulk
+704,207613,-37.9090495,145.3520359,"St Thomas More Outside School Hours Care, Belgrave",CAT 3,Belgrave
+705,207613,-37.908427,145.3526484,St Thomas More's School,CAT 3,Belgrave
+706,294507,-38.19713,145.1017576,St Thomas More's School,CAT 3,Mount Eliza
+707,403908,-36.8039442,144.3608238,St. Francis of the Fields Primary YMCA Outside School Hours Care,CAT 3,Strathfieldsaye
+708,151799,-37.6653224,145.5133892,Steel Street Children's Centre,CAT 3,Healesville
+709,229202,-34.2777181,142.0845241,Stepping Stones - Koorlong Primary OSHC,CAT 3,Koorlong
+710,247555,-37.6748156,145.162668,Story House Early Learning Diamond Creek,CAT 3,Diamond Creek
+711,247555,-37.6749319,145.163793,Story House Early Learning Diamond Creek II,CAT 3,Diamond Creek
+712,142298,-37.547472,145.270094,Strathewen Primary School,CAT 2,Strathewen
+713,403907,-36.8043077,144.3520952,Strathfieldsaye Primary School,CAT 3,Strathfieldsaye
+714,403907,-36.8043077,144.3520952,Strathfieldsaye PS TheirCare,CAT 3,Strathfieldsaye
+715,135684,-37.4864209,144.51677,Sunbury And Macedon Ranges Specialist School - Bullengarook Senior Campus,CAT 2,Bullengarook
+716,275910,-37.8235956,147.8592803,Swan Reach & District Kindergarten,CAT 3,Swan Reach
+717,291697,-37.8213116,147.8648807,Swan Reach Primary School,CAT 3,Swan Reach
+718,403531,-37.2654471,147.7220844,Swifts Creek P-12 School - Flagstaff Campus,CAT 3,Swifts Creek
+719,403531,-37.2658984,147.7255482,Swifts Creek P-12 School - Tambo Campus,CAT 3,Swifts Creek
+720,403522,-37.1888911,147.7212628,Swifts Creek Uniting Early Learning,CAT 3,Swifts Creek
+721,124183,-37.476369,144.5859076,Swinburne Avenue Children's Centre,CAT 3,Gisborne
+722,424250,-37.1713534,143.7031174,Talbot Kindergarten,CAT 3,Talbot
+723,424250,-37.1678294,143.7035185,Talbot Primary School,CAT 3,Talbot
+724,132233,-36.0658018,147.1597898,Talgarno Primary School,CAT 3,Talgarno
+725,132233,-36.0664247,147.1588021,Talgarno PS TheirCare,CAT 3,Talgarno
+726,66949,-37.0968218,145.100638,Tallarook Primary School,CAT 3,Tallarook
+727,66949,-37.0968218,145.100638,Tallarook Primary School Outside School Hours Care,CAT 3,Tallarook
+728,275377,-37.7659706,147.8463031,Tambo Upper Primary School,CAT 3,Tambo Upper
+729,284557,-37.141435,144.3510898,Taradale Primary School,CAT 3,Taradale
+730,429456,-36.7709831,143.828273,Tarnagulla Primary School,CAT 3,Tarnagulla
+731,429456,-36.7709831,143.828273,Tarnagulla Primary School OSHC,CAT 3,Tarnagulla
+732,25153,-38.7022532,145.8668185,Tarwin Lower Primary School,CAT 3,Tarwin Lower
+733,419421,-36.7106621,147.1430943,Tawonga Primary School,CAT 3,Tawonga
+734,423081,-36.6915705,147.142892,Tawonga Primary School Kindergarten,CAT 3,Tawonga
+735,423081,-36.6915705,147.142892,Tawonga Primary School OSHC,CAT 3,Tawonga
+736,294506,-38.18799,145.100165,Team Holiday - Mt Eliza North,CAT 3,Mount Eliza
+737,274006,-37.8151851,145.2062098,TeamKids - Antonio Park Primary,CAT 3,Mitcham
+738,292471,-37.8269621,145.1655873,TeamKids - Blackburn Lake Primary,CAT 3,Blackburn
+739,322889,-38.2991983,145.1880884,TeamKids - Hastings Primary,CAT 3,Hastings
+740,322805,-38.135271,145.203857,TeamKids - Woodlands Primary,CAT 3,Langwarrin
+741,208249,-37.9068865,145.3439162,Tecoma Kindergarten,CAT 3,Tecoma
+742,208249,-37.907724,145.3444908,Tecoma Primary School,CAT 3,Tecoma
+743,208249,-37.907724,145.3444908,Tecoma Primary School OSHC,CAT 3,Tecoma
+744,342664,-35.3435564,142.4276282,Tempy Primary School,CAT 3,Tempy
+745,337562,-37.8603432,145.3202795,The Basin OSHClub,CAT 3,The Basin
+746,345366,-37.8499216,145.308536,The Basin Primary School,CAT 3,The Basin
+747,345367,-37.8563925,145.3145206,The Basin Uniting Kindergarten,CAT 3,The Basin
+748,158896,-37.873333,145.402076,The Cottage Childcare Centre,CAT 3,Monbulk
+749,323888,-38.3478956,144.2999825,The Jan Juc Preschool,CAT 3,Jan Juc
+750,135690,-37.4947929,144.6023124,The Learning Sanctuary Gisborne,CAT 3,Gisborne
+751,270039,-37.7894103,145.235687,The Learning Sanctuary Park Orchards,CAT 3,Park Orchards
+752,158898,-37.8920437,145.3936861,The Patch Kindergarten,CAT 2,The Patch
+753,158898,-37.8920437,145.3936861,The Patch OSHClub,CAT 2,The Patch
+754,158898,-37.8920437,145.3936861,The Patch Primary School,CAT 2,The Patch
+755,275041,-38.2012782,145.0933096,The Peninsula School Kindergarten,CAT 3,Mount Eliza
+756,176814,-37.9235936,141.2762394,Thrive OSHC Dartmoor,CAT 3,Dartmoor
+757,452219,-37.5202422,143.8744314,Thrive OSHC Invermay,CAT 3,Invermay
+758,171468,-38.4856932,142.977317,Timboon & District Kindergarten,CAT 3,Timboon
+759,171131,-38.4827972,142.9680191,Timboon P-12 School,CAT 3,Timboon
+760,171131,-38.4827972,142.9680191,Timboon P-12 School TheirCare,CAT 3,Timboon
+761,443948,-36.984145,143.7121434,Timor Primary School,CAT 3,Timor
+762,113791,-36.4902131,145.3384954,Toolamba Kindergarten and Children's Services,CAT 3,Toolamba
+763,113791,-36.4902131,145.3384954,Toolamba OHSC,CAT 3,Toolamba
+764,113791,-36.4902131,145.3384954,Toolamba Preschool,CAT 3,Toolamba
+765,113791,-36.4902131,145.3384954,Toolamba Primary School,CAT 3,Toolamba
+766,141602,-37.5355267,145.4720338,Toolangi Primary School,CAT 2,Toolangi
+767,141602,-37.5355415,145.4719085,Toolangi Primary School Council,CAT 2,Toolangi
+768,252410,-37.6063272,144.594793,Toolern Vale and District Primary School,CAT 3,Toolern Vale
+769,252410,-37.6063272,144.594793,Toolern Vale OSHClub,CAT 3,Toolern Vale
+770,293145,-37.8516832,148.0508218,Toorloo Arm Primary School,CAT 3,Lake Tyers Beach
+771,369935,-38.2981132,146.5416019,Traralgon South Kindergarten,CAT 3,Traralgon South
+772,369935,-38.2981132,146.5416019,Traralgon South Primary School,CAT 3,Traralgon South
+773,95789,-37.3879191,144.3281616,Trentham District Primary School,CAT 3,Trentham
+774,95789,-37.3879191,144.3281616,Trentham District PS TheirCare,CAT 3,Trentham
+775,95789,-37.3887295,144.326965,Trentham Early Learning,CAT 3,Trentham
+776,324167,-38.2605591,145.1654714,Tyabb Primary School,CAT 3,Tyabb
+777,312444,-38.1489632,146.4807266,Tyers Kindergarten,CAT 3,Tyers
+778,312444,-38.1489784,146.481806,Tyers Primary School,CAT 3,Tyers
+779,312444,-38.1489784,146.481806,Tyers Primary School (OSHC),CAT 3,Tyers
+780,56259,-37.3248674,144.4092169,Tylden Primary School,CAT 3,Tylden
+781,309132,-35.1711608,141.8140655,Underbool Primary School,CAT 3,Underbool
+782,2582,-38.0053878,145.4120474,Upper Beaconsfield Community Early Learning Centre,CAT 2,Beaconsfield Upper
+783,2581,-37.996632,145.4150424,Upper Beaconsfield Kindergarten,CAT 2,Beaconsfield Upper
+784,273246,-38.0058,145.4096,Upper Beaconsfield McBride Road Kindergarten,CAT 2,Beaconsfield Upper
+785,331028,-37.8966484,145.3138693,Upper Ferntree Gully Primary School,CAT 3,Upper Ferntree Gully
+786,331028,-37.8964112,145.3155251,Upper Gully OSH,CAT 3,Upper Ferntree Gully
+787,124822,-37.4243205,145.0581114,Upper Plenty Primary School,CAT 3,Upper Plenty
+788,124822,-37.4243205,145.0581114,Upper Plenty PS TheirCare,CAT 3,Upper Plenty
+789,388312,-36.3551736,147.1131426,Upper Sandy Creek Primary School,CAT 3,Sandy Creek
+790,269963,-37.7909514,145.6248742,Upper Yarra Secondary College,CAT 3,Yarra Junction
+791,208248,-37.9037079,145.3348573,Upwey High School,CAT 3,Upwey
+792,156718,-37.9021585,145.3310176,Upwey Preschool,CAT 3,Upwey
+793,156718,-37.9036351,145.3334088,Upwey Primary School,CAT 3,Upwey
+794,156718,-37.9036351,145.3334088,Upwey PS TheirCare,CAT 3,Upwey
+795,156720,-37.9169205,145.3225575,Upwey South Preschool,CAT 3,Upwey South
+796,156719,-37.9130754,145.3256514,Upwey South Primary School,CAT 3,Upwey
+797,156719,-37.9130754,145.3256514,Upwey South PS TheirCare,CAT 3,Upwey
+798,413346,-36.7829222,144.313268,Victory Christian College,CAT 3,Strathdale
+799,413346,-36.7833898,144.3126242,Victory Christian College TheirCare,CAT 3,Kennington
+800,209937,-36.1775932,146.9403564,Village Early Education Baranduda,CAT 3,Baranduda
+801,423407,-36.7428104,144.2057054,Village Early Education Maiden Gully,CAT 3,Maiden Gully
+802,251458,-37.763028,145.2919016,Village School,CAT 3,Croydon North
+803,294506,-38.1890809,145.1039157,Walkers Road Preschool,CAT 3,Mount Eliza
+804,325605,-38.2181356,144.5077112,Wallington Primary School,CAT 3,Wallington
+805,436820,-36.7690856,146.9841251,Wandiligong Primary School,CAT 2,Wandiligong
+806,158582,-37.7695554,145.408757,Wandin North Primary School,CAT 3,Wandin North
+807,158582,-37.7695554,145.408757,Wandin North PS TheirCare,CAT 3,Wandin North
+808,289161,-37.7812538,145.4273736,Wandin Preschool,CAT 3,Wandin North
+809,269954,-37.7897291,145.4362473,Wandin Yallock Primary School,CAT 3,Wandin North
+810,269954,-37.7897291,145.4362473,Wandin Yallock Primary School OSHC,CAT 3,Wandin North
+811,89317,-37.3585379,145.0299951,Wandong Kindergarten,CAT 3,Wandong
+812,67240,-37.3630841,145.0269257,Wandong Primary School,CAT 3,Wandong
+813,67240,-37.3630841,145.0269257,Wandong PS TheirCare,CAT 3,Wandong
+814,87539,-36.355371,146.3288304,Wangaratta Primary School,CAT 3,Wangaratta
+815,87539,-36.355371,146.3288304,Wangaratta PS TheirCare,CAT 3,Wangaratta
+816,249659,-37.754065,145.701073,Warburton Preschool,CAT 2,Warburton
+817,249659,-37.7554085,145.7004524,Warburton Primary School,CAT 2,Warburton
+818,249659,-37.7554085,145.7004524,Warburton Primary School Combined OSHC,CAT 2,Warburton
+819,254559,-37.7422772,145.2304753,Warrandyte Childcare and Preschool Centre Co-operative Limited,CAT 2,Warrandyte
+820,254555,-37.7465024,145.185107,Warrandyte High School,CAT 2,Warrandyte
+821,254557,-37.7451653,145.2083922,Warrandyte Kindergarten,CAT 2,Warrandyte
+822,254558,-37.7423845,145.2147247,Warrandyte Primary School,CAT 1,Warrandyte
+823,254558,-37.7423845,145.2147247,Warrandyte Primary School,CAT 1,Warrandyte
+824,314656,-38.3686153,144.9140255,Waterfall Gully Preschool,CAT 3,Rosebud
+825,247557,-37.6685936,145.1822946,Wattle Glen Primary School,CAT 3,Wattle Glen
+826,254436,-37.8427759,145.1085791,Wattle Hill Kindergarten,CAT 3,Burwood
+827,453762,-37.3550456,143.6335172,Waubra Children's Service,CAT 3,Waubra
+828,453671,-37.3535593,143.634448,Waubra Primary School,CAT 3,Waubra
+829,453671,-37.3535593,143.634448,Waubra Primary School (OSHC),CAT 3,Waubra
+830,358365,-36.4173138,143.6187809,Wedderburn College,CAT 3,Wedderburn
+831,358365,-36.4173138,143.6187809,Wedderburn College (OSHC),CAT 3,Wedderburn
+832,358364,-36.4181455,143.6096234,Wedderburn Preschool,CAT 3,Wedderburn
+833,233969,-34.3915992,141.5933207,Werrimull P-12 School,CAT 3,Werrimull
+834,291014,-37.768967,145.6476071,Wesburn Primary School,CAT 2,Wesburn
+835,291014,-37.768967,145.6476071,Wesburn Primary School OSHC,CAT 2,Wesburn
+836,30448,-38.2795999,141.404788,Wesley College - Lochend Camp,CAT 3,Cape Bridgewater
+837,459936,-37.9462727,147.687219,Wesley College - Mallana Camp,CAT 3,Banksia Peninsula
+838,174667,-37.5817624,145.4764057,Wesley College Melbourne - Chum Creek Outdoor Education Campus,CAT 1,Chum Creek
+839,294183,-38.3098145,145.1753202,Western Port Secondary College,CAT 3,Hastings
+840,311851,-37.9302008,145.4444294,Where We Grow - Emerald,CAT 3,Emerald
+841,360195,-37.9530956,145.5534277,Where We Grow - Gembrook,CAT 3,Gembrook
+842,270036,-37.791057,145.2003117,Whitefriars College - Whitefriars College Inc.,CAT 3,Donvale
+843,437270,-36.7642537,146.4148745,Whitfield Community Child Care Centre,CAT 3,Whitfield
+844,437270,-36.765912,146.411952,Whitfield District Primary School,CAT 3,Whitfield
+845,437270,-36.765912,146.411952,Whitfield District Primary School - OSHC,CAT 3,Whitfield
+846,315814,-38.0727533,146.1800381,Willow Grove Kindergarten,CAT 3,Willow Grove
+847,315814,-38.0700022,146.1764874,Willow Grove Primary School,CAT 3,Willow Grove
+848,315814,-38.0700022,146.1764874,Willow Grove Primary School Out of School Hours Care,CAT 3,Willow Grove
+849,243046,-37.0702364,144.2080321,Winters Flat OSHClub,CAT 3,Castlemaine
+850,243046,-37.0702364,144.2080321,Winters Flat Primary School,CAT 3,Castlemaine
+851,452576,-37.6709613,143.6550296,Woady Yaloak Kindergarten,CAT 3,Scarsdale
+852,452577,-37.6815909,143.6565392,Woady Yaloak OSHClub - Scarsdale Campus,CAT 3,Scarsdale
+853,452577,-37.6815909,143.6565392,Woady Yaloak Primary School - Scarsdale Campus,CAT 3,Scarsdale
+854,239676,-36.1730513,146.9396248,Wodonga Catholic Parish OSHC - St Francis Campus,CAT 3,Baranduda
+855,265321,-37.7399853,145.268774,Wonga Park Community Cottage Child Care Centre,CAT 3,Wonga Park
+856,264569,-37.7327268,145.2725229,Wonga Park Primary School,CAT 3,Wonga Park
+857,251074,-37.7308019,145.273465,Wonga Park PS TheirCare,CAT 3,Wonga Park
+858,67196,-37.3559989,144.53033,Woodend Kindergarten,CAT 3,Woodend
+859,67196,-37.353237,144.5327721,Woodend Primary School,CAT 3,Woodend
+860,56623,-37.2830871,144.5042909,Woodend Primary School - Carlsruhe Campus,CAT 3,Carlsruhe
+861,43072,-38.3164932,142.4848464,Woodford Primary School,CAT 3,Woodford
+862,43072,-38.3164932,142.4848464,Woodford PS TheirCare,CAT 3,Woodford
+863,294507,-38.19713,145.1017576,Woodland Early Learning Centre,CAT 3,Mount Eliza
+864,325605,-38.2181356,144.5077112,Woodlands House Outside School Hours Care Program,CAT 3,Wallington
+865,322805,-38.135274,145.2038946,Woodlands Primary School,CAT 3,Langwarrin
+866,9554,-38.5274993,146.8761539,Woodside Primary School,CAT 3,Woodside
+867,387210,-36.2898753,146.7310619,Wooragee Primary School,CAT 2,Wooragee
+868,147382,-37.7785073,145.5300914,Woori Yallock Kindergarten,CAT 3,Woori Yallock
+869,147382,-37.7762862,145.5318904,Woori Yallock Primary School,CAT 3,Woori Yallock
+870,324299,-35.2899278,143.453306,Woorinen District Primary School,CAT 3,Woorinen South
+871,151801,-37.6831793,145.5094724,Worawa Aboriginal College,CAT 3,Healesville
+872,294426,-38.1073399,147.039479,Wurruk Kindergarten,CAT 3,Wurruk
+873,294426,-38.1073399,147.039479,Wurruk Primary School,CAT 3,Wurruk
+874,387416,-36.3087445,146.8463646,Yackandandah Kindergarten,CAT 3,Yackandandah
+875,379610,-36.3124289,146.8373871,Yackandandah Primary School,CAT 3,Yackandandah
+876,379610,-36.3124289,146.8373871,Yackandandah Primary School Outside School Hours Care,CAT 3,Yackandandah
+877,252496,-37.699617,145.1141673,Yandell Kindergarten,CAT 3,Greensborough
+878,292525,-37.2157176,144.0875527,Yandoit Primary School,CAT 2,Yandoit
+879,276679,-37.780996,145.6121691,Yarra Centre,CAT 3,Yarra Junction
+880,165393,-37.7738735,145.3846815,Yarra Hills Secondary College - Mount Evelyn Campus,CAT 3,Mount Evelyn
+881,276678,-37.7786902,145.6054105,Yarra Junction Primary School,CAT 3,Yarra Junction
+882,276678,-37.7786902,145.6054105,Yarra Junction PS TheirCare,CAT 3,Yarra Junction
+883,252449,-37.6141003,145.1893461,Yarra Me School - Hurstbridge Farm Campus,CAT 0,Nutfield
+884,165393,-37.7755382,145.3861142,Yarra Ranges Special Developmental School,CAT 2,Mount Evelyn
+885,332280,-37.8722436,146.7808973,Yarra Valley Grammar School - Wootton Lodge,CAT 2,Coongulla
+886,255144,-37.7293095,145.2141463,Yarra Warra Preschool,CAT 3,North Warrandyte
+887,6734,-38.519012,146.6478517,Yarram Secondary College - Devon North Campus,CAT 2,Devon North
+888,258096,-37.6397293,145.1364606,Yarrambat / Plenty Preschool,CAT 3,Yarrambat
+889,255502,-37.6418007,145.1319507,Yarrambat Primary Out of School Hours Care,CAT 3,Yarrambat
+890,255502,-37.6407796,145.133264,Yarrambat Primary School,CAT 3,Yarrambat
+891,102830,-37.7052983,145.3824589,Yering Primary School,CAT 3,Yering
+892,378102,-38.3724907,146.3716043,Yinnar South Primary School,CAT 0,Yinnar South
+893,363822,-38.3692178,146.3645498,Yinnar South PS TheirCare,CAT 0,Yinnar South
+894,414162,-36.7057961,144.2377963,YMCA – Eaglehawk North Primary School OSHC,CAT 3,Eaglehawk
+895,152346,-36.743012,144.2737154,YMCA Lightning Reef Primary School OSHC,CAT 3,North Bendigo
+896,425927,-36.7240566,144.2175147,YMCA Victoria – Marist College After School Program,CAT 3,Maiden Gully
+897,364399,-38.134732,145.8963902,3C Kidz Care - Chairo Drouin,CAT 4,Drouin East
+898,360210,-38.0954401,145.548004,3C Kidz Care - Chairo Pakenham,CAT 4,Nar Nar Goon
+899,339272,-37.8780697,145.2150638,3C Kidzcare Waverley,CAT 4,Wantirna South
+900,322872,-38.1524713,145.1959553,Acacia Park Early Learning Centre and Kindergarten,CAT 4,Langwarrin
+901,312997,-38.0257565,147.1133856,Airly Primary School,CAT 4,Airly
+902,255810,-37.624894,145.0373755,Al Siraat College,CAT 4,Epping
+903,255810,-37.624894,145.0373755,Al Siraat College - Al Siraat Online College,CAT 4,Epping
+904,255810,-37.624894,145.0373755,Al Siraat College OSHC- Extend,CAT 4,Epping
+905,15996,-38.6180841,146.6667143,Alberton Primary School,CAT 4,Alberton
+906,324151,-38.117451,145.1617983,AlderCt Child and Family Centre,CAT 4,Frankston North
+907,324151,-38.117451,145.1617983,AlderCt Primary School,CAT 4,Frankston North
+908,32966,-38.3602834,141.6095084,All Saints Parish School,CAT 4,Portland
+909,63614,-38.3859638,142.598193,Allansford & District Preschool,CAT 4,Allansford
+910,56026,-38.386152,142.590033,Allansford & District PS TheirCare,CAT 4,Allansford
+911,56026,-38.3865068,142.5908603,Allansford and District Primary School,CAT 4,Allansford
+912,273972,-37.8100622,144.6955674,Al-Taqwa College - Olive Branch Annexe,CAT 4,Tarneit
+913,322937,-38.1505762,145.1894031,ALTO Montessori Early Learning and Kindergarten,CAT 4,Langwarrin
+914,160022,-38.2415866,143.5033952,Alvie Primary School,CAT 4,Alvie
+915,265126,-37.6393594,144.8795159,AMIGA Montessori Greenvale,CAT 4,Greenvale
+916,181524,-38.7541154,143.6622383,Apollo Bay Child Care Services,CAT 4,Apollo Bay
+917,181524,-38.7533321,143.6611779,Apollo Bay Kindergarten,CAT 4,Apollo Bay
+918,181524,-38.7533321,143.6611779,Apollo Bay P-12 College,CAT 4,Apollo Bay
+919,445397,-37.276128,142.9320617,Ararat Child Care & Kinder Retreat,CAT 4,Ararat
+920,445880,-37.2938737,142.943235,Ararat Secondary College - School Farm Campus,CAT 4,Ararat
+921,103829,-36.3853991,145.3120624,Ardmona Primary School,CAT 4,Ardmona
+922,103829,-36.3853991,145.3120624,Ardmona Primary School Council outside hours care,CAT 4,Ardmona
+923,315524,-38.2279823,144.3549542,Aspire Early Education & Kindergarten Armstrong Creek,CAT 4,Armstrong Creek
+924,314030,-38.1291658,145.2939628,Aspire Early Education & Kindergarten Cranbourne East,CAT 4,Cranbourne East
+925,265283,-37.7286791,144.7083271,Aspire Early Education & Kindergarten Deanside,CAT 4,Plumpton
+926,96158,-37.4732276,144.9688282,Aspire Early Education And Kindergarten Beveridge,CAT 4,Beveridge
+927,305682,-38.0854531,145.3034118,Aspire Early Education And Kindergarten Cranbourne North (Thompson),CAT 4,Cranbourne North
+928,265282,-37.7223615,144.6979837,Aspire Early Education And Kindergarten Deanside Village,CAT 4,Deanside
+929,142278,-37.5416173,144.96394,Aspire Early Education and Kindergarten Donnybrook,CAT 4,Donnybrook
+930,58382,-37.7164592,144.5955903,Aspire Early Education Atherstone Estate,CAT 4,Strathtulloh
+931,58382,-37.7147746,144.5953176,Aspire Early Education Cobblebank,CAT 4,Cobblebank
+932,247534,-37.6698033,144.8853456,Attwood Child Care Centre and Kindergarten,CAT 4,Attwood
+933,461876,-38.1228483,145.25771,Aussie Kindies Early Learning Cranbourne,CAT 4,Cranbourne
+934,412507,-36.5542303,145.9969015,Australian Christian College - Benalla,CAT 4,Benalla
+935,209864,-36.1454114,144.7319015,Australian Christian College - Echuca,CAT 4,Echuca
+936,327526,-35.3778141,143.5464555,Australian Christian College – Swan Hill,CAT 4,Swan Hill
+937,162601,-36.9015029,145.2378861,Avenel Early Childhood Service,CAT 4,Avenel
+938,162602,-36.9052919,145.2366312,Avenel Primary School,CAT 4,Avenel
+939,452697,-37.0906888,143.4693741,Avoca Preschool,CAT 4,Avoca
+940,252313,-36.7858904,144.5012386,Axedale Primary School,CAT 4,Axedale
+941,252313,-36.7858904,144.5012386,Axedale PS TheirCare,CAT 4,Axedale
+942,140399,-37.6888495,144.4323698,Bacchus Marsh Grammar - Maddingley Campus,CAT 4,Bacchus Marsh
+943,71375,-37.8757969,144.2691011,Bacchus Marsh Grammar Staughton Vale Farm Campus,CAT 4,Staughton Vale
+944,292217,-37.8417326,147.5771827,Bairnsdale Christian College,CAT 4,Bairnsdale
+945,252382,-37.5987688,144.2232458,Ballan Community Kindergarten,CAT 4,Ballan
+946,448880,-37.5942253,143.8450388,Ballarat Christian College,CAT 4,Sebastopol
+947,448873,-37.5048355,143.8403962,Ballarat Grammar - Ballarat Grammar Mount Rowan Campus,CAT 4,Mount Rowan
+948,416451,-37.2389237,141.8239633,Balmoral and District Kindergarten,CAT 4,Balmoral
+949,416451,-37.2389237,141.8239633,Balmoral K-12 Community College,CAT 4,Balmoral
+950,414988,-37.2494007,141.8411979,Balmoral Uniting Early Learning,CAT 4,Balmoral
+951,279479,-38.3721668,145.1288332,Balnarring Early Learning Centre,CAT 4,Balnarring
+952,314156,-38.0889469,145.2680874,Bambino's Kindergarten Cranbourne West,CAT 4,Cranbourne West
+953,196624,-36.1521496,146.926408,Bandiana Primary School,CAT 4,Bandiana
+954,196624,-36.1521496,146.926408,Bandiana PS TheirCare,CAT 4,Bandiana
+955,439159,-36.6976575,142.2046131,Bani Manya Kindergarten,CAT 4,Horsham
+956,29095,-38.1921451,146.257429,Baringa Special School,CAT 4,Moe
+957,295369,-38.2774031,144.4880094,Barwon Heads Primary School,CAT 4,Barwon Heads
+958,20032,-38.594638,145.5930431,Bass Coast Children's Centre,CAT 4,Wonthaggi
+959,15903,-38.6075637,145.5942798,Bass Coast College - Community VCAL Program Campus,CAT 4,Wonthaggi
+960,15901,-38.6065981,145.5814427,Bass Coast College - Dudley Campus,CAT 4,Wonthaggi
+961,15301,-38.5278069,145.3896644,Bass Coast College - San Remo Campus,CAT 4,San Remo
+962,15903,-38.6105618,145.5999783,Bass Coast College - Wonthaggi Campus,CAT 4,Wonthaggi
+963,15903,-38.6099925,145.5976847,Bass Coast Specialist School,CAT 4,Wonthaggi
+964,15903,-38.6099925,145.5976847,Bass Coast SS TheirCare,CAT 4,Wonthaggi
+965,323752,-38.4303991,145.4888435,Bass Valley Primary School,CAT 4,Corinella
+966,311905,-38.416968,145.4302774,Bass Valley Uniting Early Learning,CAT 4,Corinella
+967,324225,-38.1975633,145.1525482,Baxter Kindergarten & Children's Centre,CAT 4,Baxter
+968,322943,-38.2077859,145.1797679,Baxter Primary School,CAT 4,Baxter
+969,24568,-38.1769277,145.565516,Bayles Regional Primary School,CAT 4,Bayles
+970,324156,-38.1589772,145.1593345,Bayview Preschool,CAT 4,Frankston
+971,394461,-38.0562846,145.3854378,Beaconsfield Children's Hub Panorama Estate,CAT 4,Beaconsfield
+972,285304,-38.0457315,145.3671288,Beaconsfield Kindergarten,CAT 4,Beaconsfield
+973,435060,-37.4367672,143.3831002,Beaufort Early Childhood Centre,CAT 4,Beaufort
+974,435060,-37.4365937,143.3819764,Beaufort Primary School,CAT 4,Beaufort
+975,435060,-37.4365937,143.3819764,Beaufort Secondary College,CAT 4,Beaufort
+976,158443,-38.1941106,143.6436089,Beeac Primary School,CAT 4,Beeac
+977,158442,-38.1935508,143.6378217,Beeac Primary School Outside School Hours Care,CAT 4,Beeac
+978,447441,-37.5649361,143.7833392,Beginnings Early Learners,CAT 4,Alfredton
+979,325353,-38.2584023,144.5412379,Bellarine Aquatic & Sport Centre - BASC,CAT 4,Ocean Grove
+980,271205,-38.1875641,144.5524505,Bellarine Secondary College - Drysdale Campus,CAT 4,Drysdale
+981,305493,-38.1740002,144.4031774,Bellarine Twinklekids  Early Learning Centre,CAT 4,Moolap
+982,448878,-37.5837357,143.8433355,Berry Street Victoria Inc - Berry Street School - Ballarat Campus,CAT 4,Sebastopol
+983,378025,-38.2339197,146.383493,Berry Street Victoria Inc - Berry Street School - Morwell Campus,CAT 4,Morwell
+984,355668,-35.2322535,143.4792707,Beverford District Primary School,CAT 4,Beverford
+985,96157,-37.4694746,144.9550823,Beveridge Primary School - Ambrosia Way Campus,CAT 4,Beveridge
+986,96159,-37.4727655,144.9777244,Beveridge Primary School - Arrowsmith Street Campus,CAT 4,Beveridge
+987,252438,-37.6150462,145.0324658,Big Childcare - Glowrey Catholic PS OSHC,CAT 4,Wollert
+988,130896,-37.5807814,144.9392994,Big Childcare - Hume Anglican OSHC,CAT 4,Craigieburn
+989,315699,-38.223948,144.327781,Big Childcare - Mirripoa PS OSHC,CAT 4,Mount Duneed
+990,259354,-37.7052149,144.8218512,Big Childcare - Overnewton ACC Yirramboi OSHC,CAT 4,Keilor
+991,322590,-38.0647309,145.5097959,Big Childcare - Pakenham PS OSHC,CAT 4,Pakenham
+992,254519,-37.7331287,144.6618068,Big Childcare - Rockbank PS OSHC,CAT 4,Rockbank
+993,246593,-37.7117916,144.8194245,Big Childcare - St Augustine's PS OSHC,CAT 4,Keilor
+994,208236,-37.7876896,145.3396138,Billanook College,CAT 4,Mooroolbark
+995,208236,-37.7876896,145.3396138,Billanook College - Early Learning Program,CAT 4,Mooroolbark
+996,293910,-38.1772129,145.1208403,Birches Early Learning Centre Frankston South,CAT 4,Frankston South
+997,311479,-35.9844377,142.9084491,Birchip Early Learning Centre,CAT 4,Birchip
+998,311479,-35.9844377,142.9084491,Birchip P-12 School,CAT 4,Birchip
+999,166805,-38.3360589,143.7820728,Birregurra Preschool Centre,CAT 4,Birregurra
+1000,447249,-37.5494121,143.8699404,Black Hill Primary School,CAT 4,Ballarat
+1001,314032,-38.1489035,145.2894631,Bluebird Early Education Botanic Ridge,CAT 4,Botanic Ridge
+1002,353146,-37.8806701,146.9793297,Boisdale Consolidated School,CAT 4,Boisdale
+1003,353146,-37.8806701,146.9793297,Boisdale Consolidated School TheirCare,CAT 4,Boisdale
+1004,113995,-37.4341381,144.7457423,Bolinda Primary School,CAT 4,Bolinda
+1005,316507,-38.4119996,144.8869032,Boneo Primary School,CAT 4,Boneo
+1006,316507,-38.4119996,144.8869032,Boneo PS TheirCare,CAT 4,Boneo
+1007,449039,-37.6043263,143.8266074,Bonshaw Kindergarten,CAT 4,Sebastopol
+1008,331243,-38.0559078,145.4468059,Boollam Boollam Child & Family Centre,CAT 4,Pakenham
+1009,271213,-38.2596364,144.5571046,Boorai Centre Ocean Grove,CAT 4,Ocean Grove
+1010,368520,-36.3384035,146.3109432,Borinya  Wangaratta Community Partnership,CAT 4,Wangaratta
+1011,314032,-38.1501496,145.2872756,Botanic Ridge Family and Community Centre,CAT 4,Botanic Ridge
+1012,314032,-38.1501496,145.2872756,Botanic Ridge Primary School,CAT 4,Botanic Ridge
+1013,314032,-38.1501496,145.2872756,Botanic Ridge PS TheirCare,CAT 4,Botanic Ridge
+1014,246578,-37.7028643,144.5452984,Botanica Springs Kindergarten,CAT 4,Brookfield
+1015,442296,-37.5952114,143.8049648,Brady Bunch Early Learning Centre Delacombe,CAT 4,Smythes Creek
+1016,134802,-37.8563149,141.7985006,Branxholme-Wallacedale Community School,CAT 4,Branxholme
+1017,292376,-37.8424602,147.0669391,Briagolong Primary School,CAT 4,Briagolong
+1018,292376,-37.8424602,147.0669391,Briagolong PS TheirCare,CAT 4,Briagolong
+1019,292376,-37.8429121,147.071833,Briagolong Uniting Early Learning,CAT 4,Briagolong
+1020,416428,-36.6030901,143.9451782,Bridgewater Primary School,CAT 4,Bridgewater On Loddon
+1021,323052,-37.8303111,144.6546177,Bright Beginnings Learning Centre Tarneit Pty Ltd,CAT 4,Tarneit
+1022,339270,-37.8771339,145.1892564,Bright Early Learning Centre (Glen Waverley),CAT 4,Glen Waverley
+1023,355179,-38.0442921,144.1646352,Bright Minds Early Learning Centre Bannockburn,CAT 4,Bannockburn
+1024,56663,-37.2875298,144.9543286,Brighthouse Early Learning Kilmore,CAT 4,Kilmore
+1025,68861,-37.2039288,145.0392181,Broadford Secondary College,CAT 4,Broadford
+1026,400368,-36.4233706,145.8893629,Broken Creek Primary School,CAT 4,Broken Creek
+1027,2715,-38.4770278,145.9373698,Brown Street Children's Centre,CAT 4,Leongatha
+1028,159308,-38.2424804,142.9171162,Buckle My Shoe Terang PTY LTD,CAT 4,Terang
+1029,322661,-38.1001363,145.9386996,Buln Buln Primary School,CAT 4,Buln Buln
+1030,294274,-38.0234964,147.0130167,Bundalaguah Primary School,CAT 4,Bundalaguah
+1031,130817,-37.5580846,144.0068692,BungaBuddies,CAT 4,Bungaree
+1032,130817,-37.5580846,144.0068692,Bungaree Primary School,CAT 4,Bungaree
+1033,401477,-38.3384164,144.2916178,Butterfield House Child Care and Kindergarten,CAT 4,Jan Juc
+1034,156669,-37.6126014,145.1338221,Butterflies Childcare & Early Learning Centre,CAT 4,Doreen
+1035,156669,-37.6062311,145.1363045,Butterflies Childcare & Early Learning Centre,CAT 4,Doreen
+1036,295369,-38.281002,144.4848974,Camp Australia - Barwon Heads Primary School OSHC,CAT 4,Barwon Heads
+1037,208236,-37.7876896,145.3396138,Camp Australia - Billanook College OSHC,CAT 4,Mooroolbark
+1038,447249,-37.5494121,143.8699404,Camp Australia - Black Hill Primary School OSHC,CAT 4,Ballarat
+1039,317798,-38.3387114,144.308329,Camp Australia - Christian College Geelong - Surf Coast Campus OSHC,CAT 4,Torquay
+1040,271203,-38.1663563,144.5536814,Camp Australia - Clifton Springs Primary School OSHC,CAT 4,Clifton Springs
+1041,255137,-37.7234945,145.1416621,Camp Australia - Eltham Leisure Centre OSHC,CAT 4,Eltham
+1042,294178,-38.2625864,145.1690101,Camp Australia - Flinders Christian College Tyabb Campus OSHC,CAT 4,Tyabb
+1043,153597,-37.5877032,143.7218781,Camp Australia - Haddon Primary School OSHC,CAT 4,Haddon
+1044,339275,-37.8830709,145.2517125,Camp Australia - Knox Park Primary School OSHC,CAT 4,Knoxfield
+1045,331243,-38.055695,145.4481289,Camp Australia - Kuyim Primary School OSHC,CAT 4,Pakenham
+1046,253091,-37.6432716,144.5763555,Camp Australia - Melton Christian College -Toolern Vale Campus OSHC,CAT 4,Toolern Vale
+1047,294513,-38.2485565,145.1058304,Camp Australia - Moorooduc Primary School OSHC,CAT 4,Moorooduc
+1048,370384,-38.1795571,146.2927085,Camp Australia - Newborough East Primary School OSHC,CAT 4,Newborough
+1049,156670,-37.6129052,145.1395585,Camp Australia - Plenty Valley Christian College OSHC,CAT 4,Doreen
+1050,273251,-38.0545523,145.4048658,Camp Australia - St Brigid's Primary School Officer OSHC,CAT 4,Officer
+1051,348506,-37.8421529,144.7288903,Camp Australia - St Clare’s Catholic Primary School Truganina OSHC,CAT 4,Truganina
+1052,462936,-38.1590228,145.9119091,Camp Australia - St Joseph’s Primary School - Warragul OSHC,CAT 4,Warragul
+1053,293910,-38.1738062,145.1138038,Camp Australia - Woodleigh Primary School OSHC,CAT 4,Frankston
+1054,275046,-38.2496316,145.0936066,Camp Australia - Woodleigh School Penbank Campus OSHC,CAT 4,Moorooduc
+1055,140386,-37.7918691,143.6085302,Cape Clear OSHClub,CAT 4,Cape Clear
+1056,140386,-37.7918691,143.6085302,Cape Clear Primary School,CAT 4,Cape Clear
+1057,322590,-38.0638376,145.5081766,Cardinia Lakes Early Learning Centre,CAT 4,Pakenham
+1058,462070,-38.1453558,145.4238759,Cardinia Primary School,CAT 4,Cardinia
+1059,276719,-37.7724389,145.1856673,Carey Baptist Grammar School - Donvale Campus,CAT 4,Donvale
+1060,276719,-37.7724389,145.1856673,Carey Donvale OSHClub,CAT 4,Donvale
+1061,276719,-37.7724389,145.1856673,Carey Early Learning Centre Donvale,CAT 4,Donvale
+1062,378906,-36.3286795,146.4607938,Carraragarmungee Primary School,CAT 4,Londrigan
+1063,182018,-37.5865906,141.4056107,Casterton Primary School,CAT 4,Casterton
+1064,186202,-37.5901563,141.3887915,Casterton Secondary College,CAT 4,Casterton
+1065,122926,-37.1315117,144.185831,Castlemaine Secondary College - Yapeen Campus,CAT 4,Yapeen
+1066,87542,-36.3869557,146.32757,Cathedral College Wangaratta - Murdoch Road Campus,CAT 4,Wangaratta
+1067,87542,-36.3869557,146.32757,Cathedral College Wangaratta TheirCare,CAT 4,Wangaratta
+1068,332895,-37.9015507,145.1965543,Caulfield Grammar Pre-Prep,CAT 4,Wheelers Hill
+1069,332895,-37.9015507,145.1965543,Caulfield Grammar School - Wheelers Hill Campus,CAT 4,Wheelers Hill
+1070,332895,-37.9015507,145.1965543,Caulfield Grammar School Wheelers Hill OSHC-Extend,CAT 4,Wheelers Hill
+1071,391180,-38.1734691,144.2668877,Ceres Primary School,CAT 4,Ceres
+1072,364530,-38.1433598,145.8780598,Chairo Christian School - Chairo Christian School - Drouin Campus,CAT 4,Drouin
+1073,364399,-38.134732,145.8963902,Chairo Christian School - Drouin East Campus,CAT 4,Drouin East
+1074,360210,-38.0954401,145.548004,Chairo Christian School - Pakenham Campus,CAT 4,Nar Nar Goon
+1075,303138,-38.2084783,146.5511503,Chairo Christian School - Traralgon,CAT 4,Traralgon
+1076,303138,-38.2084783,146.5511503,Chairo Christian School - Traralgon Campus,CAT 4,Traralgon
+1077,364399,-38.134732,145.8963902,Chairo Kinder - Drouin East,CAT 4,Drouin
+1078,360210,-38.0942585,145.5481206,Chairo Kinder - Pakenham,CAT 4,Pakenham
+1079,166789,-38.3439072,143.5719845,Champs OSHC Colac VIC,CAT 4,Colac
+1080,335971,-36.2716357,143.360546,Charlton College,CAT 4,Charlton
+1081,78367,-37.8437895,144.6395492,Child's Play Tarneit West,CAT 4,Tarneit
+1082,315533,-38.3032676,144.3413548,Childs Play Torquay,CAT 4,Torquay
+1083,36619,-37.874189,144.620367,Child's Play Wyndham Vale,CAT 4,Wyndham Vale
+1084,249694,-37.7498987,145.3128685,Chirnside Park Primary School,CAT 4,Chirnside Park
+1085,249694,-37.7498987,145.3128685,Chirnside Park PS TheirCare,CAT 4,Chirnside Park
+1086,317781,-38.1859543,144.3123142,Christian College Geelong - Middle School – Highton,CAT 4,Highton
+1087,323872,-38.2023637,144.3063572,Christian College Geelong - Senior School – Waurn Ponds,CAT 4,Waurn Ponds
+1088,401476,-38.3346997,144.2916348,Christian College Geelong - Surf Coast Campus,CAT 4,Jan Juc
+1089,36620,-37.8855677,144.6252073,Christway College - Christway College Wyndham,CAT 4,Wyndham Vale
+1090,377911,-38.3132465,146.422099,Churchill Central Preschool,CAT 4,Churchill
+1091,377910,-38.3043622,146.4172055,Churchill North Primary Before & After School Care,CAT 4,Churchill
+1092,377910,-38.3058173,146.4172157,Churchill North Primary School,CAT 4,Churchill
+1093,378033,-38.3108439,146.3799486,Churchill Primary School - Hazelwood Estate,CAT 4,Yinnar
+1094,303397,-38.0356619,145.3351785,Cire Community School | Cire Training - Cire Community School Berwick Campus,CAT 4,Berwick
+1095,271203,-38.1663563,144.5536814,Clifton Springs Primary School,CAT 4,Clifton Springs
+1096,460589,-38.0979325,145.8377451,Club House Boot Camp Drouin,CAT 4,Drouin
+1097,443194,-37.292142,143.7837573,Clunes & District Preschool Centre,CAT 4,Clunes
+1098,446460,-37.2943344,143.7943479,Clunes Primary School,CAT 4,Clunes
+1099,303476,-38.1316276,145.3261987,Clyde Primary School,CAT 4,Clyde
+1100,303407,-38.1290389,145.3380308,Clyde Secondary College,CAT 4,Clyde
+1101,314313,-38.0744067,147.1322174,Cobains Primary School,CAT 4,Cobains
+1102,130469,-38.3266161,143.0679948,Cobden Technical School,CAT 4,Cobden
+1103,127005,-35.8127483,144.2252061,Cohuna Secondary College,CAT 4,Cohuna
+1104,166468,-38.3362466,143.5959681,Colac East Kindergarten,CAT 4,Colac
+1105,166789,-38.3439072,143.5719845,Colac South West Primary School,CAT 4,Colac
+1106,406983,-36.5919676,144.7985893,Colbinabbin Preschool,CAT 4,Colbinabbin
+1107,406983,-36.5897997,144.8015605,Colbinabbin Primary School,CAT 4,Colbinabbin
+1108,324017,-37.8483583,145.3054578,Colchester Park Preschool,CAT 4,Boronia
+1109,165666,-37.7328011,145.3817059,Coldstream Preschool,CAT 4,Coldstream
+1110,165666,-37.7319166,145.3827518,Coldstream Primary School,CAT 4,Coldstream
+1111,165666,-37.7319166,145.3827518,Coldstream Primary School OSHC & Early Years,CAT 4,Coldstream
+1112,451416,-37.6030336,141.6914222,Coleraine Primary School,CAT 4,Coleraine
+1113,359561,-38.1774464,145.9259376,Community College Gippsland Ltd | ECG Secondary College - Community College Gippsland Ltd,CAT 4,Warragul
+1114,249696,-37.7511735,145.3656169,Como Park Child Care & Kindergarten,CAT 4,Lilydale
+1115,387495,-36.2996534,145.4339399,Congupna Primary School,CAT 4,Congupna
+1116,387495,-36.2998356,145.4339287,Congupna PS TheirCare,CAT 4,Congupna
+1117,444437,-37.0648618,142.769697,Cooinda Kindergarten,CAT 4,Stawell
+1118,331027,-37.8954076,145.3031076,Coonara Community House,CAT 4,Upper Ferntree Gully
+1119,164320,-38.270242,143.5184938,Coragulac & District Kindergarten,CAT 4,Coragulac
+1120,314085,-38.044222,145.2753908,Coral Drive Kindergarten,CAT 4,Hampton Park
+1121,314085,-38.0450232,145.2781204,Coral Park OSHClub,CAT 4,Hampton Park
+1122,314085,-38.0450232,145.2781204,Coral Park Primary School,CAT 4,Hampton Park
+1123,25648,-38.7094512,146.1958958,Corner Inlet College,CAT 4,Foster
+1124,324209,-38.0500202,145.1484288,Cornish College,CAT 4,Bangholme
+1125,324209,-38.0500202,145.1484288,Cornish College Early Learning Centre,CAT 4,Bangholme
+1126,324209,-38.0500202,145.1484288,Cornish College OSHC - Extend,CAT 4,Bangholme
+1127,198250,-36.1936917,147.9118247,Corryong College,CAT 4,Corryong
+1128,398395,-36.3745494,146.2984722,Country  Buddies Wangaratta,CAT 4,Wangaratta
+1129,239872,-36.254093,144.9484925,Country Kidz Preschool,CAT 4,Tongala
+1130,317771,-38.0964941,144.3179264,Covenant College,CAT 4,Bell Post Hill
+1131,317771,-38.0964941,144.3179264,Covenant College Kindergarten,CAT 4,Bell Post Hill
+1132,367486,-38.0134877,146.6985579,Cowwarr Primary School,CAT 4,Cowwarr
+1133,303476,-38.1324972,145.3275273,Cranbourne Daycare & Kindergarten Centre,CAT 4,Clyde
+1134,460473,-38.0803512,145.25739,Cranbourne Fitness Solutions Pty Ltd,CAT 4,Cranbourne West
+1135,314248,-38.1057627,145.2456976,Cranbourne West Secondary College,CAT 4,Cranbourne West
+1136,124815,-37.4226611,144.977702,Creative Garden Early Learning Wallan,CAT 4,Wallan
+1137,166788,-38.3411055,143.5686792,Creative Minds Early Years,CAT 4,Colac
+1138,446782,-37.4237818,143.8911368,Creswick Primary School,CAT 4,Creswick
+1139,446782,-37.4237818,143.8911368,Creswick Primary School OSHC - Extend,CAT 4,Creswick
+1140,294166,-38.1560863,145.169578,Cricklewood Child Care Centre,CAT 4,Langwarrin
+1141,73962,-38.348209,142.6507116,Cudgee Primary School,CAT 4,Cudgee
+1142,451878,-37.5917083,143.9658119,Damascus College - St Brendan's,CAT 4,Dunnstown
+1143,312205,-37.9831954,145.2330334,Dandenong High School - Myuna Secondary Teaching Unit,CAT 4,Doveton
+1144,374930,-38.1874463,145.9990911,Darnum Primary School,CAT 4,Darnum
+1145,374930,-38.1874463,145.9990911,Darnum Primary School Out of School Hours Care,CAT 4,Darnum
+1146,255107,-37.7194034,144.6985777,Deanside Kindergarten,CAT 4,Deanside
+1147,255107,-37.7214536,144.6977828,Deanside Primary School,CAT 4,Deanside
+1148,293911,-38.1822474,145.1205649,Derinya Primary School,CAT 4,Frankston South
+1149,293910,-38.17489380000001,145.1215092,Derinya PS TheirCare,CAT 4,Frankston
+1150,139531,-37.9475817,143.2196172,Derrinallum Preschool,CAT 4,Derrinallum
+1151,305690,-38.1628676,145.3014903,Devon Meadows Primary School,CAT 4,Devon Meadows
+1152,305690,-38.1628676,145.3014903,Devon Meadows Primary School Kindergarten,CAT 4,Devon Meadows
+1153,305690,-38.1628676,145.3014903,Devon Meadows PS TheirCare,CAT 4,Devon Meadows
+1154,122842,-36.370892,144.2121768,Dingee Preschool,CAT 4,Dingee
+1155,348507,-37.8429532,144.7356908,Dohertys Creek OSHCLUB,CAT 4,Truganina
+1156,348507,-37.8429532,144.7356908,Dohertys Creek P-9 College,CAT 4,Truganina
+1157,332451,-36.371015,142.9743184,Donald High School,CAT 4,Donald
+1158,270033,-37.7912403,145.1749999,Donvale Early Learning Centre,CAT 4,Donvale
+1159,379773,-36.329411,145.6826651,Dookie Primary School,CAT 4,Dookie
+1160,379773,-36.3311946,145.6837322,Dookie PS TheirCare,CAT 4,Dookie
+1161,369582,-38.1351047,145.8425316,Drouin Holiday Program,CAT 4,Drouin
+1162,461963,-38.1378057,145.8559005,Drouin Secondary College,CAT 4,Drouin
+1163,436194,-38.1703796,145.826828,Drouin South Primary School,CAT 4,Drouin South
+1164,3150,-38.0867889,145.871412,Drouin West Kindergarten,CAT 4,Drouin West
+1165,3150,-38.0867889,145.871412,Drouin West Primary School,CAT 4,Drouin West
+1166,3150,-38.0867889,145.871412,Drouin West PS TheirCare,CAT 4,Drouin West
+1167,375308,-38.0725454,145.5731244,DS Sports,CAT 4,Nar Nar Goon
+1168,323752,-38.4303991,145.4888435,DS Sports Bass Valley,CAT 4,Corinella
+1169,462070,-38.1453558,145.4238759,DS Sports Cardinia,CAT 4,Cardinia
+1170,394467,-38.1083237,145.38423,DS Sports Topirum,CAT 4,Clyde North
+1171,295498,-38.083112,145.3521117,DS Sports Turrun Clyde,CAT 4,Clyde North
+1172,363968,-37.9640671,146.9704498,Duke Street Children's Centre,CAT 4,Maffra
+1173,340329,-37.8927712,147.680159,Eagle Point Primary School,CAT 4,Eagle Point
+1174,340329,-37.8927712,147.680159,Eagle Point PS TheirCare,CAT 4,Eagle Point
+1175,258085,-37.6339356,144.8725575,Early Education Montessori Centre,CAT 4,Greenvale
+1176,173547,-36.6225746,142.4755848,Early Learning Victoria Bani Walup,CAT 4,Murtoa
+1177,390714,-36.3721216,144.1425558,East Loddon P-12 College,CAT 4,Dingee
+1178,370298,-38.1768346,146.2993444,East Newborough Kindergarten,CAT 4,Newborough
+1179,313087,-38.1053111,147.1236191,East Sale Uniting Kindergarten,CAT 4,East Sale
+1180,284285,-37.8082176,147.6415133,Eastwood Early Learning Centre and Kindergarten,CAT 4,Eastwood
+1181,314031,-38.1409436,145.2927464,Eden Academy Junction Village,CAT 4,Junction Village
+1182,188473,-37.0327397,141.3009167,Edenhope College,CAT 4,Edenhope
+1183,188473,-37.0401502,141.3037075,Edenhope Early Childhood Service,CAT 4,Edenhope
+1184,66839,-37.2349539,145.9069927,Eildon and District Kindergarten,CAT 4,Eildon
+1185,66839,-37.2349539,145.9069927,Eildon Primary School,CAT 4,Eildon
+1186,156649,-37.5998051,144.889296,Elevation Secondary College,CAT 4,Craigieburn
+1187,167401,-38.3611242,143.5845237,Elliminyt Primary School,CAT 4,Elliminyt
+1188,167401,-38.3611242,143.5845237,Elliminyt PS TheirCare,CAT 4,Elliminyt
+1189,322677,-38.2404362,145.9354903,Ellinbank Primary School,CAT 4,Ellinbank
+1190,246618,-37.7170034,145.1464266,Eltham Child Care Co-op Ltd,CAT 4,Eltham
+1191,255137,-37.7254953,145.141622,Eltham High School,CAT 4,Eltham
+1192,252500,-37.7032393,145.1627272,Eltham Learning Centre for Children,CAT 4,Eltham
+1193,255137,-37.7234945,145.1416621,Eltham Leisure Centre,CAT 4,Eltham
+1194,252498,-37.6981731,145.1440112,Eltham North Preschool,CAT 4,Eltham
+1195,246617,-37.7208187,145.1443593,Eltham Playhouse,CAT 4,Eltham
+1196,246618,-37.7151734,145.1476124,Eltham Preschool,CAT 4,Eltham
+1197,324151,-38.117451,145.1617983,Elysium OSHC - AlderCt,CAT 4,Frankston North
+1198,253769,-37.2489406,144.4452881,Embracia Childcare and Kindergarten,CAT 4,Kyneton
+1199,274006,-37.8170275,145.2056397,Emmikins ELC,CAT 4,Mitcham
+1200,354105,-37.8601103,144.6570348,Equip Early Learning Centre,CAT 4,Tarneit
+1201,324222,-38.1668512,145.152665,Erinwood Preschool,CAT 4,Frankston
+1202,103758,-36.7522401,145.5730897,Euroa Kindergarten,CAT 4,Euroa
+1203,114993,-36.7591327,145.5629024,Euroa Secondary College,CAT 4,Euroa
+1204,58112,-36.4353791,146.5447337,Everton Primary School,CAT 4,Everton
+1205,58112,-36.4353791,146.5447337,Everton PS TheirCare,CAT 4,Everton
+1206,125672,-37.7446272,144.558806,Exford OSHClub,CAT 4,Exford
+1207,125672,-37.7446272,144.558806,Exford Primary School,CAT 4,Exford
+1208,32908,-37.8285551,144.6476863,Explorers Early Learning - Mt Cottrell,CAT 4,Mount Cottrell
+1209,377911,-38.3132465,146.422099,Federation Children's Centre Churchill,CAT 4,Churchill
+1210,317783,-38.2023713,144.3113384,Fernwood Women's Health Club - Waurn Ponds,CAT 4,Waurn Ponds
+1211,322805,-38.1365563,145.2042161,First Grammar Gumnut Drive,CAT 4,Langwarrin
+1212,24698,-38.6944177,146.0843255,Fish Creek and District Primary School,CAT 4,Fish Creek
+1213,24698,-38.6922439,146.0822651,Fish Creek Kindergarten,CAT 4,Fish Creek
+1214,24698,-38.6944177,146.0843255,Fish Creek PS TheirCare,CAT 4,Fish Creek
+1215,294178,-38.2625864,145.1690101,Flinders Christian Community College - Main Campus,CAT 4,Tyabb
+1216,323052,-37.8311551,144.6634072,Future Kids Child Care-West Tarneit,CAT 4,Tarneit
+1217,355604,-35.7255388,143.9145006,Gannawarra Shire Children's Centre,CAT 4,Kerang
+1218,277798,-38.0872443,145.6741316,Garfield Kindergarten,CAT 4,Garfield
+1219,277799,-38.0898832,145.6738689,Garfield Primary School,CAT 4,Garfield
+1220,315683,-38.0775839,144.3340759,Geelong Baptist College,CAT 4,Lovely Banks
+1221,308111,-38.0692663,144.3975349,Geelong Grammar School - Corio Campus,CAT 4,Corio
+1222,284284,-37.8078839,147.6192843,Gippsland Grammar - Bairnsdale Campus,CAT 4,Wy Yung
+1223,284284,-37.8097463,147.620453,Gippsland Grammar Early Learning Centre - Wy Yung,CAT 4,Wy Yung
+1224,396369,-36.3987739,144.9846201,Girgarre Primary School,CAT 4,Girgarre
+1225,364952,-38.1262871,146.5737828,Glengarry Kindergarten,CAT 4,Glengarry
+1226,365047,-38.1266443,146.5716376,Glengarry Primary School,CAT 4,Glengarry
+1227,252438,-37.6150462,145.0324658,Glowrey Catholic Primary School,CAT 4,Wollert
+1228,435728,-37.7704036,142.0412078,Good Shepherd College - Senior Campus,CAT 4,Hamilton
+1229,198113,-36.150974,144.7311858,Goodstart Early Learning Echuca,CAT 4,Echuca
+1230,265310,-37.7330863,145.1389409,Goodstart Early Learning Eltham,CAT 4,Eltham
+1231,114993,-36.7560497,145.5642339,Goodstart Early Learning Euroa,CAT 4,Euroa
+1232,324224,-38.1828334,145.1517344,Goodstart Early Learning Frankston South - Stotts Lane,CAT 4,Frankston South
+1233,253992,-37.7469449,145.0622864,Goodstart Early Learning Heidelberg,CAT 4,Heidelberg
+1234,377963,-38.2387814,146.4019067,Goodstart Early Learning Morwell,CAT 4,Morwell
+1235,214997,-36.0885237,145.43218,Goodstart Early Learning Numurkah,CAT 4,Numurkah
+1236,322667,-38.1533418,145.9434245,Goodstart Early Learning Warragul - Sutton Street,CAT 4,Warragul
+1237,323871,-38.1993545,144.3036946,Goodstart Early Learning Waurn Ponds,CAT 4,Waurn Ponds
+1238,156581,-37.5844045,144.1051252,Gordon OHSC,CAT 4,Gordon
+1239,156581,-37.5844045,144.1051252,Gordon Primary School,CAT 4,Gordon
+1240,434522,-36.719172,141.4573072,Goroke P-12 College,CAT 4,Goroke
+1241,409082,-36.7196402,141.4768893,Goroke Preschool,CAT 4,Goroke
+1242,112060,-36.3262168,145.4132818,Goulburn Valley Grammar School,CAT 4,Shepparton
+1243,196621,-36.1580794,146.8859511,Grace Christian College Wodonga,CAT 4,Leneva
+1244,84078,-38.285256,142.5236191,Grasmere Primary School,CAT 4,Grasmere
+1245,246579,-37.7062845,144.5613326,Great Beginnings Brookfield,CAT 4,Brookfield
+1246,271204,-38.1713143,144.5526936,Great Beginnings Curlewis,CAT 4,Curlewis
+1247,197373,-36.1454609,145.6109125,Greater Shepparton Secondary College - Invergordon campus,CAT 4,Invergorden
+1248,312204,-37.9665054,145.2409367,Green Kids Early Learning Endeavour Hills,CAT 4,Endeavour Hills
+1249,129132,-37.536449,144.9203098,Green Leaves Early Learning Merrifield,CAT 4,Mickleham
+1250,315731,-37.9135235,145.2205749,Greenwood Scoresby,CAT 4,Scoresby
+1251,314079,-37.9851895,145.2776838,Grow Early Education Narre Warren North,CAT 4,Narre Warren North
+1252,322873,-38.1603948,145.195747,Guardian Childcare & Education Langwarrin,CAT 4,Langwarrin
+1253,252439,-37.6161252,145.0371709,Guardian Childcare & Education Wollert,CAT 4,Wollert
+1254,291052,-37.7596109,145.1800769,Gumnut Gully Preschool,CAT 4,Doncaster East
+1255,303912,-38.0992141,147.0752952,Gumnuts Early Learning Centre,CAT 4,Sale
+1256,111747,-35.9549147,144.3723447,Gunbower Primary School,CAT 4,Gunbower
+1257,171346,-37.5734418,143.7419298,Haddon Community Childcare,CAT 4,Haddon
+1258,153597,-37.5885117,143.7198683,Haddon Preschool Centre,CAT 4,Haddon
+1259,153597,-37.5877032,143.7218781,Haddon Primary School,CAT 4,Haddon
+1260,443079,-37.7262095,141.9952802,Hamilton North Primary School,CAT 4,Hamilton
+1261,447733,-37.7271826,142.02262,Hamilton Parklands School,CAT 4,Hamilton
+1262,165782,-38.3237767,143.0643976,Hampden P-12 School,CAT 4,Cobden
+1263,159308,-38.2402852,142.924851,Hampden P-12 School - Terang Campus,CAT 4,Terang
+1264,305601,-37.9758219,145.3169652,Harkaway Hills College,CAT 4,Narre Warren North
+1265,163394,-36.4703157,145.141886,Harston Primary School,CAT 4,Harston
+1266,423409,-36.7463291,144.2623927,Havilah Road Preschool,CAT 4,Long Gully
+1267,374366,-38.2683574,146.4480531,Hazelwood North Primary School,CAT 4,Hazelwood North
+1268,354144,-37.8749365,145.253633,Headstart Early Learning Centre Knoxfield,CAT 4,Knoxfield
+1269,273028,-37.8385715,145.2329944,Heathmont College,CAT 4,Heathmont
+1270,323872,-38.2046653,144.3036009,HEI Schools Waurn Ponds Early Education Centre,CAT 4,Waurn Ponds
+1271,163795,-38.2428053,143.9890645,Helen M Kininmonth Kindergarten,CAT 4,Winchelsea
+1272,2587,-38.0546699,145.4187473,Heritage College - Officer Campus,CAT 4,Officer
+1273,2587,-38.0546699,145.4187473,Heritage College Early Learning Centre,CAT 4,Officer
+1274,459995,-37.9818438,146.7844258,Heyfield Primary School,CAT 4,Heyfield
+1275,2053,-37.9820193,146.7906027,Heyfield Uniting Kindergarten,CAT 4,Heyfield
+1276,285309,-38.0853776,145.3642587,Hillcrest Christian College - Main Campus,CAT 4,Clyde North
+1277,285309,-38.0853776,145.3642587,Hillcrest Christian College - Rivercrest Christian College,CAT 4,Clyde North
+1278,285309,-38.0853776,145.3642587,Hillcrest Early Learning Centre,CAT 4,Clyde
+1279,285309,-38.0853776,145.3642587,Hillcrest OSHClub,CAT 4,Clyde
+1280,279434,-37.9670095,145.1485387,Hoa Nghiem Early Learning Centre,CAT 4,Springvale South
+1281,279434,-37.9670095,145.1485387,Hoa Nghiem Primary School,CAT 4,Springvale South
+1282,322590,-38.0639766,145.5087517,Hollins Children's Centre,CAT 4,Pakenham
+1283,276895,-37.9151985,144.7679014,Homestead Senior Secondary College,CAT 4,Point Cook
+1284,293909,-38.1701593,145.1215677,Hope Early Learning Centre,CAT 4,Frankston South
+1285,417191,-35.7349447,142.3667916,Hopetoun P-12 College,CAT 4,Hopetoun
+1286,439245,-36.7107758,142.215573,Horsham Primary School - 298 Campus,CAT 4,Horsham
+1287,439159,-36.6976575,142.2046131,Horsham Primary School - Rasmussen Campus,CAT 4,Horsham
+1288,425005,-36.7581378,142.1942659,Horsham West and Haven Primary School - Haven Campus,CAT 4,Haven
+1289,434453,-36.7169751,142.1792585,Horsham West and Haven Primary School - Horsham West Campus,CAT 4,Horsham
+1290,182872,-37.5670312,144.9320836,Hume Anglican Grammar - Mount Ridley Homestead Campus,CAT 4,Mickleham
+1291,156664,-37.6054038,145.0702751,I Am Learning,CAT 4,Mernda
+1292,315838,-38.288223,146.1794061,In 2 Learn,CAT 4,Thorpdale
+1293,284284,-37.8097463,147.620453,In 2 Learn Bairnsdale,CAT 4,Wy Yung
+1294,365047,-38.1266443,146.5716376,In 2 Learn Glengarry,CAT 4,Glengarry
+1295,322808,-38.1615939,145.2051566,Inspire Early Learning Journey Langwarrin,CAT 4,Langwarrin
+1296,314032,-38.1485016,145.2916026,Inspired Early Learning Centre and Kindergarten,CAT 4,Botanic Ridge
+1297,350355,-38.1007012,144.0546324,Inverleigh CommunityOSH,CAT 4,Inverleigh
+1298,350355,-38.1007012,144.0546324,Inverleigh Primary School,CAT 4,Inverleigh
+1299,315524,-38.2204243,144.3541985,Iona College Geelong,CAT 4,Charlemont
+1300,315633,-38.2425609,144.3344359,Jenny's ELC Armstrong Creek,CAT 4,Armstrong Creek
+1301,323872,-38.2023637,144.3063572,Jenny's ELC Waurn Ponds,CAT 4,Waurn Ponds
+1302,329315,-36.1431015,141.9886329,Jeparit Kindergarten,CAT 4,Jeparit
+1303,329314,-36.1393847,141.9833354,Jeparit Primary School,CAT 4,Jeparit
+1304,314020,-38.0449807,145.2904039,Jindalee Kindergarten,CAT 4,Narre Warren South
+1305,408909,-36.6915957,144.31841,Journey Early Learning Centre - Epsom,CAT 4,Epsom
+1306,163794,-38.240043,143.9858368,Journey Early Learning Centre Winchelsea,CAT 4,Winchelsea
+1307,305687,-38.1331175,145.2954784,Junction Village Early Education,CAT 4,Junction Village
+1308,358458,-36.3771244,141.2461841,Kaniva College,CAT 4,Kaniva
+1309,264992,-37.7773844,145.2509866,Kardinia Child Care Centre,CAT 4,Warranwood
+1310,323854,-38.0423079,144.3065376,Kardinia International College - Kardinia Grove,CAT 4,Moorabool
+1311,142587,-36.0775391,145.6855405,Katamatite and District Multipurpose Children's Centre,CAT 4,Katamatite
+1312,142587,-36.0766853,145.6847061,Katamatite Primary School,CAT 4,Katamatite
+1313,227511,-36.2259075,145.5611747,Katandra West Kindergarten,CAT 4,Katandra West
+1314,227511,-36.2250734,145.5609694,Katandra West Primary School,CAT 4,Katandra West
+1315,227511,-36.2250734,145.5609694,Katandra West PS TheirCare,CAT 4,Katandra West
+1316,182018,-37.5856301,141.406159,Kathleen Millikan Centre,CAT 4,Casterton
+1317,121571,-35.9973877,145.4550839,Katunga Primary School,CAT 4,Katunga
+1318,246593,-37.7153932,144.8229067,Keilor Gatehouse,CAT 4,Keilor
+1319,36620,-37.8855677,144.6252073,Kelly Club Christway College - Wyndham,CAT 4,Wyndham Vale
+1320,315640,-38.3029052,144.3324432,Kelly Club Lisieux Catholic Primary School,CAT 4,Torquay
+1321,162602,-36.9052919,145.2366312,Kelly Club OSHC Avenel Primary School,CAT 4,Avenel
+1322,391180,-38.1734691,144.2668877,Kelly Club OSHC Ceres Primary School,CAT 4,Ceres
+1323,330252,-38.2417236,144.1768294,Kelly Club OSHC Moriac Primary School,CAT 4,Moriac
+1324,308174,-38.015037,144.3907004,Kelly Club OSHC St Anthony's Catholic Primary School,CAT 4,Lara
+1325,254518,-37.7338523,144.5721042,Kelly Club OSHC St Lawrence of Brindisi Catholic Primary School,CAT 4,Weir Views
+1326,271206,-38.1897151,144.5556585,Kelly Club OSHC St Thomas Primary School,CAT 4,Drysdale
+1327,355605,-35.7296857,143.913373,Kerang Christian College,CAT 4,Kerang
+1328,158471,-36.4524838,145.430789,Kialla Central Primary School,CAT 4,Kialla
+1329,158471,-36.4524838,145.430789,Kialla Central PS TheirCare,CAT 4,Kialla
+1330,133186,-36.4663334,145.3898141,Kialla West Primary School,CAT 4,Kialla West
+1331,133186,-36.4663334,145.3898141,Kialla West Primary School OSHC,CAT 4,Kialla West
+1332,182796,-37.5686064,144.6958455,Kiddie Cove Early Learning Centre Sunbury,CAT 4,Sunbury
+1333,459995,-37.9802048,146.7861675,Kids House,CAT 4,Heyfield
+1334,235428,-36.1095599,146.8543646,Kids on Campus,CAT 4,Wodonga
+1335,324151,-38.1117462,145.1593563,Kids Paradise Childcare Pty Ltd,CAT 4,Carrum Downs
+1336,67277,-36.4415415,146.3600611,Kidz Bizz Oxley Primary School OSHC,CAT 4,Oxley
+1337,241880,-36.2512743,147.0346222,Kiewa Valley Kids,CAT 4,Tangambalanga
+1338,241880,-36.2509933,147.0385914,Kiewa Valley Primary School,CAT 4,Tangambalanga
+1339,241880,-36.2509933,147.0385914,Kiewa Valley Primary School Combined Out of School Hour Care,CAT 4,Tangambalanga
+1340,67932,-37.2961806,144.9475756,Kilmore Primary School,CAT 4,Kilmore
+1341,314077,-37.9694217,145.2796471,KindyTown Endeavour Hills Early Learning Centre,CAT 4,Endeavour Hills
+1342,156659,-37.610364,145.0163949,Kirrip Kindergarten- YMCA Wollert East,CAT 4,Wollert
+1343,339275,-37.8830709,145.2517125,Knox Park Primary School,CAT 4,Knoxfield
+1344,9453,-38.5156492,145.7128947,Kongwak Primary School,CAT 4,Kongwak
+1345,315387,-38.214554,144.3680147,Kool Kidz Charlemont,CAT 4,Charlemont
+1346,265126,-37.6427026,144.8799584,Kool Kidz Greenvale,CAT 4,Greenvale
+1347,18259,-38.5479651,145.9438044,Koonwarra Village School,CAT 4,Koonwarra
+1348,261707,-37.6214369,145.0247973,Korin Korin Kindergarten,CAT 4,Wollert
+1349,41989,-38.2932553,142.3689136,Koroit & District School TheirCare,CAT 4,Koroit
+1350,41989,-38.2932553,142.3689136,Koroit And District Primary School,CAT 4,Koroit
+1351,274211,-38.4449193,145.804316,Korumburra Secondary College,CAT 4,Korumburra
+1352,461188,-38.1874662,145.0752642,Kunyung Primary School,CAT 4,Mount Eliza
+1353,377910,-38.308388,146.4210986,Kurnai College - Churchill Campus,CAT 4,Churchill
+1354,374582,-38.3120128,146.4276025,Kurnai College - University Campus,CAT 4,Churchill
+1355,331243,-38.055695,145.4481289,Kuyim Primary School,CAT 4,Pakenham
+1356,377962,-38.2294202,146.4003845,Kylie Early Learning Centre,CAT 4,Morwell
+1357,253768,-37.2481829,144.4441223,Kyneton High School - Macedon Ranges Satellite VCAL,CAT 4,Kyneton
+1358,136165,-37.7242991,142.8342458,Lake Bolac & District Kindergarten,CAT 4,Lake Bolac
+1359,136164,-37.7200287,142.839079,Lake Bolac College,CAT 4,Lake Bolac
+1360,182589,-36.3126623,145.1327508,Lancaster Primary School,CAT 4,Lancaster
+1361,305476,-38.0165419,144.4107627,Lara Primary School,CAT 4,Lara
+1362,305476,-38.0165419,144.4107627,Lara PS TheirCare,CAT 4,Lara
+1363,305476,-38.0178276,144.4112689,Lara Secondary College,CAT 4,Lara
+1364,364537,-38.204847,145.8804364,Lardner and District Primary School,CAT 4,Lardner
+1365,303137,-38.2014546,146.551153,Latrobe Special Developmental School,CAT 4,Traralgon
+1366,354139,-37.8684627,145.1879698,Legend Park Kindergarten,CAT 4,Glen Waverley
+1367,100512,-35.9097772,144.3023755,Leitchville Primary School,CAT 4,Leitchville
+1368,2717,-38.4786842,145.959441,Leongatha PS TheirCare,CAT 4,Leongatha
+1369,2717,-38.4786842,145.959441,Leongatha Secondary College,CAT 4,Leongatha
+1370,297403,-38.1866054,144.4555852,Leopold World of Learning,CAT 4,Leopold
+1371,348441,-37.9690652,144.1351777,Lethbridge CommunityOSH,CAT 4,Lethbridge
+1372,348441,-37.9690652,144.1351777,Lethbridge Primary School,CAT 4,Lethbridge
+1373,305620,-38.1382199,145.3073482,Lighthouse Christian College Cranbourne - Main Campus,CAT 4,Cranbourne
+1374,57006,-37.6903836,144.6104263,Lil' Angels Early Learning Centre,CAT 4,Melton
+1375,269781,-37.7998315,147.4563279,Lindenow & District Kindergarten,CAT 4,Lindenow
+1376,269781,-37.8011234,147.4543241,Lindenow Primary School - Lindenow Campus,CAT 4,Lindenow
+1377,290968,-37.7760866,147.3819385,Lindenow Primary School - Woodglen Campus,CAT 4,Woodglen
+1378,275872,-37.8267166,147.4332248,Lindenow South Primary School,CAT 4,Lindenow South
+1379,315640,-38.3032274,144.3322447,Lisieux Catholic Primary School,CAT 4,Torquay North
+1380,139881,-37.9549426,143.3419717,Lismore Preschool,CAT 4,Lismore
+1381,139881,-37.9547999,143.3391713,Lismore Primary School,CAT 4,Lismore
+1382,304139,-38.2671761,145.0147149,Little Acorns Childcare Mount Martha,CAT 4,Mount Martha
+1383,293914,-38.2145298,145.110452,Little Grasshoppers Early Learning Centre,CAT 4,Moorooduc
+1384,295334,-37.9642019,144.4987035,Little River Kindergarten,CAT 4,Little River
+1385,295334,-37.9646255,144.5005106,Little River Primary School,CAT 4,Little River
+1386,295334,-37.9646255,144.5005106,Little River PS TheirCare,CAT 4,Little River
+1387,24578,-38.2657665,145.561222,Little Saints Early Learning Centre - Lang Lang,CAT 4,Lang Lang
+1388,373800,-38.178479,146.2693458,Little Saints Early Learning Centre - Moe,CAT 4,Moe
+1389,30596,-37.3649727,144.7454839,Little Stones Early Learning,CAT 4,Romsey
+1390,167060,-38.3548354,143.5688998,Little Tikes Early Learning,CAT 4,Elliminyt
+1391,305686,-38.1207257,145.2956756,Livingston Kindergarten,CAT 4,Cranbourne East
+1392,366194,-38.3694093,145.7033713,Loch Primary School,CAT 4,Loch
+1393,366194,-38.3694093,145.7033713,Loch Primary School OSHC,CAT 4,Loch
+1394,379101,-36.2662818,144.5370848,Lockington Consolidated School,CAT 4,Lockington
+1395,379101,-36.2662818,144.5370848,Lockington Consolidated School TheirCare,CAT 4,Lockington
+1396,319623,-38.2692019,144.6195521,Lonsdale House Childcare,CAT 4,Point Lonsdale
+1397,370500,-38.1748194,146.2851913,Lowanna College,CAT 4,Newborough
+1398,165666,-37.7319166,145.3827518,Lyrebird College,CAT 4,Coldstream
+1399,305601,-37.9758219,145.3169652,Lysterfield Lake College,CAT 4,Narre Warren North
+1400,140399,-37.6832055,144.4322351,Maddingley Montessori Centre,CAT 4,Maddingley
+1401,448882,-37.6156582,143.8434916,Magpie OSHClub,CAT 4,Magpie
+1402,448882,-37.6156582,143.8434916,Magpie Primary School,CAT 4,Magpie
+1403,323057,-37.8400778,144.7359557,Mainview Boulevard Kindergarten,CAT 4,Truganina
+1404,65379,-37.0607738,146.0856512,Mansfield Autism Statewide Services - Main Campus,CAT 4,Mansfield
+1405,78197,-37.0780974,146.1075139,Mansfield Autism Statewide Services - Mansfield Farm Campus,CAT 4,Mansfield
+1406,65379,-37.0607634,146.0839344,Mansfield Rudolf Steiner School,CAT 4,Mansfield
+1407,65379,-37.0607634,146.0839344,Mansfield Rudolf Steiner School & Kindergarten,CAT 4,Mansfield
+1408,65379,-37.0618769,146.0914268,Mansfield Secondary College,CAT 4,Mansfield
+1409,444334,-37.064005,142.7727797,Marrang Kindergarten,CAT 4,Stawell
+1410,444334,-37.064005,142.7727797,Marrang Kindergarten & Early Learning Centre,CAT 4,Stawell
+1411,377476,-38.0167971,145.9552954,Mary Beck Kindergarten,CAT 4,Neerim South
+1412,298337,-38.4676491,145.9638033,Mary MacKillop Catholic Regional College,CAT 4,Leongatha
+1413,20032,-38.5984673,145.5927704,McKenzie Street Children's Centre,CAT 4,Wonthaggi
+1414,18812,-38.578152,146.014105,Meeniyan Preschool,CAT 4,Meeniyan
+1415,19163,-38.5797487,146.0150734,Meeniyan Primary School,CAT 4,Meeniyan
+1416,264992,-37.7776841,145.2464067,Melbourne Rudolf Steiner Kindergarten,CAT 4,Warranwood
+1417,264992,-37.7776841,145.2464067,Melbourne Rudolf Steiner School,CAT 4,Warranwood
+1418,264992,-37.7776841,145.2464067,Melbourne Rudolf Steiner School OSHC,CAT 4,Warranwood
+1419,253091,-37.6432716,144.5763555,Melton Christian College - Melton Christian College - Online Campus,CAT 4,Toolern Vale
+1420,253091,-37.6432716,144.5763555,Melton Christian College - Melton Christian College – Toolern Vale Campus,CAT 4,Toolern Vale
+1421,258866,-37.6668271,144.5410511,Melton Montessori Early Learning Centre,CAT 4,Melton West
+1422,158054,-38.1979488,142.9612123,Mercy Regional College - Mercy Regional College - O'Keeffe Campus,CAT 4,Noorat
+1423,337637,-37.8431256,144.0756318,Meredith Kindergarten,CAT 4,Meredith
+1424,337637,-37.8428157,144.0784247,Meredith Primary School,CAT 4,Meredith
+1425,337637,-37.8428157,144.0784247,Meredith Primary School Council,CAT 4,Meredith
+1426,131589,-37.5996753,145.0745777,Mernda Hills Christian College,CAT 4,Mernda
+1427,131589,-37.5996753,145.0745777,Mernda Hills Christian College OSHC,CAT 4,Mernda
+1428,42859,-38.3572092,142.481632,Merri River School,CAT 4,Warrnambool
+1429,182596,-36.3693395,145.1322995,Merrigum Kindergarten & Early Childhood Services,CAT 4,Merrigum
+1430,182596,-36.3691849,145.1299299,Merrigum Primary School,CAT 4,Merrigum
+1431,141352,-37.5631254,144.8777358,Mickleham Primary School,CAT 4,Mickleham
+1432,141352,-37.5631254,144.8777358,Mickleham PS TheirCare,CAT 4,Mickleham
+1433,57162,-36.4443119,146.4330055,Milawa Primary School,CAT 4,Milawa
+1434,252382,-37.5987502,144.2235779,Milestones Early Learning Ballan,CAT 4,Ballan
+1435,2587,-38.0575608,145.4103228,Milestones Early Learning Officer (Tivendale Road Campus),CAT 4,Officer
+1436,461996,-38.1303539,145.1249449,Milestones Early Learning Seaford,CAT 4,Seaford
+1437,2587,-38.0530562,145.41112,Minaret College - Officer Campus,CAT 4,Officer
+1438,2587,-38.0534725,145.410137,Minaret Early Learning Centre - Officer,CAT 4,Officer
+1439,443214,-37.477896,143.7941877,Miners Rest Kindergarten,CAT 4,Miners Rest
+1440,443214,-37.477896,143.7941877,Miners Rest Primary School,CAT 4,Miners Rest
+1441,293910,-38.1738062,145.1138038,Minimbah Early Childhood Centre,CAT 4,Frankston
+1442,345348,-36.4617346,142.5851789,Minyip Kindergarten,CAT 4,Minyip
+1443,345348,-36.4629912,142.5845099,Minyip Primary School,CAT 4,Minyip
+1444,303404,-38.1018349,145.3380453,Mirniyan Primary School,CAT 4,Clyde North
+1445,303404,-38.1018349,145.3380453,Mirniyan PS TheirCare,CAT 4,Clyde North
+1446,315699,-38.223948,144.327781,Mirripoa Primary School,CAT 4,Mount Duneed
+1447,435232,-37.75350150000001,142.0325921,Mitchell Park Kindergarten,CAT 4,Hamilton
+1448,324217,-38.1252523,145.1483657,Monterey Secondary College,CAT 4,Frankston North
+1449,305425,-38.1714443,144.4243261,Moolap Primary School,CAT 4,Moolap
+1450,305425,-38.1714443,144.4243261,Moolap Primary School OSHC- Extend,CAT 4,Moolap
+1451,443740,-36.9900678,143.3209121,Moonambel Primary School,CAT 4,Moonambel
+1452,294513,-38.2485565,145.1058304,Moorooduc Primary School,CAT 4,Moorooduc
+1453,330252,-38.2417236,144.1768294,Moriac Primary School,CAT 4,Moriac
+1454,443208,-37.4293629,143.7866379,Mount Blowhard OSHClub,CAT 4,Blowhard
+1455,443208,-37.4293629,143.7866379,Mount Blowhard Primary School,CAT 4,Blowhard
+1456,317787,-38.2408432,144.3192287,Mount Duneed PS TheirCare,CAT 4,Mount Duneed
+1457,317787,-38.2408432,144.3192287,Mount Duneed Regional Primary School,CAT 4,Mount Duneed
+1458,324223,-38.1736235,145.1465188,Mount Erin Secondary College - Frankston Campus,CAT 4,Frankston South
+1459,324223,-38.1736235,145.1465188,Mount Erin Secondary College - Mount Erin Deaf Facility,CAT 4,Frankston South
+1460,449032,-37.5195563,143.8333065,Mount Rowan Secondary College - Mount Rowan Campus,CAT 4,Wendouree
+1461,354116,-37.8641623,144.8110808,Mount St Joseph Girls' College,CAT 4,Altona
+1462,74511,-36.5779826,146.3782809,Moyhu & District Kindergarten,CAT 4,Moyhu
+1463,413642,-36.5933227,146.3837116,Moyhu Primary School,CAT 4,Moyhu
+1464,413642,-36.5933227,146.3837116,Moyhu Primary School Outside School Hours Care,CAT 4,Moyhu
+1465,462775,-38.2644147,145.0697101,Mt Martha Kinder@Flinders,CAT 4,Mount Martha
+1466,129781,-37.2054373,145.0547347,Mt Piper Kindergarten,CAT 4,Broadford
+1467,183303,-36.6182767,145.2163412,Murchison Kindergarten and Early Childhood Service,CAT 4,Murchison
+1468,183303,-36.6192928,145.2135168,Murchison Primary After Care,CAT 4,Murchison
+1469,183303,-36.6192928,145.2135168,Murchison Primary School,CAT 4,Murchison
+1470,345453,-35.5290799,143.950787,Murrabit Group School,CAT 4,Murrabit
+1471,345453,-35.5290799,143.950787,Murrabit Group School (OSHC),CAT 4,Murrabit
+1472,173547,-36.6236867,142.4751958,Murtoa College,CAT 4,Murtoa
+1473,173547,-36.6225746,142.4755848,Murtoa College (OSHC),CAT 4,Murtoa
+1474,258055,-37.6193533,144.3462488,Myrniong Primary School,CAT 4,Myrniong
+1475,258055,-37.6193533,144.3462488,Myrniong Primary School Outside School Hours Care,CAT 4,Myrniong
+1476,292218,-37.8377907,147.5873059,Nagle College,CAT 4,Bairnsdale
+1477,373862,-38.0546646,146.8751489,Nambrok Denison Primary School,CAT 4,Nambrok
+1478,379945,-36.3132015,144.7779735,Nanneella Estate Primary School,CAT 4,Nanneella
+1479,425930,-36.723982,144.3107325,Napier Street Children's Centre,CAT 4,White Hills
+1480,442060,-37.6778638,143.8259794,Napoleons Kindergarten,CAT 4,Napoleons
+1481,442060,-37.6778638,143.8259794,Napoleons Primary School,CAT 4,Napoleons
+1482,442060,-37.6778638,143.8259794,Napoleons Primary School OSHC,CAT 4,Napoleons
+1483,158968,-38.2432253,141.7487121,Narrawong District Primary School,CAT 4,Narrawong
+1484,433675,-36.7412282,141.9492066,Natimuk Primary School,CAT 4,Natimuk
+1485,317986,-37.9118252,147.716002,Natures Playground Early Learning Centre,CAT 4,Paynesville
+1486,377476,-38.0177217,145.9565865,Neerim District Secondary College,CAT 4,Neerim South
+1487,377476,-38.0154837,145.9559965,Neerim South Primary School,CAT 4,Neerim South
+1488,377476,-38.0154837,145.9559965,Neerim South Primary School Outside School Care,CAT 4,Neerim South
+1489,370384,-38.1795571,146.2927085,Newborough East Primary School,CAT 4,Newborough
+1490,4558,-38.4900782,145.2681815,Newhaven College - Main Campus,CAT 4,Rhyll
+1491,9422,-38.5128481,145.3560471,Newhaven Kindergarten,CAT 4,Newhaven
+1492,9422,-38.5128481,145.3560471,Newhaven Primary School,CAT 4,Newhaven
+1493,446600,-37.4118501,143.9847627,Newlyn Primary School,CAT 4,Newlyn
+1494,357719,-36.3318933,141.6561016,Nhill College,CAT 4,Nhill
+1495,357719,-36.3318933,141.6561016,Nhill College Kindergarten,CAT 4,Nhill
+1496,357719,-36.3315964,141.655634,Nhill Early Learning Centre,CAT 4,Nhill
+1497,273338,-37.8201064,145.3093663,Nido Early School Bayswater North,CAT 4,Bayswater North
+1498,167062,-38.3538274,143.5909696,Nido Early School Colac,CAT 4,Colac
+1499,298304,-38.1656747,145.9747597,Nilma Primary School,CAT 4,Nilma
+1500,298304,-38.1656747,145.9747597,Nilma Primary School OSHC,CAT 4,Nilma
+1501,157727,-38.1902199,142.9285103,Noorat Primary School,CAT 4,Noorat
+1502,322872,-38.1529886,145.2012017,North Gateway World of Learning,CAT 4,Langwarrin
+1503,258897,-37.6843021,145.1386084,North-Eastern Montessori School,CAT 4,St Helena
+1504,258897,-37.6843021,145.1386084,North-Eastern Montessori School - Plenty Valley International Montessori School,CAT 4,St Helena
+1505,258897,-37.6843021,145.1386084,North-Eastern Montessori School OSHC,CAT 4,St Helena
+1506,379751,-36.3249885,145.4065798,Notre Dame College - Notre Dame College - Emmaus Campus,CAT 4,Shepparton North
+1507,86615,-38.4665187,142.7345423,Nullawarre and District Primary School,CAT 4,Nullawarre
+1508,86615,-38.4665187,142.7345423,Nullawarre Kindergarten,CAT 4,Nullawarre
+1509,277826,-38.3364586,145.6752237,Nyora Primary School,CAT 4,Nyora
+1510,277826,-38.3364586,145.6752237,Nyora Primary School Council OSHC,CAT 4,Nyora
+1511,314789,-38.3680733,144.9086168,Oakwood School - Rosebud Campus,CAT 4,Rosebud
+1512,2588,-38.0611238,145.4127921,Officer Child Care Centre,CAT 4,Officer
+1513,2589,-38.069824,145.4111607,Officer One Early Education Group,CAT 4,Officer
+1514,273251,-38.0583664,145.4095443,Officer OSHClub,CAT 4,Officer
+1515,273251,-38.0583664,145.4095443,Officer Primary School,CAT 4,Officer
+1516,314384,-38.1053385,147.1432294,One Tree Defence Childcare Unit East Sale,CAT 4,East Sale
+1517,284286,-37.8100903,147.6494341,OneSchool Global Vic - Bairnsdale Centre,CAT 4,Lucknow
+1518,2587,-38.0583666,145.4163732,OneSchool Global Vic - Berwick Centre,CAT 4,Officer
+1519,435131,-37.7459508,142.0630357,OneSchool Global Vic - Hamilton Campus,CAT 4,Hamilton
+1520,252460,-37.6868043,144.5414259,OneSchool Global Vic - Main Campus,CAT 4,Melton West
+1521,252460,-37.6868043,144.5414259,OneSchool Global Vic - Melton Centre,CAT 4,Melton West
+1522,131591,-37.6010375,145.0980199,Only About Children Mernda,CAT 4,Mernda
+1523,247709,-37.7041583,148.4671517,Orbost Community College,CAT 4,Orbost
+1524,258983,-37.6997356,148.4531864,Orbost Uniting Early Learning,CAT 4,Orbost
+1525,252444,-37.6154955,145.1270087,Orchard Road Community and Early Learning Centre,CAT 4,Doreen
+1526,173547,-36.6229583,142.4734289,Our Lady Help of Christians School,CAT 4,Murtoa
+1527,316502,-38.3700987,144.8979022,Our Lady of Fatima OSHC Rosebud,CAT 4,Rosebud
+1528,260684,-36.4939326,144.613834,Our Lady of the Sacred Heart Primary,CAT 4,Elmore
+1529,825,-38.4643391,145.2425725,Our Lady Star of the Sea Catholic Primary School - Our Lady Star of the Sea,CAT 4,Cowes
+1530,825,-38.4643391,145.2425725,Our Lady Star of the Sea PS Cowes TheirCare,CAT 4,Cowes
+1531,377902,-38.2308652,146.4160713,Our Patch OSHC at St Vincent de Paul Primary School,CAT 4,Morwell
+1532,259354,-37.70654,144.8240261,Overnewton Anglican Community College - Yirramboi Campus,CAT 4,Keilor
+1533,251458,-37.762621,145.3017634,Oxley Christian College,CAT 4,Chirnside Park
+1534,251458,-37.762621,145.3017634,Oxley Kids,CAT 4,Chirnside Park
+1535,67277,-36.4415415,146.3600611,Oxley Primary School,CAT 4,Oxley
+1536,322885,-38.2680005,145.1911421,Padua College - Padua College - Tyabb Campus,CAT 4,Tyabb
+1537,461287,-38.2152935,145.0638593,Padua College - Padua College Mornington Campus,CAT 4,Mornington
+1538,322590,-38.0647309,145.5097959,Pakenham Primary School,CAT 4,Pakenham
+1539,2588,-38.0615428,145.4101358,Papilio Early Learning Officer,CAT 4,Officer
+1540,374572,-38.2221831,146.4337936,Parklands Kindergarten,CAT 4,Morwell
+1541,325321,-37.966295,144.5559011,Parkville College - Cherry Creek Campus,CAT 4,Little River
+1542,312230,-38.202316,145.232155,Pearcedale Day Care & Kindergarten Centre,CAT 4,Pearcedale
+1543,312230,-38.2035557,145.2310042,Pearcedale Primary School,CAT 4,Pearcedale
+1544,461280,-38.2049466,145.2525635,Pearcedale Primary School - Pearcedale Deaf Facility,CAT 4,Pearcedale
+1545,312230,-38.2035557,145.2310042,Pearcedale PS TheirCare,CAT 4,Pearcedale
+1546,461845,-38.1093902,145.2553215,Pebble Patch ELC,CAT 4,Cranbourne West
+1547,275046,-38.2496316,145.0936066,Penbank Early Learning Centre,CAT 4,Moorooduc
+1548,265388,-37.7954735,144.752659,Penguin Childcare Ravenhall,CAT 4,Ravenhall
+1549,316503,-38.3835786,144.8887914,Penguin Childcare Rosebud,CAT 4,Rosebud
+1550,141807,-37.879714,142.2909768,Penshurst Primary School,CAT 4,Penshurst
+1551,253774,-37.6520053,144.4252691,Pentland Afterschool Care Program,CAT 4,Darley
+1552,411842,-36.5927163,145.8639773,Peranbin Primary College - Baddaginnie Campus,CAT 4,Baddaginnie
+1553,447251,-37.5532055,143.8926227,Perridak Burron Early Learning,CAT 4,Brown Hill
+1554,9759,-38.507104,145.2038454,Phillip Island Village School,CAT 4,Ventnor
+1555,449038,-37.6022127,143.8309871,Phoenix P-12 Community College - DOTS Campus,CAT 4,Sebastopol
+1556,293910,-38.1744426,145.1203665,Piccolo's Accelerated Early Learning,CAT 4,Frankston South
+1557,156670,-37.6129052,145.1395585,Plenty Kids Early Learning Centre,CAT 4,Doreen
+1558,156670,-37.6129052,145.1395585,Plenty Valley Christian College - Doreen Campus,CAT 4,Doreen
+1559,272151,-38.3431296,145.77025,Poowong Consolidated School,CAT 4,Poowong
+1560,359872,-38.3426042,145.76498,Poowong OSHC,CAT 4,Poowong
+1561,359872,-38.342956,145.7649934,Poowong Uniting Kindergarten,CAT 4,Poowong
+1562,167329,-38.3853516,142.2287673,Port Fairy Consolidated School,CAT 4,Port Fairy
+1563,167329,-38.3864783,142.2287951,Port Fairy Consolidated School TheirCare,CAT 4,Port Fairy
+1564,32757,-38.3461138,141.5976532,Portland Bay School,CAT 4,Portland
+1565,36192,-38.3170642,141.5721122,Portland North Primary School,CAT 4,Portland North
+1566,36192,-38.3170642,141.5721122,Portland North Uniting Outside School Hours Care,CAT 4,Portland North
+1567,32967,-38.3655201,141.6106268,Portland South Primary School,CAT 4,Portland
+1568,142790,-36.0473631,144.1128005,Pyramid Hill College,CAT 4,Pyramid Hill
+1569,142790,-36.0473631,144.1128005,Pyramid Hill College OSHC,CAT 4,Pyramid Hill
+1570,142790,-36.0502935,144.1143446,Pyramid Hill Preschool,CAT 4,Pyramid Hill
+1571,314090,-38.0875848,145.2735171,Rangebank Kindergarten,CAT 4,Cranbourne
+1572,314090,-38.087781,145.2756406,Rangebank Primary School,CAT 4,Cranbourne
+1573,162801,-37.5192504,144.7061366,Red Rock Christian College - Main Campus,CAT 4,Sunbury
+1574,302195,-38.1105646,147.0609527,Reeve Street Children's Centre,CAT 4,Sale
+1575,252502,-37.7031595,145.1819416,Research Preschool,CAT 4,Research
+1576,252502,-37.7011388,145.1875063,Research Primary OSHClub,CAT 4,Research
+1577,252502,-37.7029189,145.1841507,Research Primary School,CAT 4,Research
+1578,96132,-37.4621099,144.6755472,Riddells Creek Kindergarten,CAT 4,Riddells Creek
+1579,115420,-37.4605047,144.6810655,Riddells Creek Primary School,CAT 4,Riddells Creek
+1580,359962,-38.2038287,145.7579044,Ripplebrook OSHC,CAT 4,Ripplebrook
+1581,359962,-38.2038287,145.7579044,Ripplebrook Primary School,CAT 4,Ripplebrook
+1582,285309,-38.0853776,145.3642587,Rivercrest Early Learning Centre,CAT 4,Clyde North
+1583,285309,-38.0853776,145.3642587,Rivercrest OSHClub,CAT 4,Clyde North
+1584,32897,-37.7270021,144.6536102,Rockbank Kindergarten,CAT 4,Rockbank
+1585,254519,-37.7331287,144.6618068,Rockbank Primary School,CAT 4,Rockbank
+1586,138540,-37.9035832,143.7224824,Rokewood Kindergarten,CAT 4,Rokewood
+1587,138540,-37.904538,143.7223121,Rokewood OSHClub,CAT 4,Rokewood
+1588,138540,-37.9035832,143.7224824,Rokewood Primary School,CAT 4,Rokewood
+1589,389967,-38.091284,144.2868316,Rollins Primary School - Batesford Campus,CAT 4,Batesford
+1590,56501,-38.2994388,142.8123155,Roots Childcare & Kindergarten Garvoc,CAT 4,Garvoc
+1591,316569,-38.3734297,144.8848888,Rosebud West Community Hub,CAT 4,Rosebud
+1592,286702,-38.1548033,146.7737623,Rosedale Primary School,CAT 4,Rosedale
+1593,286702,-38.1548033,146.7737623,Rosedale Primary School OSHC,CAT 4,Rosedale
+1594,460014,-38.1544696,146.7882476,Rosedale Uniting Early Learning,CAT 4,Rosedale
+1595,416326,-36.6324453,142.6276685,Rupanyup Primary School,CAT 4,Rupanyup
+1596,410774,-36.6344999,142.6290754,Rupanyup Primary School (OSHC),CAT 4,Rupanyup
+1597,132169,-36.0604743,146.4501084,Rutherglen High School,CAT 4,Rutherglen
+1598,322527,-38.0663519,145.5160706,Ryan Road Childcare,CAT 4,Pakenham
+1599,182018,-37.5862845,141.4124413,Sacred Heart School,CAT 4,Casterton
+1600,447456,-37.5589964,143.9884711,Saints College - St Joseph’s Bungaree campus,CAT 4,Bungaree
+1601,130878,-37.5762236,144.7309507,Salesian College Sunbury,CAT 4,Sunbury
+1602,66839,-37.2349539,145.9069927,SchoolsOUT! Eildon Primary,CAT 4,Eildon
+1603,124184,-37.4693192,144.5981615,SchoolsOUT! Gisborne Holiday Program,CAT 4,New Gisborne
+1604,382386,-36.2987816,145.1320022,SchoolsOUT! Lancaster Primary,CAT 4,Lancaster
+1605,115420,-37.4605047,144.6810655,SchoolsOUT! Riddell's Creek,CAT 4,Riddells Creek
+1606,390025,-35.5103146,142.8535031,Sea Lake Early Learning Centre,CAT 4,Sea Lake
+1607,279447,-38.0891638,145.1356045,Seaford North Primary School,CAT 4,Seaford
+1608,448880,-37.5966443,143.8449604,Sebastopol Primary School,CAT 4,Sebastopol
+1609,141973,-37.0311159,145.1564215,Seymour College - Seymour College Agricultural Block,CAT 4,Seymour
+1610,152310,-38.0142318,143.9817842,Shelford Primary School,CAT 4,Shelford
+1611,246616,-37.7134424,145.133372,Sherbourne Preschool,CAT 4,Montmorency
+1612,411932,-36.7976582,144.5540043,Shine Bright Axedale Kindergarten,CAT 4,Axedale
+1613,198115,-36.1462263,144.7532873,Shine Bright Echuca South Community Kindergarten,CAT 4,Echuca South
+1614,106506,-36.3977814,144.974049,Shine Bright Girgarre Kindergarten,CAT 4,Girgarre
+1615,111747,-35.9575942,144.368758,Shine Bright Gunbower Kindergarten,CAT 4,Gunbower
+1616,379101,-36.2677733,144.5377073,Shine Bright Lockington Kindergarten,CAT 4,Lockington
+1617,121571,-35.9973877,145.4550839,Skillzone Sports – Katunga Primary School OSHC,CAT 4,Katunga
+1618,160785,-37.6859655,143.3680506,Skipton Kindergarten,CAT 4,Skipton
+1619,160785,-37.6870593,143.3680114,Skipton Primary School,CAT 4,Skipton
+1620,160785,-37.6870593,143.3680114,Skipton Primary School Council,CAT 4,Skipton
+1621,322868,-38.1169707,145.2011139,Skye Primary School,CAT 4,Skye
+1622,296935,-38.3382976,144.7357923,Sorrento Community Centre,CAT 4,Sorrento
+1623,324160,-38.1957669,145.1596648,Sparrow Early Learning Baxter,CAT 4,Baxter
+1624,37092,-37.8768015,144.6146416,Sparrow Early Learning Manor Lakes,CAT 4,Manor Lakes
+1625,324163,-38.2208825,145.1659245,Sparrow Early Learning Somerville,CAT 4,Somerville
+1626,360250,-38.4593941,145.545911,Spensley Street Primary School - Glen Forbes Camp,CAT 4,Glen Forbes
+1627,308124,-38.1852677,144.4003664,Splashdown Leisure Centre,CAT 4,Moolap
+1628,277799,-38.0898832,145.6738689,Sports DS Pty Ltd,CAT 4,Garfield
+1629,2589,-38.070922,145.4110664,Sports DS Pty Ltd,CAT 4,Officer
+1630,369584,-38.146687,145.8509178,SportsDSptyltd,CAT 4,Drouin
+1631,238470,-36.1841984,146.46818,Springhurst Primary School,CAT 4,Springhurst
+1632,320344,-38.4226021,144.8375118,St Andrews Beach Kindergarten,CAT 4,St Andrews Beach
+1633,308174,-38.015037,144.3907004,St Anthony's School,CAT 4,Lara
+1634,412059,-36.6089097,143.2578158,St Arnaud Primary School,CAT 4,St Arnaud
+1635,324223,-38.1756904,145.1515012,St Augustine's OSHC Frankston South,CAT 4,Frankston South
+1636,246593,-37.7117917,144.8194245,St Augustine's Primary School,CAT 4,Keilor
+1637,446782,-37.4279491,143.8916063,St Augustine's School,CAT 4,Creswick
+1638,324223,-38.1745113,145.1497278,St Augustine's School,CAT 4,Frankston South
+1639,345366,-37.8535993,145.3108102,St Bernadette’s OSHClub,CAT 4,The Basin
+1640,345366,-37.8535993,145.3108102,St Bernadette's Catholic Primary School,CAT 4,The Basin
+1641,164320,-38.270242,143.5184938,St Brendan's School,CAT 4,Coragulac
+1642,332279,-37.8702928,148.0204412,St Brendan's School,CAT 4,Lakes Entrance
+1643,273251,-38.0545523,145.4048658,St Brigid's School - Main Campus,CAT 4,Officer
+1644,348506,-37.8435949,144.7285404,St Clare's Catholic Primary School,CAT 4,Truganina South
+1645,57010,-37.7217306,144.6087794,St Francis Catholic College - St Francis Catholic College – Cobblebank Campus,CAT 4,Cobblebank
+1646,271206,-38.1890059,144.5579568,St Ignatius College Geelong,CAT 4,Drysdale
+1647,375308,-38.0725454,145.5731244,St James School,CAT 4,Nar Nar Goon
+1648,45771,-38.3512125,142.4457639,St John's Dennington PS TheirCare,CAT 4,Dennington
+1649,36318,-38.3575565,141.5893207,St John's Lutheran School,CAT 4,Portland
+1650,45771,-38.3512125,142.4457639,St John's School,CAT 4,Dennington
+1651,207187,-36.118071,144.7432615,St Joseph's College - Brigidine Campus,CAT 4,Echuca
+1652,197504,-36.12916680000001,144.7050173,St Joseph's College - Kildare,CAT 4,Echuca
+1653,312565,-35.7239028,142.3620825,St Joseph's School,CAT 4,Hopetoun
+1654,462936,-38.1590228,145.9119091,St Joseph's School,CAT 4,Warragul
+1655,254518,-37.7338523,144.5721042,St Lawrence of Brindisi Catholic Primary School,CAT 4,Weir Views
+1656,188473,-37.0338884,141.2996502,St Malachy's School,CAT 4,Edenhope
+1657,2587,-38.0526893,145.4128327,St Margaret’s Berwick Grammar - Berwick Grammar School,CAT 4,Officer
+1658,163358,-37.0203803,145.1426519,St Mary's College,CAT 4,Seymour
+1659,130878,-37.5762236,144.7309507,St Mary's College for the Deaf - Sunbury Campus,CAT 4,Sunbury
+1660,292218,-37.8408895,147.5856614,St Mary's School,CAT 4,Bairnsdale
+1661,451157,-37.5002255,143.988697,St Mary's School,CAT 4,Clarkes Hill
+1662,332452,-36.3738846,142.9849036,St Mary's School,CAT 4,Donald
+1663,434756,-37.7397098,142.0502392,St Mary's School,CAT 4,Hamilton
+1664,165864,-36.0525633,146.4616542,St Mary's School,CAT 4,Rutherglen
+1665,342990,-36.2546298,142.3892464,St Mary's School,CAT 4,Warracknabeal
+1666,28485,-38.5574831,146.6762313,St Mary's School,CAT 4,Yarram
+1667,459995,-37.9799496,146.7839942,St Michael's School,CAT 4,Heyfield
+1668,215878,-36.2112347,147.1769765,St Michael's School,CAT 4,Tallangatta
+1669,131505,-37.5804317,144.0901299,St Patrick's School,CAT 4,Gordon
+1670,357718,-36.3358985,141.6428833,St Patrick's School,CAT 4,Nhill
+1671,197969,-36.0548277,144.111186,St Patrick's School,CAT 4,Pyramid Hill
+1672,192706,-37.0637091,142.790243,St Patrick's School,CAT 4,Stawell
+1673,303897,-37.9649152,147.0776076,St Patrick's School,CAT 4,Stratford
+1674,239872,-36.2507387,144.9505911,St Patrick's School,CAT 4,Tongala
+1675,436187,-38.1031477,145.8234696,St Paul's Anglican Grammar School - Drouin Campus,CAT 4,Drouin
+1676,436187,-38.1007339,145.8237675,St Paul's Early Learning Centre- Drouin,CAT 4,Drouin
+1677,461845,-38.1081862,145.2571743,St Peter's College,CAT 4,Cranbourne
+1678,1573,-38.0840632,145.6206607,St Thomas Aquinas College,CAT 4,Tynong
+1679,271205,-38.1874622,144.557291,St Thomas Primary School,CAT 4,Drysdale
+1680,403881,-36.4483643,144.9879356,Stanhope Primary School,CAT 4,Stanhope
+1681,192707,-37.0650248,142.7912151,Stawell Secondary College,CAT 4,Stawell
+1682,444437,-37.0659116,142.7711676,Stawell West Primary School,CAT 4,Stawell
+1683,94415,-37.6208964,145.0057244,Story House Early Learning Epping,CAT 4,Epping
+1684,253774,-37.6487851,144.4300737,Story House Early Learning Telford Park,CAT 4,Darley
+1685,402056,-35.3566971,143.5626166,Swan Hill College - FLO Campus,CAT 4,Swan Hill
+1686,444437,-37.0659116,142.7711676,SWPS OSHC (Stawell West PS),CAT 4,Stawell
+1687,305677,-38.0390407,145.3058297,Talbingo Kindergarten,CAT 4,Narre Warren
+1688,215879,-36.2156173,147.1769576,Tallangatta Early Years Learning Centre,CAT 4,Tallangatta
+1689,215879,-36.2154082,147.1739822,Tallangatta Primary School,CAT 4,Tallangatta
+1690,215879,-36.2193575,147.172802,Tallangatta Secondary College,CAT 4,Tallangatta
+1691,241992,-36.2390778,145.4363917,Tallygaroopna Kindergarten,CAT 4,Tallygaroopna
+1692,241992,-36.2383871,145.4362785,Tallygaroopna Primary School,CAT 4,Tallygaroopna
+1693,241992,-36.2383871,145.4362785,Tallygaroopna Primary School OSH Care,CAT 4,Tallygaroopna
+1694,374656,-38.1188398,146.252078,Tanjil South Primary School,CAT 4,Tanjil South
+1695,323053,-37.8354506,144.6960384,Tarneit Kindergarten,CAT 4,Tarneit
+1696,435732,-37.7673679,142.0947529,Tarrington Lutheran School,CAT 4,Tarrington
+1697,322943,-38.2077859,145.1797679,TeamKids - Baxter Primary,CAT 4,Baxter
+1698,96157,-37.4694746,144.9550823,TeamKids - Beveridge Primary Ambrosia Campus,CAT 4,Beveridge
+1699,96159,-37.4727655,144.9777244,TeamKids - Beveridge Primary Arrowsmith Campus,CAT 4,Beveridge
+1700,303476,-38.1316276,145.3261987,TeamKids - Clyde Primary,CAT 4,Clyde
+1701,255107,-37.7214536,144.6977828,TeamKids - Deanside Primary,CAT 4,Deanside
+1702,67932,-37.2961806,144.9475756,TeamKids - Kilmore Primary,CAT 4,Kilmore
+1703,279447,-38.0891638,145.1356045,TeamKids - Seaford North Primary,CAT 4,Seaford
+1704,322868,-38.1169707,145.2011139,TeamKids - Skye Primary,CAT 4,Skye
+1705,252439,-37.6172894,145.0359506,TeamKids - Wirrigirri Primary,CAT 4,Wollert
+1706,461188,-38.1874662,145.0752642,TeamKids- Kunyung Primary,CAT 4,Mount Eliza
+1707,350711,-38.028283,144.0477431,Teesdale Children's Centre,CAT 4,Teesdale
+1708,350347,-38.0297696,144.0550818,Teesdale CommunityOSH,CAT 4,Teesdale
+1709,350347,-38.0290365,144.0572138,Teesdale Primary School,CAT 4,Teesdale
+1710,159308,-38.2402852,142.924851,Terang Children's Centre,CAT 4,Terang
+1711,159641,-38.2461903,142.9221014,Terang College,CAT 4,Terang
+1712,159641,-38.2461903,142.9221014,Terang College TheirCare,CAT 4,Terang
+1713,86922,-37.049656,146.0665279,The Farmhouse,CAT 4,Mansfield
+1714,447734,-37.7287619,142.0351194,The Hamilton and Alexandra College - Junior Campus,CAT 4,Hamilton
+1715,447734,-37.7281024,142.0351622,The Hamilton and Alexandra College Early Learning Centre,CAT 4,Hamilton
+1716,32758,-38.3481694,141.5955642,The Karreeta Peeneeyt Mara Portland Child & Family Complex,CAT 4,Portland
+1717,315838,-38.2876805,146.1775269,Thorpdale Kindergarten,CAT 4,Thorpdale
+1718,315838,-38.288223,146.1794061,Thorpdale Primary School,CAT 4,Thorpdale
+1719,182018,-37.5865906,141.4056107,Thrive OSHC Casterton,CAT 4,Casterton
+1720,212361,-36.2459715,144.9479593,Tongala Community Activities Centre,CAT 4,Tongala
+1721,377716,-38.0568675,146.6254554,Toongabbie Primary School,CAT 4,Toongabbie
+1722,23383,-38.6651261,146.3267806,Toora Primary School,CAT 4,Toora
+1723,394467,-38.1083237,145.38423,Topirum Primary School,CAT 4,Clyde North
+1724,394467,-38.1083237,145.38423,Topirum Primary School Kindergarten,CAT 4,Clyde North
+1725,23383,-38.6651261,146.3267806,TOSHcare,CAT 4,Toora
+1726,369924,-38.2026843,146.5460776,Traralgon Early Learning Centre,CAT 4,Traralgon
+1727,446754,-37.4377972,143.4701432,Trawalla Primary School,CAT 4,Trawalla
+1728,446754,-37.4377972,143.4701432,Trawalla-Beaufort OSHClub,CAT 4,Trawalla
+1729,93036,-36.0128479,146.0270855,Trikki Kidz Yarrawonga,CAT 4,Yarrawonga
+1730,292442,-37.8192378,144.7216468,Truganina Community Centre Kindergarten,CAT 4,Truganina
+1731,259357,-37.7050088,144.8586725,Tullamarine Early Learning Centre,CAT 4,Tullamarine
+1732,209714,-36.1610624,145.8792572,Tungamah Primary School,CAT 4,Tungamah
+1733,305620,-38.1382199,145.3073482,Turningpoint Early Learning Centre,CAT 4,Cranbourne
+1734,295498,-38.083112,145.3521117,Turrun Primary School,CAT 4,Clyde North
+1735,322884,-38.2564368,145.1900443,Tyabb Preschool,CAT 4,Tyabb
+1736,390025,-35.5103146,142.8535031,Tyrrell College,CAT 4,Sea Lake
+1737,390025,-35.5103146,142.8535031,Tyrrell College OSHC,CAT 4,Sea Lake
+1738,379157,-36.2763701,145.218792,Undera Kindergarten,CAT 4,Undera
+1739,379157,-36.2763701,145.218792,Undera Primary School,CAT 4,Undera
+1740,322938,-38.1548144,145.181134,Veronica Street Children's Centre,CAT 4,Langwarrin
+1741,15315,-38.5290967,145.558513,Village High School,CAT 4,Ryanston
+1742,15902,-38.6067548,145.5928785,Village High School - Village High School - Watt St,CAT 4,Wonthaggi
+1743,377903,-38.2394989,146.4195597,Virtual School Victoria - Bellum Bellum Blended Learning Hub,CAT 4,Morwell
+1744,130820,-37.5548548,144.0498665,Wallace & District Kindergarten,CAT 4,Wallace
+1745,294181,-38.2983511,145.174249,Wallaroo Community Centre,CAT 4,Hastings
+1746,294181,-38.295475,145.172677,Wallaroo Primary School,CAT 4,Hastings
+1747,108527,-35.9644292,147.7319509,Walwa Early Years Learning Centre,CAT 4,Walwa
+1748,108527,-35.9644292,147.7319509,Walwa Primary School,CAT 4,Walwa
+1749,354141,-37.8748997,145.2200636,Wantirna Kinder Haven,CAT 4,Wantirna South
+1750,342990,-36.2575985,142.3881046,Warracknabeal Memorial Kindergarten,CAT 4,Warracknabeal
+1751,342989,-36.2509656,142.3840759,Warracknabeal Neighbourhood House Take a Break Child Care Centre,CAT 4,Warracknabeal
+1752,342990,-36.2581869,142.3897232,Warracknabeal Primary School,CAT 4,Warracknabeal
+1753,342990,-36.2581869,142.3897232,Warracknabeal Secondary College,CAT 4,Warracknabeal
+1754,342989,-36.2509656,142.3840759,Warracknabeal Secondary College - Warracknabeal and Community Re-engagement Program,CAT 4,Warracknabeal
+1755,342990,-36.2581869,142.3897232,Warracknabeal Special Developmental School,CAT 4,Warracknabeal
+1756,342990,-36.2575985,142.3881046,Warracknabeal Uniting Early Learning,CAT 4,Warracknabeal
+1757,451574,-37.5741428,143.9279147,Warrenheip OSHC,CAT 4,Warrenheip
+1758,451574,-37.5741428,143.9279147,Warrenheip Primary School,CAT 4,Warrenheip
+1759,339272,-37.8780697,145.2150638,Waverley Christian College,CAT 4,Wantirna South
+1760,339272,-37.8780697,145.2150638,Waverley Christian College (Early Childhood Service),CAT 4,Wantirna South
+1761,183550,-36.7959078,144.2449646,Weeroona College Bendigo - Bendigo FLO,CAT 4,Kangaroo Flat
+1762,23392,-38.666297,146.4308482,Welshpool and District Primary School,CAT 4,Welshpool
+1763,23391,-38.6634269,146.4099872,Welshpool Kindergarten,CAT 4,Welshpool
+1764,357719,-36.3299321,141.6606237,West Wimmera Health Service,CAT 4,Nhill
+1765,156664,-37.6050644,145.0755294,Where We Grow - Mernda,CAT 4,Mernda
+1766,252502,-37.7034044,145.1821676,Where We Grow - Research,CAT 4,Research
+1767,74813,-36.727159,144.3043447,White Hills OSHClub,CAT 4,White Hills
+1768,74813,-36.727159,144.3043447,White Hills Primary School,CAT 4,White Hills
+1769,131308,-37.5149321,145.1136141,Whittlesea Primary School,CAT 4,Whittlesea
+1770,131308,-37.5149321,145.1136141,Whittlesea PS TheirCare,CAT 4,Whittlesea
+1771,77647,-36.5058681,146.5872553,Whorouly & District Kindergarten,CAT 4,Whorouly
+1772,77647,-36.5054425,146.5866274,Whorouly OSHC,CAT 4,Whorouly
+1773,77647,-36.5054425,146.5866274,Whorouly Primary School,CAT 4,Whorouly
+1774,190297,-37.5451485,142.742268,Willaura & District Kindergarten,CAT 4,Willaura
+1775,190297,-37.544536,142.7389073,Willaura Primary School,CAT 4,Willaura
+1776,190297,-37.5436524,142.738536,Willaura Primary School OSHC,CAT 4,Willaura
+1777,261929,-37.2591406,144.8882076,Willowmavin Primary School,CAT 4,Willowmavin
+1778,357719,-36.3284492,141.6626865,Wimmera Lutheran College - Nhill Lutheran School,CAT 4,Nhill
+1779,343389,-36.4574103,142.0381708,Wimmera Lutheran College - Wimmera Lutheran College - Dimboola Campus,CAT 4,Dimboola
+1780,439245,-36.7075655,142.218327,Wimmera Lutheran College - Wimmera Lutheran College - Horsham Campus,CAT 4,Horsham
+1781,163795,-38.2428053,143.9890645,Winchelsea House Occasional Care,CAT 4,Winchelsea
+1782,436194,-38.1702765,145.82612,Windermere Child And Family Services,CAT 4,Drouin
+1783,24568,-38.1769277,145.565516,Windermere OSHC Bayles,CAT 4,Bayles
+1784,332901,-37.8951023,145.2638381,Windermere Reserve Kindergarten,CAT 4,Ferntree Gully
+1785,79333,-36.5231124,146.0861452,Winton Primary School,CAT 4,Winton
+1786,252439,-37.6172894,145.0359506,Wirrigirri Primary School,CAT 4,Wollert
+1787,454878,-37.6434819,143.6839469,Woady Yaloak OSHClub - Smythesdale Campus,CAT 4,Smythesdale
+1788,454736,-37.6328737,143.7566779,Woady Yaloak OSHClub Ross Creek Campus,CAT 4,Ross Creek
+1789,122709,-37.6146568,143.5866317,Woady Yaloak OSHClub Snake Valley,CAT 4,Snake Valley
+1790,454736,-37.6328737,143.7566779,Woady Yaloak Primary School - Ross Creek Campus,CAT 4,Ross Creek
+1791,454878,-37.6434819,143.6839469,Woady Yaloak Primary School - Smythesdale Campus,CAT 4,Smythesdale
+1792,122709,-37.6146568,143.5866317,Woady Yaloak Primary School - Snake Valley Campus,CAT 4,Snake Valley
+1793,197690,-36.0937557,146.9033859,Wodonga Middle Years College - HighWater Campus,CAT 4,Wodonga
+1794,243906,-37.7559813,145.092562,Wonderworld Childcare & Kinder,CAT 4,Bulleen
+1795,323053,-37.8345366,144.6934242,Woodlands Tarneit,CAT 4,Tarneit
+1796,323056,-37.8391006,144.7308891,Woodlands Truganina Pty Ltd,CAT 4,Truganina
+1797,293910,-38.1722639,145.1138651,Woodleigh School - Minimbah,CAT 4,Frankston South
+1798,275046,-38.2496316,145.0936066,Woodleigh School - Penbank,CAT 4,Moorooduc
+1799,294170,-38.1915971,145.1749277,Woodleigh School - Senior Campus,CAT 4,Langwarrin South
+1800,401458,-38.1726999,144.2889568,Woodline Primary,CAT 4,Ceres
+1801,447448,-37.5596046,143.8947857,Woodmans Hill Secondary College,CAT 4,Ballarat East
+1802,157418,-38.1874092,142.4326819,Woolsthorpe Primary School,CAT 4,Woolsthorpe
+1803,42852,-38.2906977,142.4728803,Woolsthorpe PS TheirCare,CAT 4,Mailors Flat
+1804,285309,-38.0923816,145.3685996,Wulerrp Secondary College,CAT 4,Clyde North
+1805,209775,-36.1501614,145.4305201,Wunghnu Primary School,CAT 4,Wunghnu
+1806,309338,-36.0761418,143.2280425,Wycheproof P-12 College,CAT 4,Wycheproof
+1807,447251,-37.5549855,143.8978838,Y Learn and Swim,CAT 4,Brown Hill
+1808,363799,-38.1618007,146.3613331,Yallourn North Kindergarten,CAT 4,Yallourn North
+1809,363799,-38.1634806,146.3628905,Yallourn North Primary School,CAT 4,Yallourn North
+1810,363799,-38.1634806,146.3628905,Yallourn North Primary School (OSHC),CAT 4,Yallourn North
+1811,138688,-37.6482007,145.3751043,Yarra Glen Early Learning Centre,CAT 4,Yarra Glen
+1812,138687,-37.6493113,145.3730012,Yarra Glen Primary School,CAT 4,Yarra Glen
+1813,138687,-37.6493113,145.3730012,Yarra Glen PS TheirCare,CAT 4,Yarra Glen
+1814,269952,-37.7901284,145.315946,Yarra Hills Secondary College - Mooroolbark Campus,CAT 4,Mooroolbark
+1815,15996,-38.6180841,146.6667143,Yarram Early Learning Centre - Alberton OSHC,CAT 4,Alberton
+1816,28951,-38.5682039,146.6844041,Yarram Secondary College,CAT 4,Yarram
+1817,254757,-37.8379285,145.2818559,Yea High School - Chinese Community Centre,CAT 4,Bayswater
+1818,365510,-38.3202966,146.3299908,Yinnar & District Kindergarten,CAT 4,Yinnar
+1819,365510,-38.3216932,146.3293526,Yinnar Primary School,CAT 4,Yinnar
+1820,365510,-38.3216932,146.3293526,Yinnar PS TheirCare,CAT 4,Yinnar
+1821,322661,-38.1001363,145.9386996,YMCA – Buln Buln Primary School OSHC,CAT 4,Buln Buln
+1822,374366,-38.2683574,146.4480531,YMCA – Hazelwood North Primary School OSHC,CAT 4,Hazelwood North
+1823,140400,-37.6914216,144.4337731,YMCA Ballarat - Bacchus Marsh Grammar,CAT 4,Maddingley
+1824,442042,-37.5201066,143.8220176,Yuille Park Community College - Young Parents Campus,CAT 4,Wendouree
+1825,449032,-37.5208349,143.8253537,Yuille Park Community College - Yuille Campus,CAT 4,Wendouree
+1826,378978,-36.2764779,145.4048129,Zeerust Primary School,CAT 4,Zeerust

@@ -1,0 +1,211 @@
+{
+  "schema_version": "2.0.0",
+  "request_id": "FFX-20190129-0892",
+  "created_at": "2019-01-29T06:00:00Z",
+
+  "grid_resolution_m": 500,
+  "cell_area_ha": 25.0,
+  "forecast_horizon_h": 24,
+
+  "tensor_shape": {
+    "window_days": 4,
+    "steps_per_day": 2,
+    "total_timesteps": 8,
+    "static_features": 8,
+    "temporal_features": 10
+  },
+
+  "cells": [
+    {
+      "cell_id": "VIC_GRID_0892",
+
+      "static_features": {
+        "feature_order": [
+          "elevation_m",
+          "slope_deg",
+          "aspect_deg",
+          "dist_to_water_m",
+          "veg_type_encoded",
+          "ndvi_at_ignition",
+          "ndwi_at_ignition",
+          "nbr_at_ignition"
+        ],
+
+        "values": [
+          540.0,
+          12.0,
+          315.0,
+          1200.0,
+          3,
+          0.31,
+          -0.12,
+          0.18
+        ]
+      },
+
+      "temporal_features": {
+
+        "feature_order": [
+          "max_temp_c",
+          "wind_speed_kmh",
+          "wind_dir_deg",
+          "rel_humidity_pct",
+          "precipitation_mm",
+          "evapotranspiration",
+          "soil_moisture",
+          "soil_temp_c",
+          "days_since_rain",
+          "years_since_last_fire"
+        ],
+
+        "timesteps": [
+
+          {
+            "day": -3,
+            "hour": 6,
+
+            "values": [
+              35.8,
+              32.0,
+              292.0,
+              22.0,
+              0.0,
+              6.1,
+              0.11,
+              29.5,
+              10,
+              21.0
+            ]
+          },
+
+          {
+            "day": -3,
+            "hour": 18,
+
+            "values": [
+              37.0,
+              35.0,
+              295.0,
+              18.0,
+              0.0,
+              6.5,
+              0.10,
+              32.4,
+              10,
+              21.0
+            ]
+          },
+
+          {
+            "day": -2,
+            "hour": 6,
+
+            "values": [
+              36.5,
+              35.0,
+              298.0,
+              18.0,
+              0.0,
+              6.5,
+              0.10,
+              30.5,
+              11,
+              21.0
+            ]
+          },
+
+          {
+            "day": -2,
+            "hour": 18,
+
+            "values": [
+              37.8,
+              40.0,
+              302.0,
+              15.0,
+              0.0,
+              6.9,
+              0.09,
+              33.8,
+              11,
+              21.0
+            ]
+          },
+
+          {
+            "day": -1,
+            "hour": 6,
+
+            "values": [
+              37.2,
+              38.0,
+              305.0,
+              15.0,
+              0.0,
+              6.9,
+              0.09,
+              32.0,
+              12,
+              21.0
+            ]
+          },
+
+          {
+            "day": -1,
+            "hour": 18,
+
+            "values": [
+              38.2,
+              45.0,
+              308.0,
+              13.0,
+              0.0,
+              7.3,
+              0.08,
+              35.5,
+              12,
+              21.0
+            ]
+          },
+
+          {
+            "day": 0,
+            "hour": 6,
+
+            "values": [
+              36.4,
+              44.0,
+              310.0,
+              14.0,
+              0.0,
+              7.1,
+              0.09,
+              35.0,
+              13,
+              21.0
+            ]
+          },
+
+          {
+            "day": 0,
+            "hour": 18,
+
+            "values": [
+              39.8,
+              52.0,
+              315.0,
+              9.0,
+              0.0,
+              7.8,
+              0.08,
+              38.4,
+              13,
+              21.0
+            ]
+          }
+
+        ]
+      }
+    }
+  ]
+}
