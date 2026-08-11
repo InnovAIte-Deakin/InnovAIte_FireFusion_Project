@@ -90,6 +90,55 @@ class MaskedMSELoss(nn.Module):
         n_valid = self.mask.sum() * pred.shape[0] * pred.shape[1] * pred.shape[-1]
         return masked.sum() / n_valid
 
+class MaskedFocalLoss(nn.Module):
+    """
+    Binary focal loss over valid (land) cells only, computed from raw logits.
+
+    FL(p_t) = -alpha_t * (1 - p_t)^gamma * log(p_t)
+
+    gamma down-weights easy, well-classified examples (the vast majority of
+    "no fire" cells) so the loss focuses on hard/rare positives. alpha applies
+    a fixed class weight on top of that, analogous to pos_weight in BCE.
+
+    Inputs:
+        valid_mask (Tensor): Boolean [H, W] tensor — True where cells are valid.
+        alpha (float): weight for the positive class, in [0, 1]. The negative class gets (1 - alpha). Higher alpha = more weight on fire cells.
+        gamma (float): focusing parameter. 0 reduces to weighted BCE; typical values are 1-5. Higher gamma = more focus on hard examples.
+    """
+    def __init__(self, valid_mask: torch.Tensor, alpha: float = 0.85, gamma: float = 2.0) -> None:
+        super().__init__()
+        self.register_buffer(
+            'mask',
+            valid_mask.float().unsqueeze(0).unsqueeze(0).unsqueeze(-1)
+        )
+        self.alpha = alpha
+        self.gamma = gamma
+        self.bce = nn.BCEWithLogitsLoss(reduction='none')
+
+    def forward(self, pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+        """
+        Inputs:
+            pred (Tensor): [B, horizon, H, W, F] raw logits
+            target (Tensor): [B, horizon, H, W, F] binary labels
+
+        Outputs:
+            Tensor: scalar masked focal loss
+        """
+        pred_clamped = pred.clamp(min=-30, max=30)
+        bce = self.bce(pred_clamped, target)
+
+        p = torch.sigmoid(pred_clamped)
+        p_t = p * target + (1 - p) * (1 - target)
+
+        alpha_t = self.alpha * target + (1 - self.alpha) * (1 - target)
+        focal_weight = alpha_t * (1 - p_t) ** self.gamma
+
+        loss = focal_weight * bce
+        masked = loss * self.mask
+
+        n_valid = self.mask.sum() * pred.shape[0] * pred.shape[1] * pred.shape[-1]
+        return masked.sum() / n_valid
+
 class GriddedTimeSeriesDataset(Dataset):
     """
     Dataset that generates sequences on the fly.
@@ -591,10 +640,10 @@ def main():
     valid_mask_tensor = torch.tensor(valid_mask, dtype=torch.bool)
     
     # Class imbalance ratio for the loss function (training split only, to avoid leaking val/test distribution).
-    # Not yet consumed — the masked BCEWithLogitsLoss that uses it needs to be added.
     pos_weight, _, _, _ = compute_pos_weight(train_labels, valid_mask)
+    alpha = pos_weight / (1 + pos_weight)
     
-    criterion = MaskedMSELoss(valid_mask_tensor).to(DEVICE)
+    criterion = MaskedMSELoss(valid_mask_tensor, alpha=alpha, gamma=2.0).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     
     best_val_loss = float("inf")
@@ -603,7 +652,7 @@ def main():
     patience_counter = 0
     
     print(f"Training config:")
-    print(f"Loss: MSELoss")
+    print(f"Loss: MaskedMSELoss")
     print(f"Learning Rate: {LEARNING_RATE}")
     print(f"Epochs: {EPOCHS}")
     print(f"Early stopping patience: {patience}")
@@ -644,34 +693,34 @@ def main():
     # (precision, recall, F1, ROC-AUC, PR-AUC) once the masked BCE loss lands.
     
     
-    # y_pred_scaled, y_true_scaled = predict(model, test_loader, DEVICE)
+    y_pred_scaled, y_true_scaled = predict(model, test_loader, DEVICE)
     
-    # # Reshape for inverse scaling
-    # y_pred_flat = y_pred_scaled.reshape(-1, n_features)
-    # y_true_flat = y_true_scaled.reshape(-1, n_features)
+    # Reshape for inverse scaling
+    y_pred_flat = y_pred_scaled.reshape(-1, n_features)
+    y_true_flat = y_true_scaled.reshape(-1, n_features)
     
-    # # Inverse transform
-    # y_pred_original = scaler.inverse_transform(y_pred_flat)
-    # y_true_original = scaler.inverse_transform(y_true_flat)
+    # Inverse transform
+    y_pred_original = scaler.inverse_transform(y_pred_flat)
+    y_true_original = scaler.inverse_transform(y_true_flat)
 
-    # pred_spatial = y_pred_original.reshape(y_pred_scaled.shape)
-    # true_spatial = y_true_original.reshape(y_true_scaled.shape)
+    pred_spatial = y_pred_original.reshape(y_pred_scaled.shape)
+    true_spatial = y_true_original.reshape(y_true_scaled.shape)
     
-    # mask_expanded = valid_mask[np.newaxis, np.newaxis, :, :, np.newaxis]
-    # mask_tiled = np.broadcast_to(mask_expanded, pred_spatial.shape)
+    mask_expanded = valid_mask[np.newaxis, np.newaxis, :, :, np.newaxis]
+    mask_tiled = np.broadcast_to(mask_expanded, pred_spatial.shape)
  
-    # pred_valid = pred_spatial[mask_tiled].reshape(-1, n_features)
-    # true_valid = true_spatial[mask_tiled].reshape(-1, n_features)
+    pred_valid = pred_spatial[mask_tiled].reshape(-1, n_features)
+    true_valid = true_spatial[mask_tiled].reshape(-1, n_features)
     
-    # print(f"\nPer-feature Test Metrics:")
-    # print(f"  {'Feature':<40} {'MAE':<12} {'RMSE':<12} {'R2':<10}")
-    # print("-" * 80)
+    print(f"\nPer-feature Test Metrics:")
+    print(f"  {'Feature':<40} {'MAE':<12} {'RMSE':<12} {'R2':<10}")
+    print("-" * 80)
     
-    # for i, feature in enumerate(FEATURES):
-    #     feature_mae  = mean_absolute_error(true_valid[:, i], pred_valid[:, i])
-    #     feature_rmse = np.sqrt(mean_squared_error(true_valid[:, i], pred_valid[:, i]))
-    #     feature_r2   = r2_score(true_valid[:, i], pred_valid[:, i])
-    #     print(f"  {feature:<40} {feature_mae:<12.4f} {feature_rmse:<12.4f} {feature_r2:<10.4f}")
+    for i, feature in enumerate(FEATURES):
+        feature_mae  = mean_absolute_error(true_valid[:, i], pred_valid[:, i])
+        feature_rmse = np.sqrt(mean_squared_error(true_valid[:, i], pred_valid[:, i]))
+        feature_r2   = r2_score(true_valid[:, i], pred_valid[:, i])
+        print(f"  {feature:<40} {feature_mae:<12.4f} {feature_rmse:<12.4f} {feature_r2:<10.4f}")
     
     print("STEP 11: Save Model and Scaler")
     
