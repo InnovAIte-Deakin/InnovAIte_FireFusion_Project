@@ -1,0 +1,43 @@
+name: ENSO Data Pipeline
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: "0 0 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  run-enso-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas
+
+      - name: Run ENSO pipeline
+        run: |
+          python fetch_enso.py
+
+      - name: Check generated files
+        run: |
+          echo "Raw files:"
+          ls -lah data/raw/
+
+          echo "Processed files:"
+          ls -lah data/processed/
+
+          echo "ENSO datasets:"
+          ls -lah datasets/enso/
