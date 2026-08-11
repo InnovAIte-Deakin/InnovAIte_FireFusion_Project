@@ -368,9 +368,12 @@
 
 .stat-card,
 .panel {
-  background: white;
-  border: 1px solid #e1e8f3;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 16px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
 }
 
 .stat-card {
@@ -817,10 +820,12 @@
 }
 
 .ff-panel {
-  background: #ffffff;
-  border: 1px solid #d8e0eb;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
   padding: 14px;
 }
 
@@ -1125,9 +1130,11 @@
 .ff-map-panel,
 .ff-chart-panel,
 .ff-misinfo-panel {
-  background: #071d3a;
+  background: rgba(7, 29, 58, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .ff-map-head {
