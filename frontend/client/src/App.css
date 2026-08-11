@@ -667,10 +667,11 @@
 
 .footer {
   margin-top: 18px;
+  margin-bottom: 24px;
   background: #061b45;
   color: white;
   border-radius: 16px;
-  padding: 26px;
+  padding: 28px;
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr 1fr;
   gap: 30px;
@@ -678,11 +679,17 @@
 
 .footer h4 {
   margin-top: 0;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
 }
 
 .footer p {
   color: #d6e3ff;
-  font-size: 14px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  margin: 6px 0;
 }
 
 @media (max-width: 1100px) {
