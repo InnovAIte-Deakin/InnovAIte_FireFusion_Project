@@ -124,10 +124,9 @@ class MaskedFocalLoss(nn.Module):
         Outputs:
             Tensor: scalar masked focal loss
         """
-        pred_clamped = pred.clamp(min=-30, max=30)
-        bce = self.bce(pred_clamped, target)
+        bce = self.bce(pred, target)
 
-        p = torch.sigmoid(pred_clamped)
+        p = torch.sigmoid(pred)
         p_t = p * target + (1 - p) * (1 - target)
 
         alpha_t = self.alpha * target + (1 - self.alpha) * (1 - target)
