@@ -166,6 +166,7 @@ class ForecastPropertiesOut(BaseModel):
     risk_score: Optional[float] = Field(None, description="Mean fire_probability across the horizon")
     risk_levels: Optional[List[int]] = Field(None, description="Discrete risk level 0..4 per horizon step")
     risk_labels: Optional[List[str]] = Field(None, description="Label per risk level (see RISK_LEVEL_LABELS)")
+    risk_factor: Optional[List[int]] = Field(None, description="Frontend risk_factor convention (1=extreme..5=very low), one per horizon step. Inverse of risk_levels.")
     
     forecast: Optional[List[List[float]]] = Field(
         None, description="[horizon, n_output_channels] raw model output, one row per horizon step"
