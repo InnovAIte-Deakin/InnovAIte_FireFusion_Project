@@ -18,8 +18,8 @@ import json
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from ..models.bushfire.ts_convlstm_forecaster import ForecasterConfig, MultivariateTSForecaster
+from ..evaluation.metrics import compute_metrics, find_best_threshold, format_metrics, flatten_valid
 
 # Paths
 DATA_PATH = "src/data/bushfire/forecaster_test_data.csv"
@@ -518,17 +518,20 @@ def main():
     Training pipeline for ConvLSTM on gridded spatiotemporal data.
     
     Workflow:
-    1. Load gridded weather features and the binary is_burning label grid
-    2. Split both into train/val/test in time order
-    3. Fit scaler on training features only (labels are never scaled)
-    4. Derive land mask from the weather grid
-    5. Create sliding-window sequences (X from features, y from labels)
-    6. Create DataLoaders
-    7. Initialise ConvLSTM with single-channel output at horizon 1
-    8. Compute class imbalance ratio and train
-    9. Load best model
-    10. Evaluate (pending — classification metrics not yet implemented)
-    11. Save trained model, scaler and inference metadata
+    1.  Load gridded weather features (from cache or CSV)
+    1b. Load the binary is_burning label grid (from cache or CSV), aligned
+        to the same time axis as the weather features
+    2.  Split both features and labels into train/val/test in time order
+    3.  Fit a StandardScaler on training features only (labels are never
+        scaled), then scale and NaN-fill all three splits
+    4.  Split train_val into train/val and build sliding-window datasets
+    5.  Prepare DataLoader
+    6.  Initialise the ConvLSTM model with single-channel output at horizon 1
+    7.  Compute training-split class-imbalance ratio, then train
+    8.  Reload the best-validation-loss model state
+    9.  Select the decision threshold on validation by maximising F-beta
+    10. Evaluate the model on the test set
+    11. Save the trained model, scaler, and inference metadata
     """
     os.makedirs("src/models/bushfire/checkpoints", exist_ok=True)
     print("Using device:", DEVICE)
@@ -719,41 +722,25 @@ def main():
     else:
         print(f"Using final model")
     
-    print("STEP 9: Evaluate on Test Set")
+    print("STEP 9: Select Threshold on Validation Set")
     
-    # TODO: Regression metrics removed — the model now outputs a single fire-probability channel, so MAE/RMSE/R2
-    # and the scaler inverse-transform no longer apply. To be replaced with classification metrics
-    # (precision, recall, F1, ROC-AUC, PR-AUC) once the masked BCE loss lands.
-    
-    
-    y_pred_scaled, y_true_scaled = predict(model, test_loader, DEVICE)
-    
-    # Reshape for inverse scaling
-    y_pred_flat = y_pred_scaled.reshape(-1, n_features)
-    y_true_flat = y_true_scaled.reshape(-1, n_features)
-    
-    # Inverse transform
-    y_pred_original = scaler.inverse_transform(y_pred_flat)
-    y_true_original = scaler.inverse_transform(y_true_flat)
+    y_val_prob, y_val_true = predict(model, val_loader, DEVICE)
+    val_true_flat, val_prob_flat = flatten_valid(y_val_true, y_val_prob, valid_mask)
 
-    pred_spatial = y_pred_original.reshape(y_pred_scaled.shape)
-    true_spatial = y_true_original.reshape(y_true_scaled.shape)
-    
-    mask_expanded = valid_mask[np.newaxis, np.newaxis, :, :, np.newaxis]
-    mask_tiled = np.broadcast_to(mask_expanded, pred_spatial.shape)
- 
-    pred_valid = pred_spatial[mask_tiled].reshape(-1, n_features)
-    true_valid = true_spatial[mask_tiled].reshape(-1, n_features)
-    
-    print(f"\nPer-feature Test Metrics:")
-    print(f"  {'Feature':<40} {'MAE':<12} {'RMSE':<12} {'R2':<10}")
-    print("-" * 80)
-    
-    for i, feature in enumerate(FEATURES):
-        feature_mae  = mean_absolute_error(true_valid[:, i], pred_valid[:, i])
-        feature_rmse = np.sqrt(mean_squared_error(true_valid[:, i], pred_valid[:, i]))
-        feature_r2   = r2_score(true_valid[:, i], pred_valid[:, i])
-        print(f"  {feature:<40} {feature_mae:<12.4f} {feature_rmse:<12.4f} {feature_r2:<10.4f}")
+    best_threshold, best_val_fbeta = find_best_threshold(val_true_flat, val_prob_flat, beta=2.0)
+    if best_val_fbeta is None:
+        best_threshold = FIRE_THRESHOLD
+        print(f"Threshold defaulted to {FIRE_THRESHOLD}")
+    else:
+        print(f"Selected threshold: {best_threshold:.4f} (val F2 = {best_val_fbeta:.4f})")
+
+    print("STEP 10: Evaluate on Test Set")
+
+    y_test_prob, y_test_true = predict(model, test_loader, DEVICE)
+    test_true_flat, test_prob_flat = flatten_valid(y_test_true, y_test_prob, valid_mask)
+
+    test_metrics = compute_metrics(test_true_flat, test_prob_flat, threshold=best_threshold, beta=2.0)
+    print(format_metrics(test_metrics, title="Test Set Metrics"))
     
     print("STEP 11: Save Model and Scaler")
     
@@ -768,10 +755,7 @@ def main():
             "input_steps": INPUT_STEPS,
             "horizon": HORIZON,
             "grid_shape": (grid_height, grid_width),
-            # Provisional. Inference falls back to 0.5 if absent, so this is written
-            # explicitly to make the value a recorded decision rather than a default.
-            # To be set from validation once classification metrics land.
-            "fire_threshold": FIRE_THRESHOLD,
+            "fire_threshold": best_threshold,
         },
         SCALER_SAVE_PATH
     )
