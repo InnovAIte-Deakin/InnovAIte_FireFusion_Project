@@ -43,13 +43,13 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Environmental features
 FEATURES = [
-    "skin_temperature_c",
-    "soil_temperature_level_1_c",
-    "surface_solar_radiation_downwards",
-    "surface_thermal_radiation_downwards",
     "temperature_2m_c",
+    "dewpoint_temperature_2m_c",
+    "total_precipitation",
     "u_component_of_wind_10m",
-    "v_component_of_wind_10m"
+    "v_component_of_wind_10m",
+    "surface_solar_radiation_downwards",
+    "skin_temperature_c",
 ]
 
 class MaskedTverskyLoss(nn.Module):
@@ -314,22 +314,11 @@ def load_and_format_gridded_data(csv_path, feature_cols=None):
             - datetime column: Timestamp of observation
             - .geo column: GeoJSON polygon defining grid cell location
             - feature columns: Environmental measurements (7 features by default)
-        feature_cols (list, optional): List of feature column names. Defaults to the 7 environmental features.
+        feature_cols (list, optional): List of feature column names.
     
     Outputs:
         np.ndarray: Gridded data of shape [n_timesteps, height, width, n_features] with dtype=float32
     """    
-    if feature_cols is None:
-        feature_cols = [
-            "skin_temperature_c",
-            "soil_temperature_level_1_c",
-            "surface_solar_radiation_downwards",
-            "surface_thermal_radiation_downwards",
-            "temperature_2m_c",
-            "u_component_of_wind_10m",
-            "v_component_of_wind_10m"
-        ]
-    
     # Load CSV
     df = pd.read_csv(csv_path)
     print(f"Loaded CSV: {df.shape}")
@@ -546,7 +535,7 @@ def main():
         print(f"Loaded grid: {data_grid.shape}")
     else:
         print("No cache found, building grid from CSV...")
-        data_grid = load_and_format_gridded_data(DATA_PATH)
+        data_grid = load_and_format_gridded_data(DATA_PATH, feature_cols=FEATURES)
         np.save(GRID_CACHE_PATH, data_grid)
         print(f"Grid saved to {GRID_CACHE_PATH}")
 
