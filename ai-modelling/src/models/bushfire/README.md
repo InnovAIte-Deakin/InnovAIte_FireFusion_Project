@@ -1,103 +1,107 @@
-# Bushfire Modelling — Models Reference
+# ConvLSTM Bushfire Prediction Model Reference
 
-## Overview
-This folder contains the core bushfire forecasting + fire-risk components used by the FireFusion API. Two production models are provided:
+This project implements a PyTorch-based ConvLSTM model for spatiotemporal bushfire prediction. The model uses historical environmental and climate variables from gridded spatial data to predict the probability that each grid cell is burning at the next timestep. Unlike the previous architecture, it performs direct bushfire probability prediction without an intermediate environmental forecasting stage.
 
-- A 2D ConvLSTM spatiotemporal forecaster that predicts future environmental variables across grid cells.
-- A Temporal Convolutional Network (TCN) classifier that predicts fire probability per cell (supports multi-step inference).
+## Key Features
 
-Both model implementations live here:
-- Forecaster: `src/models/bushfire/ts_convlstm_forecaster.py`
-- Classifier: `src/models/bushfire/tcn_classifier.py`
+- **Binary Bushfire Prediction**: Predicts the probability that each grid cell is burning.
+- **Single-Step Prediction**: Generates predictions one timestep into the future.
+- **Stacked ConvLSTM Architecture**: Two ConvLSTM layers with dropout regularisation for spatiotemporal modelling.
+- **Direct Environmental Modelling**: Uses historical environmental and climate variables directly as input, without intermediate environmental forecasting.
+- **Separate Inference Module**: Simple API for loading trained models and generating predictions.
 
-Saved checkpoints are located under `src/models/bushfire/checkpoints/`.
+## Project Components
 
+The ConvLSTM bushfire prediction model consists of three core scripts:
 
+- **Model definition** (`src/models/bushfire/ts_convlstm_forecaster.py`) – Defines the ConvLSTM architecture and model configuration.
+- **Training pipeline** (`src/training/ts_convlstm_forecaster_train.py`) – Trains and evaluates the model using historical environmental data.
+- **Inference API** (`api/inference/bushfire_forecaster.py`) – Loads the trained model and performs bushfire probability inference.
 
-## Models summary
+Model checkpoints are stored in `src/models/bushfire/checkpoints/`.
 
-- ConvLSTM Forecaster
-  - Purpose: Forecast multivariate environmental variables for each grid cell (spatial + temporal).
-  - Input: grid sequences [batch, seq_len, height, width, input_channels]
-  - Output: forecasts [batch, horizon, height, width, output_channels]
+## Installation
 
-- TCN Classifier
-  - Purpose: Given recent history (and forecast steps) predict fire probability per cell.
-  - Input (single-step training / inference): ($B\times H \times W$, lookback, n_features)
-  - Multi-step inference input (to produce horizon more than 1): ($B\times H \times W$, lookback + horizon - 1, n_features)
-  - Output: ($B\times H \times W$, horizon, 1) or ($B\times H \times W$, 1)
+### Requirements
 
+- Python 3.8+
+- PyTorch >= 1.9.0
+- scikit-learn >= 0.24
+- pandas >= 1.2
+- numpy >= 1.19
+- joblib >= 1.0
 
-## ConvLSTM Forecaster
+## Quick Start
 
-### Architecture (high level)
-- Two stacked ConvLSTM cells (ConvLSTMCell)
-- Dropout after each ConvLSTM layer (Dropout2d)
-- Final 1×1 Conv2d projection layer to produce horizon × output_channels
-- Reshape / permute to return [batch, horizon, height, width, output_channels]
+### Training
 
-### Config
-The model uses `ForecasterConfig`:
-- `input_channels`: number of features per grid cell (e.g., 7)
-- `horizon`: forecast horizon (e.g., 2)
-- `output_channels`: output feature count (defaults to input_channels)
-- `hidden_size_1`, `hidden_size_2`: hidden channel sizes for two ConvLSTM layers
-- `dropout`: dropout probability
+```bash
+cd ai-modelling
+python -m src.training.ts_convlstm_forecaster_train
+```
 
-### Input / Output shapes
-- Input: numpy or torch tensor shaped:
-  - [batch, seq_len, height, width, input_channels]
-  - The implementation internally permutes to [batch, seq_len, input_channels, height, width] before per-time-step processing.
-- Output:
-  - [batch, horizon, height, width, output_channels]
+This will:
 
+1. Load the training dataset.
+2. Split the data into training, validation, and test sets.
+3. Train the ConvLSTM model with early stopping.
+4. Evaluate the trained model on the test set.
+5. Save the trained model checkpoint.
 
-## TCN Classifier
+### Inference
 
-### Architecture
-- Input permuted to (batch, n_features, time) for 1D convs
-- Stack of TCNBlock(s), each block:
-  - Dilated causal conv → BatchNorm → ReLU → Dropout (×2)
-  - Residual connection (1×1 conv if channel dims change)
-- AdaptiveAvgPool1d collapses time dimension
-- Head: Flatten → Linear(32) → ReLU → Dropout → Linear(1) → Sigmoid
+```bash
+cd ai-modelling
+python -m api.inference.bushfire_forecaster
+```
 
-### Config (ClassifierConfig)
-- `n_features`: number of features per timestep (e.g., 7)
-- `lookback_steps`: history window length (e.g., 60)
-- `channels`: list of channel sizes per TCN block (default 6 blocks)
-- `kernel_size`: convolution kernel size (default 3)
-- `dilation_base`: base used to compute dilations (default 2)
-- `dropout`: dropout probability
+The inference module loads the trained ConvLSTM model and generates bushfire probability predictions from new environmental data.
 
-### Receptive field
-- Receptive field = 2 * (kernel_size - 1) * sum(dilations)
-- Default dilations = `[1,2,4,8,16,32]` → sum = 63 → receptive field = $2*(3-1)*63 = 252$ timesteps
+## Model Architecture
 
-### Forward behavior and multi-step inference
-- When `model.horizon == 1` the forward pass returns shape (N, 1)
-- If `model.horizon > 1` the model expects input windows shaped:
-  - (N, lookback + horizon - 1, n_features)
-  - The model slides a window of length `lookback` across the time axis to produce `horizon` outputs:
-    - For t in 0..horizon-1 run `_forward_single(x[:, t:t+lookback, :])`
-  - Output shape: (N, horizon, 1) — caller can `squeeze(-1)` to (N, horizon)
+```text
+Input: [Batch, Sequence Length, Height, Width, Input Channels]
+   ↓
+ConvLSTM Layer 1 (hidden_size=64)
+   ↓
+Dropout (p=0.2)
+   ↓
+ConvLSTM Layer 2 (hidden_size=32)
+   ↓
+Dropout (p=0.2)
+   ↓
+1×1 Conv2d Projection
+   ↓
+Reshape → [Batch, 1, Height, Width, 1]
+   ↓
+Output (Raw Logits): [Batch, 1, Height, Width, 1]
+   ↓
+Sigmoid (predict() only)
+   ↓
+Output (Burning Probability)
+```
 
-### Input / Output
-- Caller typically flattens spatial dims: B,H,W → N = $B\times H \times W$
-- Training input shape: (N, lookback_steps, n_features)
-- Inference (multi-step): supply (N, lookback + horizon - 1, n_features)
+- Processes 60 historical timesteps of gridded environmental data.
+- Learns both spatial and temporal dependencies using stacked ConvLSTM layers.
+- Produces a single raw logit for each grid cell, representing the likelihood of burning at the next timestep.
 
+## Configuration
 
+The model uses `ForecasterConfig` to define its architecture and hyperparameters:
 
-## Inference pipeline
+- `input_channels`: Number of environmental variables per grid cell.
+- `horizon`: Prediction horizon (default: 1 timestep).
+- `output_channels`: Number of output channels (default: 1).
+- `hidden_size_1`: Number of hidden channels in the first ConvLSTM layer.
+- `hidden_size_2`: Number of hidden channels in the second ConvLSTM layer.
+- `dropout`: Dropout probability.
 
-Typical pipeline (high-level):
-1. Run forecaster to get forecasts per cell: outputs [batch, horizon, H, W, features]
-2. For each cell, gather recent history (lookback steps). Pad or truncate to `lookback_steps`.
-3. Build classifier input window:
-   - If classifier horizon > 1: concatenate history_last_lookback + forecast_first_(horizon-1) → length = lookback + horizon - 1
-   - Stack windows across cells → shape (N, L, n_features) where N = number of cells
-5. Flatten spatial dims if needed and call `model(x_tensor)`
-6. Post-process probabilities to risk levels
+## Input and Output Shapes
 
-Reference implementation: the API's adapter in `api/inference/bushfire_classifier.py` follows this pipeline.
+**Input**
+
+The model accepts a NumPy array or PyTorch tensor with shape `[batch, sequence_length, height, width, input_channels]`. Internally, the input is permuted to `[batch, sequence_length, input_channels, height, width]` before being processed by the ConvLSTM layers.
+
+**Output**
+
+The model returns raw logits with shape `[batch, 1, height, width, 1]`. During inference, these logits are passed through a sigmoid activation function to produce burning probabilities between 0 and 1.
