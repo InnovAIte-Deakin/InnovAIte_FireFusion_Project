@@ -11,6 +11,7 @@ probability that each cell is burning at the next timestep.
 
 import os
 import joblib
+import copy
 import numpy as np
 import pandas as pd
 import torch
@@ -159,7 +160,9 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         float: Mean loss across all batches in the epoch
     """
     model.train()
-    losses = []
+    total_loss = 0.0
+    total_samples = 0
+
     for X_batch, y_batch in dataloader:
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
@@ -168,8 +171,10 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         loss = criterion(preds, y_batch)
         loss.backward()
         optimizer.step()
-        losses.append(loss.item())
-    return np.mean(losses)
+        batch_size = X_batch.size(0)
+        total_loss += loss.item() * batch_size
+        total_samples += batch_size
+    return total_loss / total_samples
 
 def evaluate(model, dataloader, criterion, device):
     """
@@ -185,15 +190,18 @@ def evaluate(model, dataloader, criterion, device):
         float: Mean loss across all batches in the dataloader
     """
     model.eval()
-    losses = []
+    total_loss = 0.0
+    total_samples = 0
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
             preds = model(X_batch)
             loss = criterion(preds, y_batch)
-            losses.append(loss.item())
-    return np.mean(losses)
+            batch_size = X_batch.size(0)
+            total_loss += loss.item() * batch_size
+            total_samples += batch_size
+    return total_loss / total_samples
 
 def predict(model, dataloader, device):
     """
@@ -289,27 +297,32 @@ def load_and_format_gridded_data(csv_path, feature_cols=None):
             lon, lat = extract_coords(geojson_str)
             coords_data.append({'lon': lon, 'lat': lat})
         except Exception as e:
-            coords_data.append({'lon': 0.0, 'lat': 0.0})
+            coords_data.append({'lon': np.nan, 'lat': np.nan})
     
     # Create DataFrame from extracted coords, merge
     coords_df = pd.DataFrame(coords_data)
     df = pd.concat([df.reset_index(drop=True), coords_df.reset_index(drop=True)], axis=1)
-    
-    print(f"Extracted {len(coords_data)} coordinates")
-    
+
+    # Preserve the full weather time axis before removing invalid spatial rows
+    df['datetime'] = pd.to_datetime(df['datetime'])
+    unique_times = sorted(df['datetime'].unique().tolist())
+    print(f"Timesteps: {len(unique_times)}")
+
+    # Remove rows where GeoJSON coordinates could not be extracted
+    invalid_coords = df[['lon', 'lat']].isna().any(axis=1).sum()
+    print(f"Rows with invalid coordinates removed: {invalid_coords}")
+    df = df.dropna(subset=['lon', 'lat'])
+
+    print(f"Extracted {len(coords_data) - invalid_coords} valid coordinates")
+
     # Get unique lat/lon values (sorted)
     unique_lats = sorted(df['lat'].unique().tolist())
     unique_lons = sorted(df['lon'].unique().tolist())
     print(f"Grid dimensions: {len(unique_lats)} x {len(unique_lons)}")
-    
+
     # Create mapping
     lat_to_row = {lat: i for i, lat in enumerate(unique_lats)}
     lon_to_col = {lon: j for j, lon in enumerate(unique_lons)}
-    
-    # Get unique timestamps
-    df['datetime'] = pd.to_datetime(df['datetime'])
-    unique_times = sorted(df['datetime'].unique().tolist())
-    print(f"Timesteps: {len(unique_times)}")
     
     # Initialize array
     n_timesteps = len(unique_times)
@@ -497,10 +510,18 @@ def main():
     split_idx = int(len(data_grid) * TRAIN_VAL_RATIO)
     train_val_grid = data_grid[:split_idx]
     test_grid = data_grid[split_idx:]
+
+    val_split_idx = int(len(train_val_grid) * 0.85)
+
+    train_grid = train_val_grid[:val_split_idx]
+    val_grid = train_val_grid[val_split_idx:]
     
     # Split labels on the same index so they stay aligned with the features
     train_val_labels = label_grid[:split_idx]
     test_labels      = label_grid[split_idx:]
+    
+    train_labels = train_val_labels[:val_split_idx]
+    val_labels = train_val_labels[val_split_idx:]
     
     print(f"Train/Val: {len(train_val_grid)} timesteps")
     print(f"Test: {len(test_grid)} timesteps")
@@ -509,14 +530,14 @@ def main():
     print("STEP 3: Fit Scaler on Training Data")
  
     # Flatten to [N, F] for sklearn on valid cells
-    train_val_flat = train_val_grid.reshape(-1, n_features)
+    train_flat = train_grid.reshape(-1, n_features)
 
     # Keep only rows where at least one feature is not NaN - Used for evaluation
-    valid_rows = ~np.all(np.isnan(train_val_flat), axis=1)
+    valid_rows = ~np.all(np.isnan(train_flat), axis=1)
  
     scaler = StandardScaler()
-    scaler.fit(train_val_flat[valid_rows])
- 
+    scaler.fit(train_flat[valid_rows])
+
     print(f"Scaler fitted on {valid_rows.sum()} valid cell-timesteps")
     print(f"Feature means: {scaler.mean_}")
     print(f"Feature scales: {scaler.scale_}")
@@ -529,26 +550,20 @@ def main():
         scaled[np.isnan(scaled)] = 0.0
         return scaled.reshape(shape)
  
-    train_val_scaled = scale_and_fill(train_val_grid)
+    train_scaled = scale_and_fill(train_grid)
+    val_scaled = scale_and_fill(val_grid)
     test_scaled = scale_and_fill(test_grid)
 
     print("STEP 4: Create Datasets with Sliding Window")
 
-    # Split train_val features and labels into train/val
-    val_split_idx = int(len(train_val_scaled) * 0.85)
-    train_grid = train_val_scaled[:val_split_idx]
-    val_grid   = train_val_scaled[val_split_idx:]
-    
-    train_labels = train_val_labels[:val_split_idx]
-    val_labels   = train_val_labels[val_split_idx:]
-
-    train_dataset = GriddedTimeSeriesDataset(train_grid, train_labels, INPUT_STEPS, HORIZON)
-    val_dataset   = GriddedTimeSeriesDataset(val_grid, val_labels, INPUT_STEPS, HORIZON)
+    # Split features and labels into train/validation sets
+    train_dataset = GriddedTimeSeriesDataset(train_scaled, train_labels, INPUT_STEPS, HORIZON)
+    val_dataset   = GriddedTimeSeriesDataset(val_scaled, val_labels, INPUT_STEPS, HORIZON)
     test_dataset  = GriddedTimeSeriesDataset(test_scaled, test_labels, INPUT_STEPS, HORIZON)
 
-    print(f"train_val timesteps: {len(train_val_scaled)}")
-    print(f"train timesteps: {val_split_idx}")
-    print(f"val timesteps: {len(train_val_scaled) - val_split_idx}")
+    print(f"Train timesteps: {len(train_scaled)}")
+    print(f"Val timesteps: {len(val_scaled)}")
+    print(f"Test timesteps: {len(test_scaled)}")
     print(f"Minimum needed: {INPUT_STEPS + HORIZON}")
 
     print(f"Train sequences: {len(train_dataset)}")
@@ -560,10 +575,6 @@ def main():
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0)
     val_loader = DataLoader(val_dataset,   batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
     test_loader = DataLoader(test_dataset,  batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
-    
-    print(f"Train batches: {len(train_loader)} batches of {BATCH_SIZE}")
-    print(f"Val batches: {len(val_loader)} batches of {BATCH_SIZE}")
-    print(f"Test batches: {len(test_loader)} batches of {BATCH_SIZE}")
     
     print("STEP 6: Initialise ConvLSTM Model")
     
@@ -616,7 +627,7 @@ def main():
         
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            best_state = model.state_dict()
+            best_state = copy.deepcopy(model.state_dict())
             patience_counter = 0
             status = "BEST"
         else:
