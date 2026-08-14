@@ -34,6 +34,8 @@ class MisinformationPostOut(BaseModel):
     probabilities: dict[str, float]
     risk_score: float
     severity: str
+    urgency: str | None = None
+    humanitarian_task: str | None = None
     checkpoint: str
 class MisinformationBatchOut(BaseModel):
     model_config = ConfigDict(extra="allow")
