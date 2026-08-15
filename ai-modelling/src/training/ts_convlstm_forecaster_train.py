@@ -11,6 +11,7 @@ probability that each cell is burning at the next timestep.
 
 import os
 import joblib
+import copy
 import numpy as np
 import pandas as pd
 import torch
@@ -30,10 +31,10 @@ LABEL_PATH = "src/data/bushfire/historic_fire/unified_fire_data/satellite_detect
 LABEL_CACHE = "src/data/bushfire/label_grid_cache.npy"
 
 # Model hyperparameters
-INPUT_STEPS = 60
+INPUT_STEPS = 30
 HORIZON = 1
 BATCH_SIZE = 8
-EPOCHS = 5
+EPOCHS = 50
 LEARNING_RATE = 0.001
 
 TRAIN_VAL_RATIO = 0.9
@@ -241,7 +242,8 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         float: Mean loss across all batches in the epoch
     """
     model.train()
-    losses = []
+    total_loss = 0.0
+    total_samples = 0
     for X_batch, y_batch in dataloader:
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
@@ -250,8 +252,10 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         loss = criterion(preds, y_batch)
         loss.backward()
         optimizer.step()
-        losses.append(loss.item())
-    return np.mean(losses)
+        batch_size = X_batch.size(0)
+        total_loss += loss.item() * batch_size
+        total_samples += batch_size
+    return total_loss / total_samples
 
 def evaluate(model, dataloader, criterion, device):
     """
