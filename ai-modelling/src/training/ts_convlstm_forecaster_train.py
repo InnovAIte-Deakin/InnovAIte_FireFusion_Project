@@ -31,7 +31,7 @@ LABEL_PATH = "src/data/bushfire/historic_fire/unified_fire_data/satellite_detect
 LABEL_CACHE = "src/data/bushfire/label_grid_cache.npy"
 
 # Model hyperparameters
-INPUT_STEPS = 60
+INPUT_STEPS = 30
 HORIZON = 1
 BATCH_SIZE = 8
 EPOCHS = 50
@@ -44,13 +44,13 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Environmental features
 FEATURES = [
-    "temperature_2m_c",
-    "dewpoint_temperature_2m_c",
-    "total_precipitation",
-    "u_component_of_wind_10m",
-    "v_component_of_wind_10m",
-    "surface_solar_radiation_downwards",
-    "skin_temperature_c",
+    "era5land_temperature_2m_c",
+    "era5_dewpoint_temperature_2m_c",
+    "era5_total_precipitation",
+    "era5_u_component_of_wind_10m",
+    "era5_v_component_of_wind_10m",
+    "era5land_surface_solar_radiation_downwards",
+    "era5land_skin_temperature_c",
 ]
 
 class MaskedTverskyLoss(nn.Module):
@@ -244,7 +244,6 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
     model.train()
     total_loss = 0.0
     total_samples = 0
-
     for X_batch, y_batch in dataloader:
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
@@ -400,7 +399,7 @@ def load_and_format_gridded_data(csv_path, feature_cols=None):
     height = len(unique_lats)
     width = len(unique_lons)
     n_features = len(feature_cols)
-    
+
     data_grid = np.full((n_timesteps, height, width, n_features), np.nan, dtype=np.float32)
     
     print(f"Filling grid ({n_timesteps} x {height} x {width} x {n_features})...")
@@ -448,7 +447,7 @@ def load_and_format_label_grid(label_csv, weather_csv, grid_shape):
 
     # Rebuild the same time axis the weather loader used
     wt = pd.read_csv(weather_csv, usecols=['datetime'])
-    wt['datetime'] = pd.to_datetime(wt['datetime'])
+    wt['datetime'] = pd.to_datetime(wt['datetime'], format='mixed')
     unique_times = sorted(wt['datetime'].unique().tolist())
     time_to_idx = {t: i for i, t in enumerate(unique_times)}
 
