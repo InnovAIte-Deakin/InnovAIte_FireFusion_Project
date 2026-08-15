@@ -36,6 +36,13 @@ BATCH_SIZE = 8
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
+# Attention (patchwise / M3). ATTENTION="none" reproduces the M1 baseline.
+ATTENTION = "none"          # "none" | "patchwise"
+FOOTPRINT = 7               # patch side length (odd)
+DILATION = 1               # cell spacing within the patch
+SHARE_PLANES = 8            # output channels sharing one attention weight set
+ATTENTION_LAYERS = (1,)     # which ConvLSTM layers use attention
+
 TRAIN_VAL_RATIO = 0.9
 FIRE_THRESHOLD = 0.5
 
@@ -573,7 +580,12 @@ def main():
         output_channels=1,
         hidden_size_1=32,
         hidden_size_2=16,
-        dropout=0.2
+        dropout=0.2,
+        attention=ATTENTION,
+        footprint=FOOTPRINT,
+        dilation=DILATION,
+        share_planes=SHARE_PLANES,
+        attention_layers=ATTENTION_LAYERS,
     )
     
     model = MultivariateTSForecaster(config).to(DEVICE)
