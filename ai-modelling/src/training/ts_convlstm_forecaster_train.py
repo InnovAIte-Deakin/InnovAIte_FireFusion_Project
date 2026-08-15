@@ -11,7 +11,6 @@ probability that each cell is burning at the next timestep.
 
 import os
 import joblib
-import copy
 import numpy as np
 import pandas as pd
 import torch
@@ -31,10 +30,10 @@ LABEL_PATH = "src/data/bushfire/historic_fire/unified_fire_data/satellite_detect
 LABEL_CACHE = "src/data/bushfire/label_grid_cache.npy"
 
 # Model hyperparameters
-INPUT_STEPS = 30
+INPUT_STEPS = 60
 HORIZON = 1
 BATCH_SIZE = 8
-EPOCHS = 50
+EPOCHS = 5
 LEARNING_RATE = 0.001
 
 TRAIN_VAL_RATIO = 0.9
@@ -242,8 +241,7 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         float: Mean loss across all batches in the epoch
     """
     model.train()
-    total_loss = 0.0
-    total_samples = 0
+    losses = []
     for X_batch, y_batch in dataloader:
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
@@ -252,10 +250,8 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         loss = criterion(preds, y_batch)
         loss.backward()
         optimizer.step()
-        batch_size = X_batch.size(0)
-        total_loss += loss.item() * batch_size
-        total_samples += batch_size
-    return total_loss / total_samples
+        losses.append(loss.item())
+    return np.mean(losses)
 
 def evaluate(model, dataloader, criterion, device):
     """
@@ -271,18 +267,15 @@ def evaluate(model, dataloader, criterion, device):
         float: Mean loss across all batches in the dataloader
     """
     model.eval()
-    total_loss = 0.0
-    total_samples = 0
+    losses = []
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
             preds = model(X_batch)
             loss = criterion(preds, y_batch)
-            batch_size = X_batch.size(0)
-            total_loss += loss.item() * batch_size
-            total_samples += batch_size
-    return total_loss / total_samples
+            losses.append(loss.item())
+    return np.mean(losses)
 
 def predict(model, dataloader, device):
     """
@@ -367,36 +360,28 @@ def load_and_format_gridded_data(csv_path, feature_cols=None):
             lon, lat = extract_coords(geojson_str)
             coords_data.append({'lon': lon, 'lat': lat})
         except Exception as e:
-            # Rows that fail to parse get NaN rather than a fabricated (0.0, 0.0)
-            # coordinate, so they don't silently create a bogus extra grid cell.
-            coords_data.append({'lon': np.nan, 'lat': np.nan})
-
+            coords_data.append({'lon': 0.0, 'lat': 0.0})
+    
     # Create DataFrame from extracted coords, merge
     coords_df = pd.DataFrame(coords_data)
     df = pd.concat([df.reset_index(drop=True), coords_df.reset_index(drop=True)], axis=1)
-
-    # Preserve the full weather time axis BEFORE removing invalid spatial rows,
-    # so a bad .geo value on one row can't shrink the timestep coverage.
-    df['datetime'] = pd.to_datetime(df['datetime'], format='mixed')
-    unique_times = sorted(df['datetime'].unique().tolist())
-    print(f"Timesteps: {len(unique_times)}")
-
-    # Remove rows where GeoJSON coordinates could not be extracted
-    invalid_coords = df[['lon', 'lat']].isna().any(axis=1).sum()
-    print(f"Rows with invalid coordinates removed: {invalid_coords}")
-    df = df.dropna(subset=['lon', 'lat'])
-
-    print(f"Extracted {len(coords_data) - invalid_coords} valid coordinates")
-
+    
+    print(f"Extracted {len(coords_data)} coordinates")
+    
     # Get unique lat/lon values (sorted)
     unique_lats = sorted(df['lat'].unique().tolist())
     unique_lons = sorted(df['lon'].unique().tolist())
     print(f"Grid dimensions: {len(unique_lats)} x {len(unique_lons)}")
-
+    
     # Create mapping
     lat_to_row = {lat: i for i, lat in enumerate(unique_lats)}
     lon_to_col = {lon: j for j, lon in enumerate(unique_lons)}
-
+    
+    # Get unique timestamps
+    df['datetime'] = pd.to_datetime(df['datetime'], format='mixed')
+    unique_times = sorted(df['datetime'].unique().tolist())
+    print(f"Timesteps: {len(unique_times)}")
+    
     # Initialize array
     n_timesteps = len(unique_times)
     height = len(unique_lats)
@@ -582,43 +567,34 @@ def main():
         f"Grid mismatch: labels {label_grid.shape} vs weather {data_grid.shape}"
  
     print("STEP 2: Split Data into Train/Val/Test")
-
+    
     split_idx = int(len(data_grid) * TRAIN_VAL_RATIO)
     train_val_grid = data_grid[:split_idx]
     test_grid = data_grid[split_idx:]
-
+    
+    # Split labels on the same index so they stay aligned with the features
     train_val_labels = label_grid[:split_idx]
     test_labels      = label_grid[split_idx:]
-
-    # Split train_val into train/val NOW, before any scaling, so the scaler
-    # fit in STEP 3 below only ever sees the training portion of the data.
-    val_split_idx = int(len(train_val_grid) * 0.85)
-    train_grid_raw = train_val_grid[:val_split_idx]
-    val_grid_raw   = train_val_grid[val_split_idx:]
-
-    train_labels = train_val_labels[:val_split_idx]
-    val_labels   = train_val_labels[val_split_idx:]
-
+    
     print(f"Train/Val: {len(train_val_grid)} timesteps")
-    print(f"  -> Train: {len(train_grid_raw)} timesteps")
-    print(f"  -> Val:   {len(val_grid_raw)} timesteps")
     print(f"Test: {len(test_grid)} timesteps")
     print(f"(Split at {TRAIN_VAL_RATIO*100}% to preserve temporal order)")
+    
+    print("STEP 3: Fit Scaler on Training Data")
+ 
+    # Flatten to [N, F] for sklearn on valid cells
+    train_val_flat = train_val_grid.reshape(-1, n_features)
 
-    print("STEP 3: Fit Scaler on Training Data Only")
-
-    # Flatten to [N, F] for sklearn on valid cells — TRAIN ONLY, not train_val
-    train_flat = train_grid_raw.reshape(-1, n_features)
-
-    valid_rows = ~np.all(np.isnan(train_flat), axis=1)
-
+    # Keep only rows where at least one feature is not NaN - Used for evaluation
+    valid_rows = ~np.all(np.isnan(train_val_flat), axis=1)
+ 
     scaler = StandardScaler()
-    scaler.fit(train_flat[valid_rows])
-
-    print(f"Scaler fitted on {valid_rows.sum()} valid cell-timesteps (train split only)")
+    scaler.fit(train_val_flat[valid_rows])
+ 
+    print(f"Scaler fitted on {valid_rows.sum()} valid cell-timesteps")
     print(f"Feature means: {scaler.mean_}")
     print(f"Feature scales: {scaler.scale_}")
-
+ 
     def scale_and_fill(grid: np.ndarray) -> np.ndarray:
         """Scale [T, H, W, F] grid and replace NaNs with 0."""
         shape = grid.shape
@@ -626,19 +602,27 @@ def main():
         scaled = scaler.transform(flat)
         scaled[np.isnan(scaled)] = 0.0
         return scaled.reshape(shape)
-
-    train_grid = scale_and_fill(train_grid_raw)
-    val_grid   = scale_and_fill(val_grid_raw)
+ 
+    train_val_scaled = scale_and_fill(train_val_grid)
     test_scaled = scale_and_fill(test_grid)
 
     print("STEP 4: Create Datasets with Sliding Window")
+
+    # Split train_val features and labels into train/val
+    val_split_idx = int(len(train_val_scaled) * 0.85)
+    train_grid = train_val_scaled[:val_split_idx]
+    val_grid   = train_val_scaled[val_split_idx:]
+    
+    train_labels = train_val_labels[:val_split_idx]
+    val_labels   = train_val_labels[val_split_idx:]
 
     train_dataset = GriddedTimeSeriesDataset(train_grid, train_labels, INPUT_STEPS, HORIZON)
     val_dataset   = GriddedTimeSeriesDataset(val_grid, val_labels, INPUT_STEPS, HORIZON)
     test_dataset  = GriddedTimeSeriesDataset(test_scaled, test_labels, INPUT_STEPS, HORIZON)
 
-    print(f"train timesteps: {len(train_grid)}")
-    print(f"val timesteps: {len(val_grid)}")
+    print(f"train_val timesteps: {len(train_val_scaled)}")
+    print(f"train timesteps: {val_split_idx}")
+    print(f"val timesteps: {len(train_val_scaled) - val_split_idx}")
     print(f"Minimum needed: {INPUT_STEPS + HORIZON}")
 
     print(f"Train sequences: {len(train_dataset)}")
@@ -706,7 +690,7 @@ def main():
         
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            best_state = copy.deepcopy(model.state_dict())
+            best_state = model.state_dict()
             patience_counter = 0
             status = "BEST"
         else:
