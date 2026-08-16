@@ -24,10 +24,10 @@ async def websocket_endpoint(websocket: WebSocket):
     "/bushfire-forecast",
     tags=["bushfire"],
     summary="Fire Risk Map data",
-    response_description="GeoJSON FeatureCollection of bushfire risk polygons",
+    response_description="GeoJSON FeatureCollection of bushfire risk polygons (risk_factor 1=extreme to 5=very low)",
     responses={
         200: {
-            "description": "Risk polygons as GeoJSON. Returns an empty FeatureCollection when no prediction is available.",
+            "description": "Risk polygons as GeoJSON. risk_factor uses the Front-end scale where 1 is extreme and 5 is very low. Returns an empty FeatureCollection when no prediction is available.",
             "content": {
                 "application/json": {
                     "example": {
@@ -45,7 +45,7 @@ async def websocket_endpoint(websocket: WebSocket):
                                         [142.1560, -37.5600],
                                     ]],
                                 },
-                                "properties": {"risk_factor": 3},
+                                "properties": {"risk_factor": 2, "fire_probability": 0.78},
                             }
                         ],
                     }

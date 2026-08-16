@@ -1,17 +1,20 @@
-"""Unit tests for the Fire Risk Map fallback logic in ForecastService.
+"""Unit tests for ForecastService.fetch_predictions.
 
-No running stack and no service dependencies needed. These cover the three data
-conditions in the Fire Risk Map API contract (docs/fire-risk-map-api-contract.md):
-live data, no data, and unusable cached data.
+These exercise the real production implementation with the cache client mocked,
+so the tests fail if forecast_service.py changes behaviour.
 
-The service module imports FastAPI, Redis and the broker at import time, so rather
-than importing it here we load the fetch_predictions logic in isolation. If the
-behaviour in forecast_service.py changes, test_fire_risk_map_contract.py covers the
-same guarantees against the running stack.
+They skip if the service's runtime dependencies (FastAPI, Redis, aio_pika) are not
+installed locally. CI installs them, so the tests run there. The same guarantees are
+also covered end to end in test_fire_risk_map_contract.py.
 """
 import json
+import sys
+from pathlib import Path
+from unittest.mock import AsyncMock
 
 import pytest
+
+APP_DIR = Path(__file__).resolve().parents[1] / "firefusion-api"
 
 EMPTY_FEATURE_COLLECTION = {"type": "FeatureCollection", "features": []}
 
@@ -30,54 +33,131 @@ VALID_PAYLOAD = {
                     [142.1560, -37.5600],
                 ]],
             },
-            "properties": {"risk_factor": 3},
+            # risk_factor 1 = extreme on the confirmed Front-end convention
+            "properties": {"risk_factor": 1},
         }
     ],
 }
 
 
-async def fetch_predictions(cached):
-    """Mirror of ForecastService.fetch_predictions, without the infra imports.
-
-    Keep this aligned with firefusion-api/app/internal/services/forecast_service.py.
-    """
-    if cached is None:
-        return EMPTY_FEATURE_COLLECTION
+@pytest.fixture
+def forecast_module(monkeypatch):
+    """Import the real forecast_service module, with its cache client mocked."""
+    if str(APP_DIR) not in sys.path:
+        sys.path.insert(0, str(APP_DIR))
+    monkeypatch.setenv("CACHE_URL", "redis://localhost:6379")
     try:
-        return json.loads(cached)
-    except (TypeError, ValueError):
-        return EMPTY_FEATURE_COLLECTION
+        from app.internal.services import forecast_service as fs
+    except Exception as exc:
+        pytest.skip(f"forecast_service dependencies unavailable locally: {exc}")
+    return fs
+
+
+@pytest.fixture
+def service(forecast_module, monkeypatch):
+    """Return the real ForecastService with cache_client replaced by a mock."""
+    cache = AsyncMock()
+    monkeypatch.setattr(forecast_module, "cache_client", cache, raising=True)
+    return forecast_module.ForecastService(), cache
 
 
 @pytest.mark.asyncio
-async def test_returns_empty_feature_collection_when_no_data():
+async def test_returns_empty_feature_collection_when_no_data(service):
     """Contract: no cached prediction returns an empty FeatureCollection, not null."""
-    result = await fetch_predictions(None)
+    svc, cache = service
+    cache.get.return_value = None
+
+    result = await svc.fetch_predictions()
+
     assert result == EMPTY_FEATURE_COLLECTION
-    assert result["type"] == "FeatureCollection"
-    assert result["features"] == []
+    cache.get.assert_awaited_once_with("predictions")
 
 
 @pytest.mark.asyncio
-async def test_returns_cached_prediction_when_available():
+async def test_returns_cached_prediction_when_available(service):
     """Contract: a cached prediction is returned as a FeatureCollection."""
-    result = await fetch_predictions(json.dumps(VALID_PAYLOAD))
+    svc, cache = service
+    cache.get.return_value = json.dumps(VALID_PAYLOAD)
+
+    result = await svc.fetch_predictions()
+
     assert result["type"] == "FeatureCollection"
     assert len(result["features"]) == 1
-    assert result["features"][0]["properties"]["risk_factor"] == 3
+    assert result["features"][0]["properties"]["risk_factor"] == 1
 
 
 @pytest.mark.asyncio
-async def test_invalid_cached_json_falls_back_to_empty():
+async def test_invalid_cached_json_falls_back_to_empty(service):
     """Contract: unusable cached data must not produce a malformed response."""
-    result = await fetch_predictions("not-json-at-all")
+    svc, cache = service
+    cache.get.return_value = "not-json-at-all"
+
+    result = await svc.fetch_predictions()
+
     assert result == EMPTY_FEATURE_COLLECTION
 
 
 @pytest.mark.asyncio
-async def test_never_returns_none():
-    """Contract: the endpoint must never return null, whatever the cache holds."""
-    for cached in (None, "", "garbage", json.dumps(VALID_PAYLOAD)):
-        result = await fetch_predictions(cached)
-        assert result is not None
-        assert result.get("type") == "FeatureCollection"
+async def test_json_null_does_not_escape_as_none(service):
+    """Regression: Redis holding the literal string "null".
+
+    json.loads("null") succeeds and yields None, so a naive parse-then-fallback
+    lets None through and the map client receives an invalid body.
+    """
+    svc, cache = service
+    cache.get.return_value = "null"
+
+    result = await svc.fetch_predictions()
+
+    assert result is not None, 'cached "null" escaped as None'
+    assert result == EMPTY_FEATURE_COLLECTION
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "cached",
+    [
+        None,             # nothing cached
+        "",               # empty string
+        "garbage",        # not JSON
+        "null",           # valid JSON, decodes to None
+        "123",            # valid JSON, decodes to an int
+        '"a string"',     # valid JSON, decodes to a str
+        "[]",             # valid JSON, decodes to a list
+        "{}",             # object, but not a FeatureCollection
+        '{"type": "Feature"}',  # wrong GeoJSON type
+    ],
+)
+async def test_never_returns_a_non_feature_collection(service, cached):
+    """Contract: whatever the cache holds, the result is a FeatureCollection."""
+    svc, cache = service
+    cache.get.return_value = cached
+
+    result = await svc.fetch_predictions()
+
+    assert result is not None, f"cache value {cached!r} produced None"
+    assert isinstance(result, dict), f"cache value {cached!r} produced {type(result).__name__}"
+    assert result.get("type") == "FeatureCollection", f"cache value {cached!r} produced {result!r}"
+    assert isinstance(result.get("features"), list)
+
+
+@pytest.mark.asyncio
+async def test_valid_payload_is_returned_intact(service):
+    """A well-formed cached prediction passes through unchanged."""
+    svc, cache = service
+    cache.get.return_value = json.dumps(VALID_PAYLOAD)
+
+    result = await svc.fetch_predictions()
+
+    assert result["type"] == "FeatureCollection"
+    assert len(result["features"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_cache_failure_propagates_for_503(service):
+    """A cache/dependency failure must raise so the router can return 503."""
+    svc, cache = service
+    cache.get.side_effect = ConnectionError("redis unavailable")
+
+    with pytest.raises(Exception):
+        await svc.fetch_predictions()
