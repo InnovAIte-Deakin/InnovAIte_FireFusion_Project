@@ -4,3 +4,7 @@ aio_pika
 python-dotenv
 redis
 psycopg
+##### Comment can be removed later #####
+# HTTP client used by firefusion-api to communicate with
+# aggregator-api and the AI Modelling FastAPI service.
+httpx
