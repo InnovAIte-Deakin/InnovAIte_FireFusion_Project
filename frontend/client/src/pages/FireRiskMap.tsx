@@ -84,11 +84,15 @@ export default function MapPage() {
       }).addTo(map)
 
       //centre map to wherever polygons are
-      const bounds = geoJsonLayer.getBounds()
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, {
-          padding: [20, 20],
-        })
+      try {
+        const bounds = geoJsonLayer.getBounds()
+        if (bounds && typeof bounds.isValid === 'function' && bounds.isValid()) {
+          map.fitBounds(bounds, {
+            padding: [20, 20],
+          })
+        }
+      } catch (e) {
+        console.warn('Could not fit bounds of GeoJSON layer:', e)
       }
     }
 
@@ -126,11 +130,15 @@ export default function MapPage() {
           }),
         }).addTo(map)
 
-        const bounds = geoJsonLayer.getBounds()
-        if (bounds.isValid()) {
-          map.fitBounds(bounds, {
-            padding: [20, 20],
-          })
+        try {
+          const bounds = geoJsonLayer.getBounds()
+          if (bounds && typeof bounds.isValid === 'function' && bounds.isValid()) {
+            map.fitBounds(bounds, {
+              padding: [20, 20],
+            })
+          }
+        } catch (e) {
+          console.warn('Could not fit bounds of GeoJSON layer in WS update:', e)
         }
       } catch (error) {
         console.error('WebSocket data error:', error)

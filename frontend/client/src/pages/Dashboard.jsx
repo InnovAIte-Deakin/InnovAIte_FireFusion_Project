@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   AlertTriangle,
   Bell,
@@ -116,6 +117,12 @@ const adviceCards = [
 ];
 
 export default function Dashboard() {
+  const [activeFilter, setActiveFilter] = useState("ALL");
+
+  const filteredUpdates = activeFilter === "ALL"
+    ? officialUpdates
+    : officialUpdates.filter((item) => item.type === activeFilter);
+
   return (
     <Layout title="Dashboard">
       <main className="ff-dashboard">
@@ -176,65 +183,36 @@ export default function Dashboard() {
           </div>
         </section>
 
-        <section className="ff-top-grid">
-          <Panel className="ff-updates-panel">
-            <PanelHeader
-              icon={Megaphone}
-              title="Latest Official Updates"
-              action="View All"
-            />
+        <div className="ff-dashboard-layout">
+          <div className="ff-column-left">
+            <Panel className="ff-updates-panel">
+              <PanelHeader
+                icon={Megaphone}
+                title="Latest Official Updates"
+                action="View All"
+              />
 
-            <div className="ff-update-list">
-              {officialUpdates.map((item) => (
-                <UpdateCard key={item.title} {...item} />
-              ))}
-            </div>
-          </Panel>
+              <div className="ff-filter-tabs">
+                {["ALL", "CRITICAL", "WARNING", "ADVISORY"].map((filter) => (
+                  <button
+                    key={filter}
+                    className={`ff-filter-btn ff-filter-btn-${filter.toLowerCase()} ${
+                      activeFilter === filter ? "active" : ""
+                    }`}
+                    onClick={() => setActiveFilter(filter)}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
 
-          <Panel className="ff-incident-panel">
-            <PanelHeader icon={Activity} title="Incident Overview" />
+              <div className="ff-update-list">
+                {filteredUpdates.map((item) => (
+                  <UpdateCard key={item.title} {...item} />
+                ))}
+              </div>
+            </Panel>
 
-            <div className="ff-risk-header">
-              <span>Current Risk Level</span>
-              <strong>EXTREME</strong>
-            </div>
-
-            <div className="ff-risk-meter">
-              <span></span>
-            </div>
-
-            <div className="ff-metric-grid">
-              <Metric icon={Wind} title="Wind Speed" value="45 km/h NW" />
-              <Metric icon={Thermometer} title="Temperature" value="41°C" />
-              <Metric icon={Droplets} title="Humidity" value="12%" />
-              <Metric icon={Users} title="Evacuation Status" value="Active (2 zones)" />
-            </div>
-
-            <div className="ff-source-row">
-              <span>Data sources: BoM, CFA, VicEmergency</span>
-              <b>Updated: 14:30</b>
-            </div>
-          </Panel>
-
-          <Panel className="ff-resource-panel">
-            <PanelHeader icon={Truck} title="Resource Allocation" action="View All" />
-
-            <div className="ff-resource-list">
-              {resources.map((item) => (
-                <ResourceRow key={item.name} {...item} />
-              ))}
-            </div>
-
-            <div className="ff-legend">
-              <span><i className="safe"></i>Optimal</span>
-              <span><i className="warning"></i>Stretched</span>
-              <span><i className="critical"></i>Critical</span>
-            </div>
-          </Panel>
-        </section>
-
-        <section className="ff-middle-grid">
-          <div>
             <Panel className="ff-map-panel">
               <div className="ff-map-head">
                 <h3>Victoria Fire Risk Overview</h3>
@@ -260,6 +238,34 @@ export default function Dashboard() {
                 </div>
 
                 <button className="ff-map-btn">View Full Map</button>
+              </div>
+            </Panel>
+
+            <Panel className="ff-decision-panel">
+              <PanelHeader icon={Shield} title="Decision Support" />
+
+              <div className="ff-decision-grid">
+                <DecisionCard
+                  icon={Users}
+                  title="Evacuation Priority"
+                  text="2 zones require immediate review"
+                  button="Review Zones"
+                  tone="red"
+                />
+                <DecisionCard
+                  icon={Flame}
+                  title="Resource Gap"
+                  text="Water bombers critically low"
+                  button="View Resources"
+                  tone="orange"
+                />
+                <DecisionCard
+                  icon={Shield}
+                  title="Misinformation Risk"
+                  text="14 posts require human review"
+                  button="Review Posts"
+                  tone="purple"
+                />
               </div>
             </Panel>
 
@@ -302,32 +308,45 @@ export default function Dashboard() {
             </Panel>
           </div>
 
-          <div>
-            <Panel className="ff-decision-panel">
-              <PanelHeader icon={Shield} title="Decision Support" />
+          <div className="ff-column-right">
+            <Panel className="ff-incident-panel">
+              <PanelHeader icon={Activity} title="Incident Overview" />
 
-              <div className="ff-decision-grid">
-                <DecisionCard
-                  icon={Users}
-                  title="Evacuation Priority"
-                  text="2 zones require immediate review"
-                  button="Review Zones"
-                  tone="red"
-                />
-                <DecisionCard
-                  icon={Flame}
-                  title="Resource Gap"
-                  text="Water bombers critically low"
-                  button="View Resources"
-                  tone="orange"
-                />
-                <DecisionCard
-                  icon={Shield}
-                  title="Misinformation Risk"
-                  text="14 posts require human review"
-                  button="Review Posts"
-                  tone="purple"
-                />
+              <div className="ff-risk-header">
+                <span>Current Risk Level</span>
+                <strong>EXTREME</strong>
+              </div>
+
+              <div className="ff-risk-meter">
+                <span></span>
+              </div>
+
+              <div className="ff-metric-grid">
+                <Metric icon={Wind} title="Wind Speed" value="45 km/h NW" />
+                <Metric icon={Thermometer} title="Temperature" value="41°C" />
+                <Metric icon={Droplets} title="Humidity" value="12%" />
+                <Metric icon={Users} title="Evacuation Status" value="Active (2 zones)" />
+              </div>
+
+              <div className="ff-source-row">
+                <span>Data sources: BoM, CFA, VicEmergency</span>
+                <b>Updated: 14:30</b>
+              </div>
+            </Panel>
+
+            <Panel className="ff-resource-panel">
+              <PanelHeader icon={Truck} title="Resource Allocation" action="View All" />
+
+              <div className="ff-resource-list">
+                {resources.map((item) => (
+                  <ResourceRow key={item.name} {...item} />
+                ))}
+              </div>
+
+              <div className="ff-legend">
+                <span><i className="safe"></i>Optimal</span>
+                <span><i className="warning"></i>Stretched</span>
+                <span><i className="critical"></i>Critical</span>
               </div>
             </Panel>
 
@@ -370,7 +389,7 @@ export default function Dashboard() {
               </div>
             </Panel>
           </div>
-        </section>
+        </div>
       </main>
     </Layout>
   );
@@ -398,27 +417,67 @@ function SummaryCard({ icon: Icon, label, value, tone }) {
       <Icon size={26} />
       <div>
         <span>{label}</span>
-        <strong className={tone}>{value}</strong>
+        <strong className={`ff-tone-${tone}`}>{value}</strong>
       </div>
     </article>
   );
 }
 
 function UpdateCard({ agency, title, text, time, type, color }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <article className={`ff-update-card ${color}`}>
-      <div className="ff-agency">{agency}</div>
+    <article className={`ff-update-card ${color} ${expanded ? "expanded" : ""}`}>
+      <div className="ff-agency-container">
+        <div className="ff-agency">{agency}</div>
+        {type === "CRITICAL" && <span className="ff-pulse-dot"></span>}
+      </div>
 
       <div className="ff-update-body">
-        <div>
-          <h4>{title}</h4>
+        <div className="ff-update-content-wrapper">
+          <div className="ff-update-header">
+            <h4>{title}</h4>
+            <span className={`ff-badge ff-badge-${color}`}>{type}</span>
+          </div>
           <p>{text}</p>
-          <small>{time}</small>
+          <div className="ff-update-meta">
+            <span className="ff-time"><Clock size={12} style={{ display: "inline", marginRight: "3px" }} />{time}</span>
+          </div>
+          {expanded && (
+            <div className="ff-expanded-info">
+              <div className="ff-instructions">
+                <strong>Recommended Safety Steps:</strong>
+                <ul>
+                  {type === "CRITICAL" && (
+                    <>
+                      <li>🔴 Evacuate immediately if you are in the highlighted zones.</li>
+                      <li>🔴 Pack essential items, medications, and identification papers.</li>
+                      <li>🔴 Do not attempt to drive through smoke or active fire fronts.</li>
+                    </>
+                  )}
+                  {type === "WARNING" && (
+                    <>
+                      <li>🟠 Review your Bushfire Survival Plan now.</li>
+                      <li>🟠 Keep hydrants and emergency access ways clear.</li>
+                      <li>🟠 Monitor local news, CFA, and weather forecast websites.</li>
+                    </>
+                  )}
+                  {type === "ADVISORY" && (
+                    <>
+                      <li>🔵 Close all windows and doors to keep smoke out.</li>
+                      <li>🔵 Check on elderly neighbors or outdoor pets.</li>
+                    </>
+                  )}
+                </ul>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div>
-          <span>{type}</span>
-          <button>View Details</button>
+        <div className="ff-update-actions">
+          <button className="ff-details-btn" onClick={() => setExpanded(!expanded)}>
+            {expanded ? "Hide Details" : "View Details"}
+          </button>
         </div>
       </div>
     </article>
