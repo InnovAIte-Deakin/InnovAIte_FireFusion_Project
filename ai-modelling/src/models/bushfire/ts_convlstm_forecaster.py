@@ -18,11 +18,13 @@ from typing import Optional, Tuple
 import torch
 from torch import Tensor, nn
 
+from .attention import PatchwiseAttention2d
+
 @dataclass
 class ForecasterConfig:
     """
     Configuration dataclass for the 2D ConvLSTM spatiotemporal forecaster.
-    
+
     Attributes:
         input_channels (int): Number of input features per grid cell.
         horizon (int): Number of future timesteps to forecast.
@@ -30,6 +32,11 @@ class ForecasterConfig:
         hidden_size_1 (int): Hidden dimension of first ConvLSTM2d layer.
         hidden_size_2 (int): Hidden dimension of second ConvLSTM2d layer.
         dropout (float): Dropout probability applied after each ConvLSTM2d layer.
+        attention (str): Gate operator. "none" uses a standard Conv2d gate; "patchwise" replaces it with patchwise self-attention.
+        footprint (int): Patch side length for patchwise attention. Must be odd.
+        dilation (int): Spacing between sampled cells in the attention patch.
+        share_planes (int): Output channels sharing one attention weight set.
+        attention_layers (Tuple[int, ...]): Which ConvLSTM layers (1 and/or 2) use attention when ``attention`` is not "none".
     """
     input_channels: int
     horizon: int = 1
@@ -37,23 +44,52 @@ class ForecasterConfig:
     hidden_size_1: int = 32
     hidden_size_2: int = 16
     dropout: float = 0.2
+    attention: str = "patchwise"
+    footprint: int = 7
+    dilation: int = 1
+    share_planes: int = 8
+    attention_layers: Tuple[int, ...] = (1,)
 
 
 class ConvLSTMCell(nn.Module):
     """2D ConvLSTM cell for spatiotemporal data."""
     
-    def __init__(self, input_channels: int, hidden_channels: int, kernel_size: int = 3) -> None:
+    def __init__(
+        self,
+        input_channels: int,
+        hidden_channels: int,
+        kernel_size: int = 3,
+        attention: str = "none",
+        footprint: int = 7,
+        dilation: int = 1,
+        share_planes: int = 8,
+    ) -> None:
         super().__init__()
         self.input_channels = input_channels
         self.hidden_channels = hidden_channels
         padding = kernel_size // 2
-        
-        self.conv = nn.Conv2d(
-            input_channels + hidden_channels,
-            4 * hidden_channels,
-            kernel_size,
-            padding=padding
-        )
+
+        if attention == "patchwise":
+            if hidden_channels % share_planes != 0:
+                raise ValueError(
+                    f"hidden_channels ({hidden_channels}) must be divisible by "
+                    f"share_planes ({share_planes}) so no sharing group straddles "
+                    "a gate boundary"
+                )
+            self.conv = PatchwiseAttention2d(
+                input_channels + hidden_channels,
+                4 * hidden_channels,
+                footprint=footprint,
+                dilation=dilation,
+                share_planes=share_planes,
+            )
+        else:
+            self.conv = nn.Conv2d(
+                input_channels + hidden_channels,
+                4 * hidden_channels,
+                kernel_size,
+                padding=padding
+            )
     
     def forward(self, x: Tensor, states: Optional[Tuple[Tensor, Tensor]] = None) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
         """Forward pass of ConvLSTM2d cell."""
@@ -112,16 +148,24 @@ class MultivariateTSForecaster(nn.Module):
         self.input_channels = config.input_channels
         self.horizon = config.horizon
         self.output_channels = config.output_channels
-        
+
         self.convlstm1 = ConvLSTMCell(
             input_channels=self.input_channels,
-            hidden_channels=config.hidden_size_1
+            hidden_channels=config.hidden_size_1,
+            attention=config.attention if 1 in config.attention_layers else "none",
+            footprint=config.footprint,
+            dilation=config.dilation,
+            share_planes=config.share_planes,
         )
         self.dropout1 = nn.Dropout2d(config.dropout)
-        
+
         self.convlstm2 = ConvLSTMCell(
             input_channels=config.hidden_size_1,
-            hidden_channels=config.hidden_size_2
+            hidden_channels=config.hidden_size_2,
+            attention=config.attention if 2 in config.attention_layers else "none",
+            footprint=config.footprint,
+            dilation=config.dilation,
+            share_planes=config.share_planes,
         )
         self.dropout2 = nn.Dropout2d(config.dropout)
         
