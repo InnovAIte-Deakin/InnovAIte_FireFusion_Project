@@ -103,3 +103,4 @@ class ForecastService:
                 "returning empty FeatureCollection"
             )
             return _empty()
+        
