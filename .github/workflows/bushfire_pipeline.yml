@@ -4,8 +4,7 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: "0 6 * * *"
-      timezone: "Australia/Melbourne"
+  - cron: "0 20 * * *"
 
 jobs:
   bushfire-pipeline:
