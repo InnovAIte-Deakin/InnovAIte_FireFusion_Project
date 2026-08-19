@@ -10,7 +10,6 @@ GDB_PATH = (
     / "Bushfire_Boundaries_Historical"
     / "Bushfire_Boundaries_Historical.gdb"
 )
-
 OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -59,6 +58,13 @@ gdf["record_type"] = "HISTORICAL"
 
 print("\nOriginal CRS:", gdf.crs)
 
+# Validate the expected source CRS before reprojection
+assert gdf.crs is not None, "Source CRS is missing."
+
+assert gdf.crs.to_epsg() == 4283, (
+    f"Unexpected source CRS: {gdf.crs}. Expected EPSG:4283."
+)
+
 # Convert to the CRS commonly used by PostGIS/web mapping
 gdf = gdf.to_crs(epsg=4326)
 
@@ -73,6 +79,33 @@ print(gdf.geometry.isna().sum())
 
 print("\nRecord type:")
 print(gdf["record_type"].value_counts())
+
+# Remove only records that are exact duplicates
+records_before = len(gdf)
+
+gdf = gdf.drop_duplicates(
+    subset=[
+        "fire_id",
+        "fire_name",
+        "ignition_date",
+        "capture_date",
+        "extinguish_date",
+        "fire_type",
+        "ignition_cause",
+        "area_ha",
+        "perim_km",
+        "state",
+        "agency",
+        "record_type",
+        "geometry",
+    ]
+).copy()
+
+duplicates_removed = records_before - len(gdf)
+
+print("\nDuplicate handling:")
+print("Exact duplicate records removed:", duplicates_removed)
+print("Final records:", len(gdf))
 
 # Save processed data
 print("\nSaving historical bushfire dataset...")

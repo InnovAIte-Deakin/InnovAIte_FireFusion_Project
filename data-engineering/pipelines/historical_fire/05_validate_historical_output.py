@@ -19,23 +19,54 @@ gdf = gpd.read_file(FILE)
 print("\nRows:", len(gdf))
 print("Columns:", len(gdf.columns))
 
+# Validate dataset is not empty
+assert len(gdf) > 0, "Validation failed: output dataset is empty."
+
 print("\nCRS:")
 print(gdf.crs)
+
+# Validate output CRS
+assert gdf.crs is not None, "Validation failed: output CRS is missing."
+assert gdf.crs.to_epsg() == 4326, (
+    f"Validation failed: expected EPSG:4326, found {gdf.crs}."
+)
 
 print("\nRecord type counts:")
 print(gdf["record_type"].value_counts(dropna=False))
 
+# Validate record type
+assert (gdf["record_type"] == "HISTORICAL").all(), (
+    "Validation failed: non-HISTORICAL records found."
+)
+
 print("\nGeometry types:")
 print(gdf.geometry.geom_type.value_counts())
 
+# Validate geometry type
+assert gdf.geometry.geom_type.eq("MultiPolygon").all(), (
+    "Validation failed: geometry types other than MultiPolygon found."
+)
+
 print("\nMissing geometries:")
-print(gdf.geometry.isna().sum())
+missing_geometries = gdf.geometry.isna().sum()
+print(missing_geometries)
+
+# Validate that all records contain geometry
+assert missing_geometries == 0, (
+    f"Validation failed: {missing_geometries} missing geometries found."
+)
 
 print("\nMissing values:")
 print(gdf.isna().sum())
 
 print("\nDuplicate full rows:")
-print(gdf.drop(columns="geometry").duplicated().sum())
+duplicate_rows = gdf.duplicated().sum()
+print(duplicate_rows)
+
+# Exact duplicates should already have been removed during extraction
+assert duplicate_rows == 0, (
+    f"Validation failed: {duplicate_rows} exact duplicate rows found."
+)
 
 print("\nSample records:")
 print(
@@ -55,4 +86,4 @@ print(
     .to_string(index=False)
 )
 
-print("\nValidation completed successfully.")
+print("\nAll validation checks passed successfully.")
