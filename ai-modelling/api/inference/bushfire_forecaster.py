@@ -5,6 +5,7 @@ Routers call this after resolving model_id via model_loader.
 from typing import Any, Optional, Tuple
 import numpy as np
 import torch
+from datetime import datetime, timedelta
 
 from api.schemas.bushfire import ForecastRequest, ForecastResponse, GeoFeatureOut, ForecastPropertiesOut, DEFAULT_FEATURE_NAMES, RISK_LEVEL_LABELS, prob_to_risk_level
 from api.model_loader import LoadedModel
@@ -53,9 +54,17 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
             "geometry": feature.geometry,
             "grid_row": feature.properties.__dict__.get("grid_row"),
             "grid_col": feature.properties.__dict__.get("grid_col"),
+            "timestamps": feature.properties.timestamps,
         })
 
     expected_features = bundle.metadata.get("weather_features", DEFAULT_FEATURE_NAMES)
+    if request.feature_names is not None:
+        if request.feature_names != expected_features:
+            raise ValueError(
+                f"feature_names mismatch: request provided {request.feature_names}, "
+                f"but model {bundle.model_id!r} expects {expected_features} (order-sensitive)."
+            )
+    
     if observations_list:
         n_features = observations_list[0].shape[1]
         if n_features != len(expected_features):
@@ -168,6 +177,16 @@ def _apply_scaler(x: np.ndarray, scaler: Any) -> np.ndarray:
     # Reshape back
     return x_scaled.reshape(original_shape)
 
+def _compute_forecast_timestamps(timestamps: Optional[list[datetime]], horizon: int, step_hours: float = 12.0) -> Optional[list[datetime]]:
+    """
+    Project `horizon` future timestamps from the last observed timestamp
+    """
+    if not timestamps:
+        return None
+    step = timedelta(hours=step_hours)
+    last = timestamps[-1]
+    return [last + step * (i + 1) for i in range(horizon)]
+
 
 def _compute_risk_fields(cell_probs: list[float]) -> dict:
     """
@@ -226,11 +245,13 @@ def _postprocess_forecasts(
                 cell_probs = probs[0, :, row, col, 0].tolist()
                 risk_score = float(np.mean(cell_probs))
                 is_burning_predicted = [p > fire_threshold for p in cell_probs]
+                forecast_timestamps = _compute_forecast_timestamps(meta.get("timestamps"), horizon)
                 
                 props_out = ForecastPropertiesOut(
                     id=meta["id"],
                     fire_probability=cell_probs,
                     forecast=[[p] for p in cell_probs],
+                    forecast_timestamps=forecast_timestamps,
                     risk_score=risk_score,
                     is_burning_predicted=is_burning_predicted,
                     fire_threshold=fire_threshold,
@@ -253,11 +274,13 @@ def _postprocess_forecasts(
             cell_probs = probs[i, :, 0].tolist()
             risk_score = float(np.mean(cell_probs))
             is_burning_predicted = [p > fire_threshold for p in cell_probs]
+            forecast_timestamps = _compute_forecast_timestamps(meta.get("timestamps"), horizon)
             
             props_out = ForecastPropertiesOut(
                 id=meta["id"],
                 fire_probability=cell_probs,
                 forecast=[[p] for p in cell_probs],
+                forecast_timestamps=forecast_timestamps,
                 risk_score=risk_score,
                 is_burning_predicted=is_burning_predicted,
                 fire_threshold=fire_threshold,
