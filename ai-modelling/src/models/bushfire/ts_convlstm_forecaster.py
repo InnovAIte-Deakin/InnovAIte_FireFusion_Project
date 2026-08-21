@@ -10,13 +10,16 @@ Architecture:
     - Dropout2d
     - Layer 2: ConvLSTM2d (hidden_size_1 -> hidden_size_2)
     - Dropout2d
-    - Conv2d Projection (hidden_size_2 -> horizon * output_channels)
+    - Optional shared per-cell BiLSTM temporal layer
+    - Conv2d Projection (temporal features -> horizon * output_channels)
     - Reshape to [batch, horizon, height, width, output_channels]
 """
 from dataclasses import dataclass
 from typing import Optional, Tuple
 import torch
 from torch import Tensor, nn
+
+from .bilstm import PerCellBiLSTMLayer
 
 @dataclass
 class ForecasterConfig:
@@ -30,6 +33,8 @@ class ForecasterConfig:
         hidden_size_1 (int): Hidden dimension of first ConvLSTM2d layer.
         hidden_size_2 (int): Hidden dimension of second ConvLSTM2d layer.
         dropout (float): Dropout probability applied after each ConvLSTM2d layer.
+        use_bilstm (bool): Whether to apply the shared per-cell BiLSTM layer.
+        bilstm_hidden_size (int): Hidden dimension per BiLSTM direction.
     """
     input_channels: int
     horizon: int = 1
@@ -37,6 +42,8 @@ class ForecasterConfig:
     hidden_size_1: int = 32
     hidden_size_2: int = 16
     dropout: float = 0.2
+    use_bilstm: bool = False
+    bilstm_hidden_size: int = 8
 
 
 class ConvLSTMCell(nn.Module):
@@ -83,7 +90,9 @@ class MultivariateTSForecaster(nn.Module):
     2D ConvLSTM spatiotemporal forecasting model.
     
     Learns patterns from gridded historical sequences to predict the probability
-    that each grid cell is burning at the next timestep. Uses two stacked ConvLSTM2d layers with dropout regularization.
+    that each grid cell is burning at the next timestep. Uses two stacked
+    ConvLSTM2d layers and can optionally apply a shared BiLSTM independently to
+    each grid cell before the output projection.
 
     Inputs:
         x: [batch_size, seq_len, height, width, input_channels]
@@ -105,6 +114,8 @@ class MultivariateTSForecaster(nn.Module):
                 - output_channels: Number of output channels (defaults to 1)
                 - hidden_size_1: Hidden dimension of first ConvLSTM2d
                 - hidden_size_2: Hidden dimension of second ConvLSTM2d
+                - use_bilstm: Whether to enable the per-cell BiLSTM
+                - bilstm_hidden_size: Hidden size per BiLSTM direction
                 - dropout: Dropout probability
         """
         super().__init__()
@@ -112,6 +123,7 @@ class MultivariateTSForecaster(nn.Module):
         self.input_channels = config.input_channels
         self.horizon = config.horizon
         self.output_channels = config.output_channels
+        self.use_bilstm = config.use_bilstm
         
         self.convlstm1 = ConvLSTMCell(
             input_channels=self.input_channels,
@@ -124,9 +136,19 @@ class MultivariateTSForecaster(nn.Module):
             hidden_channels=config.hidden_size_2
         )
         self.dropout2 = nn.Dropout2d(config.dropout)
+
+        if self.use_bilstm:
+            self.bilstm = PerCellBiLSTMLayer(
+                input_size=config.hidden_size_2,
+                hidden_size=config.bilstm_hidden_size,
+            )
+            projection_input_channels = self.bilstm.output_size
+        else:
+            self.bilstm = None
+            projection_input_channels = config.hidden_size_2
         
         self.projection = nn.Conv2d(
-            config.hidden_size_2,
+            projection_input_channels,
             self.horizon * self.output_channels,
             kernel_size=1
         )
@@ -136,7 +158,8 @@ class MultivariateTSForecaster(nn.Module):
         Forward pass through the 2D ConvLSTM forecaster.
         
         Processes input grid sequences through two stacked ConvLSTM2d layers,
-        applies dropout, and projects to projects to the configured prediction horizon.
+        optionally applies the imported per-cell BiLSTM layer, and projects to
+        the configured prediction horizon.
         
         Processing Steps:
             1. Reshape input
@@ -144,8 +167,9 @@ class MultivariateTSForecaster(nn.Module):
             3. Apply dropout
             4. Process through ConvLSTM2
             5. Apply dropout
-            6. Conv2d projection
-            7. Reshape
+            6. Optionally apply the shared per-cell BiLSTM
+            7. Conv2d projection
+            8. Reshape
         
         Inputs:
             x (Tensor): Input grid sequence of shape [batch_size, seq_len, height, width, input_channels]
@@ -153,7 +177,22 @@ class MultivariateTSForecaster(nn.Module):
         Outputs:
             y_hat (Tensor): Raw 'is burning' logits of shape [batch_size, 1, height, width, 1].
         """
-        batch_size, seq_len, grid_height, grid_width, _ = x.shape
+        if x.ndim != 5:
+            raise ValueError(
+                "Expected input with shape [batch, time, height, width, channels], "
+                f"but received {tuple(x.shape)}."
+            )
+
+        batch_size, seq_len, grid_height, grid_width, input_channels = x.shape
+
+        if seq_len < 1:
+            raise ValueError("Input sequence must contain at least one timestep.")
+
+        if input_channels != self.input_channels:
+            raise ValueError(
+                "Input channel count does not match the model configuration. "
+                f"Expected {self.input_channels} channels, but received {input_channels}."
+            )
     
         # Reshape
         x = x.permute(0, 1, 4, 2, 3)
@@ -169,14 +208,22 @@ class MultivariateTSForecaster(nn.Module):
         
         # Second ConvLSTM2d processes first layer outputs
         h2_state = None
+        h2_outputs = []
         for t in range(seq_len):
             h2, h2_state = self.convlstm2(h1_outputs_dropped[t], h2_state)
-        
-        h2 = self.dropout2(h2)
+
+            if self.use_bilstm:
+                h2_outputs.append(self.dropout2(h2))
+
+        if self.bilstm is not None:
+            # [B, T, hidden_size_2, H, W] -> [B, 2*bilstm_hidden_size, H, W]
+            temporal_features = self.bilstm(torch.stack(h2_outputs, dim=1))
+        else:
+            temporal_features = self.dropout2(h2)
         
         # Project to horizon * output_channels:
-        # [B, H2, H, W] -> [B, H*O, H, W]
-        proj = self.projection(h2)
+        # [B, temporal_features, H, W] -> [B, H*O, H, W]
+        proj = self.projection(temporal_features)
         
         # Reshape to [B, H, H, W, O]
         proj = proj.view(batch_size, self.horizon, self.output_channels, grid_height, grid_width)
