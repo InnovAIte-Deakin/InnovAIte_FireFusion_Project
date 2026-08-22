@@ -40,6 +40,8 @@ def predict_misinformation_route(
         )
     payload = body.model_dump(mode="json")
     return predict_misinformation(payload, bundle)
+
+
 # --- Misinformation Detection (Batch) ---
 @router.post("/misinformation/batch", response_model=MisinformationBatchOut)
 def predict_misinformation_batch_route(
