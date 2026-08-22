@@ -1,31 +1,39 @@
 """
 2D ConvLSTM-based Spatiotemporal Forecaster
- 
+
 Defines a 2D ConvLSTM architecture that uses environmental variables to
 forecast the probability that each grid cell is burning at the next timestep. Supports configurable input channels, hidden sizes, and dropout, with a
 single output channel for the 'is burning' probability.
- 
+
 Architecture:
     - Layer 1: ConvLSTM2d (input_channels -> hidden_size_1)
     - Dropout2d
     - Layer 2: ConvLSTM2d (hidden_size_1 -> hidden_size_2)
     - Dropout2d
-    - Optional shared per-cell BiLSTM temporal layer
+    - Optional temporal refinement layer: shared per-cell BiLSTM, or BiConvLSTM
     - Conv2d Projection (temporal features -> horizon * output_channels)
     - Reshape to [batch, horizon, height, width, output_channels]
 """
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional
 import torch
 from torch import Tensor, nn
 
 from .bilstm import PerCellBiLSTMLayer
+from .biconvlstm import BiConvLSTMLayer
+from .convlstm import ConvLSTMCell
+
+__all__ = [
+    "ForecasterConfig",
+    "ConvLSTMCell",
+    "MultivariateTSForecaster",
+]
 
 @dataclass
 class ForecasterConfig:
     """
     Configuration dataclass for the 2D ConvLSTM spatiotemporal forecaster.
-    
+
     Attributes:
         input_channels (int): Number of input features per grid cell.
         horizon (int): Number of future timesteps to forecast.
@@ -35,6 +43,9 @@ class ForecasterConfig:
         dropout (float): Dropout probability applied after each ConvLSTM2d layer.
         use_bilstm (bool): Whether to apply the shared per-cell BiLSTM layer.
         bilstm_hidden_size (int): Hidden dimension per BiLSTM direction.
+        use_biconvlstm (bool): Whether to apply the BiConvLSTM layer.
+        biconvlstm_hidden_size (int): Hidden dimension per BiConvLSTM direction.
+        biconvlstm_kernel_size (int): Convolution kernel size used by the BiConvLSTM cells.
     """
     input_channels: int
     horizon: int = 1
@@ -44,45 +55,45 @@ class ForecasterConfig:
     dropout: float = 0.2
     use_bilstm: bool = False
     bilstm_hidden_size: int = 8
+    use_biconvlstm: bool = False
+    biconvlstm_hidden_size: int = 8
+    biconvlstm_kernel_size: int = 3
+
+    def __post_init__(self) -> None:
+        if self.use_bilstm and self.use_biconvlstm:
+            raise ValueError(
+                "use_bilstm and use_biconvlstm cannot both be True; "
+                "at most one optional temporal layer may be active."
+            )
+
+    @property
+    def architecture(self) -> str:
+        """Name of the selected architecture: the single source of truth for model selection."""
+        if self.use_bilstm:
+            return "convlstm_bilstm"
+        if self.use_biconvlstm:
+            return "convlstm_biconvlstm"
+        return "convlstm"
 
 
-class ConvLSTMCell(nn.Module):
-    """2D ConvLSTM cell for spatiotemporal data."""
-    
-    def __init__(self, input_channels: int, hidden_channels: int, kernel_size: int = 3) -> None:
-        super().__init__()
-        self.input_channels = input_channels
-        self.hidden_channels = hidden_channels
-        padding = kernel_size // 2
-        
-        self.conv = nn.Conv2d(
-            input_channels + hidden_channels,
-            4 * hidden_channels,
-            kernel_size,
-            padding=padding
-        )
-    
-    def forward(self, x: Tensor, states: Optional[Tuple[Tensor, Tensor]] = None) -> Tuple[Tensor, Tuple[Tensor, Tensor]]:
-        """Forward pass of ConvLSTM2d cell."""
-        if states is None:
-            h = torch.zeros(x.size(0), self.hidden_channels, x.size(2), x.size(3), device=x.device, dtype=x.dtype)
-            c = torch.zeros(x.size(0), self.hidden_channels, x.size(2), x.size(3), device=x.device, dtype=x.dtype)
-        else:
-            h, c = states
-        
-        combined = torch.cat([x, h], dim=1)
-        gates = self.conv(combined)
-        i, f, g, o = torch.split(gates, self.hidden_channels, dim=1)
-        
-        i = torch.sigmoid(i)
-        f = torch.sigmoid(f)
-        g = torch.tanh(g)
-        o = torch.sigmoid(o)
-        
-        c_new = f * c + i * g
-        h_new = o * torch.tanh(c_new)
-        
-        return h_new, (h_new, c_new)
+def _backfill_config_defaults(config: ForecasterConfig) -> ForecasterConfig:
+    """Backfill optional fields missing from checkpoints pickled before they existed.
+
+    A checkpoint saved before ``use_biconvlstm`` (or similar) was added
+    unpickles without that attribute, and ``__post_init__`` does not run on
+    unpickle, so accessing it would raise ``AttributeError``.
+    """
+    defaults = {
+        "use_bilstm": False,
+        "bilstm_hidden_size": 8,
+        "use_biconvlstm": False,
+        "biconvlstm_hidden_size": 8,
+        "biconvlstm_kernel_size": 3,
+    }
+    for field_name, default_value in defaults.items():
+        if not hasattr(config, field_name):
+            setattr(config, field_name, default_value)
+    return config
 
 
 class MultivariateTSForecaster(nn.Module):
@@ -116,21 +127,32 @@ class MultivariateTSForecaster(nn.Module):
                 - hidden_size_2: Hidden dimension of second ConvLSTM2d
                 - use_bilstm: Whether to enable the per-cell BiLSTM
                 - bilstm_hidden_size: Hidden size per BiLSTM direction
+                - use_biconvlstm: Whether to enable the BiConvLSTM layer
+                - biconvlstm_hidden_size: Hidden size per BiConvLSTM direction
+                - biconvlstm_kernel_size: Kernel size used by the BiConvLSTM cells
                 - dropout: Dropout probability
         """
         super().__init__()
+        config = _backfill_config_defaults(config)
+        if config.use_bilstm and config.use_biconvlstm:
+            raise ValueError(
+                "use_bilstm and use_biconvlstm cannot both be True; "
+                "at most one optional temporal layer may be active."
+            )
+
         self.config = config
         self.input_channels = config.input_channels
         self.horizon = config.horizon
         self.output_channels = config.output_channels
         self.use_bilstm = config.use_bilstm
-        
+        self.use_biconvlstm = config.use_biconvlstm
+
         self.convlstm1 = ConvLSTMCell(
             input_channels=self.input_channels,
             hidden_channels=config.hidden_size_1
         )
         self.dropout1 = nn.Dropout2d(config.dropout)
-        
+
         self.convlstm2 = ConvLSTMCell(
             input_channels=config.hidden_size_1,
             hidden_channels=config.hidden_size_2
@@ -142,16 +164,39 @@ class MultivariateTSForecaster(nn.Module):
                 input_size=config.hidden_size_2,
                 hidden_size=config.bilstm_hidden_size,
             )
-            projection_input_channels = self.bilstm.output_size
         else:
             self.bilstm = None
-            projection_input_channels = config.hidden_size_2
-        
+
+        if self.use_biconvlstm:
+            self.biconvlstm = BiConvLSTMLayer(
+                input_channels=config.hidden_size_2,
+                hidden_channels=config.biconvlstm_hidden_size,
+                kernel_size=config.biconvlstm_kernel_size,
+            )
+        else:
+            self.biconvlstm = None
+
+        active_layer = self.temporal_layer
+        projection_input_channels = (
+            active_layer.output_size if active_layer is not None else config.hidden_size_2
+        )
+
         self.projection = nn.Conv2d(
             projection_input_channels,
             self.horizon * self.output_channels,
             kernel_size=1
         )
+
+    @property
+    def temporal_layer(self) -> Optional[nn.Module]:
+        """Whichever optional temporal refinement layer is active, or ``None``.
+
+        A plain property (not a registered submodule) so the active layer is
+        not duplicated under a second name in ``state_dict``.
+        """
+        if self.bilstm is not None:
+            return self.bilstm
+        return self.biconvlstm
 
     def forward(self, x: Tensor) -> Tensor:
         """
@@ -167,7 +212,7 @@ class MultivariateTSForecaster(nn.Module):
             3. Apply dropout
             4. Process through ConvLSTM2
             5. Apply dropout
-            6. Optionally apply the shared per-cell BiLSTM
+            6. Optionally apply the active temporal layer (per-cell BiLSTM or BiConvLSTM)
             7. Conv2d projection
             8. Reshape
         
@@ -207,17 +252,18 @@ class MultivariateTSForecaster(nn.Module):
         h1_outputs_dropped = [self.dropout1(h) for h in h1_outputs]
         
         # Second ConvLSTM2d processes first layer outputs
+        active_layer = self.temporal_layer
         h2_state = None
         h2_outputs = []
         for t in range(seq_len):
             h2, h2_state = self.convlstm2(h1_outputs_dropped[t], h2_state)
 
-            if self.use_bilstm:
+            if active_layer is not None:
                 h2_outputs.append(self.dropout2(h2))
 
-        if self.bilstm is not None:
-            # [B, T, hidden_size_2, H, W] -> [B, 2*bilstm_hidden_size, H, W]
-            temporal_features = self.bilstm(torch.stack(h2_outputs, dim=1))
+        if active_layer is not None:
+            # [B, T, hidden_size_2, H, W] -> [B, 2*hidden_size, H, W]
+            temporal_features = active_layer(torch.stack(h2_outputs, dim=1))
         else:
             temporal_features = self.dropout2(h2)
         
