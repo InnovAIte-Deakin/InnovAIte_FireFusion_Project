@@ -16,6 +16,19 @@ class MisinformationBatchIn(BaseModel):
     posts: list[MisinformationPostIn] = Field(min_length=1, max_length=100)
 
 
+class TaskPrediction(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    label: str
+    probabilities: dict[str, float]
+
+
+class MisinformationTaskOut(TaskPrediction):
+    confidence: float
+    risk_score: float
+    severity: str
+
+
 class MisinformationPostOut(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -28,14 +41,9 @@ class MisinformationPostOut(BaseModel):
     share_count: int | None = None
     ts: datetime | str | None = None
     post_url: str | None = None
-    label_id: int
-    label: str
-    confidence: float
-    probabilities: dict[str, float]
-    risk_score: float
-    severity: str
-    urgency: str | None = None
-    humanitarian_task: str | None = None
+    misinformation: MisinformationTaskOut
+    urgency: TaskPrediction | None = None
+    humanitarian_task: TaskPrediction | None = None
     checkpoint: str
 class MisinformationBatchOut(BaseModel):
     model_config = ConfigDict(extra="allow")

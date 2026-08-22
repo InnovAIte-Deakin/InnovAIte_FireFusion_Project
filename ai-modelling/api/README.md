@@ -213,24 +213,58 @@ Classify a single social media post for misinformation.
   "author_name": "Alice",
   "platform": "twitter",
   "content": "Vaccines contain microchips...",
-  "label_id": 1,
-  "label": "misinformation",
-  "confidence": 0.92,
-  "probabilities": {
-    "non_misinformation": 0.08,
-    "misinformation": 0.92
+  "misinformation": {
+    "label": "misinformation",
+    "confidence": 0.92,
+    "probabilities": {
+      "non_misinformation": 0.08,
+      "misinformation": 0.92
+    },
+    "risk_score": 0.92,
+    "severity": "HIGH"
   },
-  "risk_score": 0.92,
-  "severity": "HIGH",
+  "urgency": null,
+  "humanitarian_task": null,
   "checkpoint": "/path/to/deberta"
 }
 ```
 
-**Severity Mapping:**
+The response is organised per classification task. `misinformation` is always populated (label, confidence, full probability distribution, plus the derived `risk_score`/`severity`). `urgency` and `humanitarian_task` follow the same `{label, probabilities}` shape but are reserved for the enhanced multi-task model — they're `null` until that model is wired in.
+
+**Severity Mapping** (derived from `misinformation.risk_score`):
 - `risk_score < 0.6` → `LOW`
 - `0.6 ≤ risk_score < 0.75` → `MEDIUM`
 - `0.75 ≤ risk_score < 0.9` → `HIGH`
 - `risk_score ≥ 0.9` → `CRITICAL`
+
+#### `POST /predict/misinformation/batch`
+Classify multiple social media posts in a single request. This exists so callers processing a batch of posts (e.g. a feed page, an ingestion job) don't have to make one HTTP round-trip per post — the model still runs one post at a time internally, but the network/auth overhead is paid once for the whole batch.
+
+**Request Body:**
+```json
+{
+  "posts": [
+    { "id": "post-1", "content": "Vaccines contain microchips inserted via 5G networks" },
+    { "id": "post-2", "content": "Bushfire has been contained by fire crews" }
+  ]
+}
+```
+`posts` accepts 1 to 100 items; each item has the same shape as the single-post request body above (`id` and `content` are required, the rest optional).
+
+**Query Parameters:**
+- `model_id` (optional): Specific model to use for every post in the batch (defaults to first misinformation model)
+
+**Response:**
+```json
+{
+  "results": [
+    { "id": "post-1", "misinformation": { "label": "misinformation", "...": "..." }, "urgency": null, "humanitarian_task": null, "...": "..." },
+    { "id": "post-2", "misinformation": { "label": "non_misinformation", "...": "..." }, "urgency": null, "humanitarian_task": null, "...": "..." }
+  ],
+  "count": 2
+}
+```
+Each entry in `results` is the exact same object shape as the single-post response. `count` is the number of posts processed. The single-post route (`/predict/misinformation`) is unchanged and still exists for callers that only need to classify one post at a time.
 
 ---
 
