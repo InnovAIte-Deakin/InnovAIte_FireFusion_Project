@@ -66,7 +66,7 @@ A lightweight **FastAPI** application that exposes trained models as HTTP endpoi
 
 | Script | Purpose |
 |---|---|
-| `misinformation.py` | Pydantic models for the misinformation prediction endpoint. `MisinformationPostIn` validates incoming post data (id, content, platform, share count, timestamp, URL). `MisinformationPostOut` defines the structured response including label, confidence, probabilities, risk score, and severity. |
+| `misinformation.py` | Pydantic models for the misinformation prediction endpoint. `MisinformationPostIn`/`MisinformationBatchIn` validate incoming post data (id, content, platform, share count, timestamp, URL) for single-post and batch (1-100 posts) requests respectively. `MisinformationPostOut` returns one nested object per classification task: `misinformation` (label, confidence, probabilities, risk score, severity — always populated), `urgency` and `humanitarian_task` (both `{label, probabilities}`, reserved for the enhanced multi-task model and `None` until populated). `MisinformationBatchOut` wraps a list of `MisinformationPostOut` plus a count. |
 
 ### `api/inference/`
 
