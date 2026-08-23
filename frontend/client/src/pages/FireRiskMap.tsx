@@ -17,6 +17,44 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
+const SAMPLE_GEOJSON = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      properties: { risk_factor: 1 },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[147.15, -37.56], [147.72, -37.74], [147.91, -37.25], [147.38, -37.11], [147.15, -37.56]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { risk_factor: 2 },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[142.15, -37.16], [142.62, -37.44], [142.81, -37.05], [142.38, -36.91], [142.15, -37.16]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { risk_factor: 3 },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[145.15, -37.86], [145.42, -37.94], [145.61, -37.65], [145.28, -37.51], [145.15, -37.86]]]
+      }
+    },
+    {
+      type: "Feature",
+      properties: { risk_factor: 4 },
+      geometry: {
+        type: "Polygon",
+        coordinates: [[[143.55, -38.12], [143.92, -38.31], [144.11, -38.05], [143.78, -37.88], [143.55, -38.12]]]
+      }
+    }
+  ]
+}
+
 export default function MapPage() {
 
   //store map
@@ -33,10 +71,10 @@ export default function MapPage() {
 
   useEffect(() => {
 
-    //Create map
+    //Create map centered on Victoria, Australia
     const map = L.map('map', {
       zoomControl: false,
-    })
+    }).setView([-37.0, 144.5], 7)
 
     //store map so SearchLocation.jsx can use it)
     mapRef.current = map
@@ -100,11 +138,13 @@ export default function MapPage() {
     const loadGeoJSON = async () => {
       try {
         const response = await fetch('/api/bushfire-forecast')
+        if (!response.ok) throw new Error(`HTTP error ${response.status}`)
         const data = await response.json()
 
         renderGeoJSON(data)
       } catch (error) {
-        console.error('Error loading GeoJSON:', error)
+        console.warn('Backend API offline, rendering fallback Victoria risk map:', error)
+        renderGeoJSON(SAMPLE_GEOJSON)
       }
     }
 

@@ -5,6 +5,9 @@
 .dashboard-shell {
   display: flex;
   min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 .sidebar {
@@ -278,14 +281,18 @@
 }
 
 .main {
-  margin-left: 305px;
-  width: calc(100% - 305px);
-  transition: margin-left 0.2s ease, width 0.2s ease;
+  padding-left: 305px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  transition: padding-left 0.2s ease;
 }
 
 .main.sidebar-collapsed {
-  margin-left: 64px;
-  width: calc(100% - 64px);
+  padding-left: 64px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .topbar {
@@ -703,7 +710,7 @@
   }
 
   .main {
-    margin-left: 0;
+    padding-left: 0;
     width: 100%;
   }
 
@@ -724,6 +731,9 @@
 }
 .ff-dashboard {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
   padding: 14px;
   background: var(--bg-dashboard);
   color: var(--text-main);
@@ -821,7 +831,7 @@
 
 .ff-summary-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(145px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -836,6 +846,7 @@
   background: rgba(4, 18, 45, 0.66);
   border: 1px solid rgba(148, 163, 184, 0.35);
   backdrop-filter: blur(8px);
+  min-width: 0;
 }
 
 .ff-summary-card span {
@@ -843,6 +854,9 @@
   font-size: 12px;
   color: #e5e7eb;
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ff-summary-card strong {
@@ -871,7 +885,7 @@
 
 .ff-dashboard-layout {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   gap: 10px;
   margin-top: 10px;
 }
@@ -881,9 +895,10 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1280px) {
   .ff-dashboard-layout {
     grid-template-columns: 1fr;
   }
@@ -987,7 +1002,7 @@
 
 .ff-update-card {
   display: grid;
-  grid-template-columns: 56px 1fr;
+  grid-template-columns: 56px minmax(0, 1fr);
   gap: 16px;
   padding: 14px;
   border-radius: 12px;
@@ -1284,7 +1299,7 @@ html[data-theme="dark"] .ff-instructions {
 
 .ff-metric-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 9px;
 }
 
@@ -1297,6 +1312,7 @@ html[data-theme="dark"] .ff-instructions {
   border-radius: 10px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
+  min-width: 0;
 }
 
 .ff-metric-card svg {
@@ -1754,14 +1770,14 @@ html[data-theme="dark"] .ff-instructions {
 
 .ff-misinfo-content {
   display: grid;
-  grid-template-columns: 160px 1fr 1.15fr;
-  gap: 18px;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 16px;
   align-items: center;
 }
 
 .ff-donut {
-  width: 135px;
-  height: 135px;
+  width: 125px;
+  height: 125px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -1795,9 +1811,11 @@ html[data-theme="dark"] .ff-instructions {
 }
 
 .ff-theme-box {
+  grid-column: 1 / -1;
   padding: 12px;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.08);
+  margin-top: 4px;
 }
 
 .ff-theme-box h4 {
@@ -1808,13 +1826,19 @@ html[data-theme="dark"] .ff-instructions {
 
 .ff-theme-row {
   display: grid;
-  grid-template-columns: 1fr 95px 40px;
+  grid-template-columns: 1fr 110px 42px;
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
   color: #e2e8f0;
   font-size: 12px;
   font-weight: 800;
+}
+
+.ff-theme-row span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ff-theme-row div {

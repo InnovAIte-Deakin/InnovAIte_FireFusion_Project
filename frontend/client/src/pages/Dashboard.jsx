@@ -125,7 +125,7 @@ export default function Dashboard() {
 
   return (
     <Layout title="Dashboard">
-      <main className="ff-dashboard">
+      <div className="ff-dashboard">
         <section className="ff-hero">
           <div className="ff-hero-overlay"></div>
           <div className="ff-fire-particles">
@@ -390,7 +390,7 @@ export default function Dashboard() {
             </Panel>
           </div>
         </div>
-      </main>
+      </div>
     </Layout>
   );
 }
