@@ -905,12 +905,12 @@
 }
 
 .ff-panel {
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--bg-panel, rgba(255, 255, 255, 0.55));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-panel, rgba(255, 255, 255, 0.6));
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-panel, 0 8px 32px rgba(15, 23, 42, 0.08));
   padding: 14px;
 }
 
@@ -930,7 +930,7 @@
   gap: 8px;
   margin: 0;
   font-size: 16px;
-  color: #10213a;
+  color: var(--text-dashboard, #10213a);
 }
 
 .ff-panel-header a,
@@ -1431,9 +1431,9 @@ html[data-theme="dark"] .ff-instructions {
   background: #ef233c;
 }
 
-.ff-map-panel,
-.ff-chart-panel,
-.ff-misinfo-panel {
+html[data-theme="dark"] .ff-map-panel,
+html[data-theme="dark"] .ff-chart-panel,
+html[data-theme="dark"] .ff-misinfo-panel {
   background: rgba(7, 29, 58, 0.65);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -1448,9 +1448,9 @@ html[data-theme="dark"] .ff-instructions {
   margin-bottom: 12px;
 }
 
-.ff-map-head h3,
-.ff-chart-panel h3,
-.ff-misinfo-panel h3 {
+html[data-theme="dark"] .ff-map-head h3,
+html[data-theme="dark"] .ff-chart-panel h3,
+html[data-theme="dark"] .ff-misinfo-panel h3 {
   color: #ffffff;
 }
 
@@ -1461,6 +1461,11 @@ html[data-theme="dark"] .ff-instructions {
   border-radius: 8px;
   width: 34px;
   height: 34px;
+  color: var(--text-dashboard, #10213a);
+  background: var(--bg-toggle-hover, rgba(0, 0, 0, 0.06));
+}
+
+html[data-theme="dark"] .ff-map-head button {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.12);
 }
@@ -1616,6 +1621,27 @@ html[data-theme="dark"] .ff-instructions {
     );
 }
 
+@keyframes ffDrawLine {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.ff-trend-line-animated {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: ffDrawLine 2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+.ff-sparkline-animated {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: ffDrawLine 1.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
 .ff-x-labels {
   grid-column: 2;
   display: flex;
@@ -1710,6 +1736,61 @@ html[data-theme="dark"] .ff-instructions {
   background: #6d5dfc;
 }
 
+/* Dark theme card overrides */
+html[data-theme="dark"] .ban-card {
+  background: rgba(15, 23, 42, 0.65);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 87, 34, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .ban-card h3 {
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] .ban-card p,
+html[data-theme="dark"] .ban-card small {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .info-box {
+  background: rgba(15, 23, 42, 0.7);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .ff-decision-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] .ff-decision-card h4 {
+  color: #f8fafc;
+}
+
+html[data-theme="dark"] .ff-decision-card p {
+  color: #94a3b8;
+}
+
+html[data-theme="dark"] .ff-decision-card.red {
+  background: rgba(239, 35, 60, 0.15);
+  border-color: rgba(239, 35, 60, 0.35);
+  color: #ff4d6d;
+}
+
+html[data-theme="dark"] .ff-decision-card.orange {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.35);
+  color: #fb923c;
+}
+
+html[data-theme="dark"] .ff-decision-card.purple {
+  background: rgba(109, 93, 252, 0.15);
+  border-color: rgba(109, 93, 252, 0.35);
+  color: #a78bfa;
+}
+
 .ff-advice-panel {
   margin-top: 10px;
 }
@@ -1782,9 +1863,15 @@ html[data-theme="dark"] .ff-instructions {
   display: grid;
   place-items: center;
   background:
-    radial-gradient(circle at center, #071d3a 0 38%, transparent 39%),
+    radial-gradient(circle at center, var(--bg-topbar, #ffffff) 0 38%, transparent 39%),
     conic-gradient(#3b82f6 0 38%, #22c55e 38% 66%, #f97316 66% 84%, #ef4444 84% 94%, #94a3b8 94% 100%);
   margin: auto;
+}
+
+html[data-theme="dark"] .ff-donut {
+  background:
+    radial-gradient(circle at center, #071d3a 0 38%, transparent 39%),
+    conic-gradient(#3b82f6 0 38%, #22c55e 38% 66%, #f97316 66% 84%, #ef4444 84% 94%, #94a3b8 94% 100%);
 }
 
 .ff-donut span {
@@ -1805,23 +1892,35 @@ html[data-theme="dark"] .ff-instructions {
 .ff-platform-row {
   display: grid;
   grid-template-columns: 1fr 50px 40px;
-  color: #e2e8f0;
+  color: var(--text-dashboard, #334155);
   font-size: 12px;
   font-weight: 800;
+}
+
+html[data-theme="dark"] .ff-platform-row {
+  color: #e2e8f0;
 }
 
 .ff-theme-box {
   grid-column: 1 / -1;
   padding: 12px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.04);
   margin-top: 4px;
+}
+
+html[data-theme="dark"] .ff-theme-box {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .ff-theme-box h4 {
   margin: 0 0 10px;
-  color: #ffffff;
+  color: var(--text-dashboard, #1e293b);
   font-size: 13px;
+}
+
+html[data-theme="dark"] .ff-theme-box h4 {
+  color: #ffffff;
 }
 
 .ff-theme-row {
@@ -1830,9 +1929,13 @@ html[data-theme="dark"] .ff-instructions {
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
-  color: #e2e8f0;
+  color: var(--text-dashboard, #334155);
   font-size: 12px;
   font-weight: 800;
+}
+
+html[data-theme="dark"] .ff-theme-row {
+  color: #e2e8f0;
 }
 
 .ff-theme-row span {

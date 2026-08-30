@@ -285,6 +285,7 @@ export default function Dashboard() {
 
                 <svg viewBox="0 0 700 170" preserveAspectRatio="none">
                   <polyline
+                    className="ff-trend-line-animated"
                     points="0,95 45,85 85,55 120,70 160,45 205,35 250,22 300,42 345,36 390,65 440,80 490,110 535,120 575,95 620,100 660,135 700,150"
                     fill="none"
                     stroke="currentColor"
