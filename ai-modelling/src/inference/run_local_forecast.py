@@ -12,6 +12,7 @@ from api.inference.bushfire_forecaster import predict_bushfire_forecast
 
 DATA_PATH = "src/data/bushfire/forecaster_test_data.csv"
 GRID_CACHE_PATH = "src/data/bushfire/data_grid_cache.npy"
+LABEL_CACHE_PATH = "src/data/bushfire/label_grid_cache.npy"
 COORDS_CACHE_PATH = "src/data/bushfire/grid_coords_cache.npz"
 TIMESTAMPS_CACHE_PATH = "src/data/bushfire/grid_timestamps_cache.npy"
 OUTPUT_DIR = "src/data/bushfire/forecasts"
@@ -83,17 +84,27 @@ def cell_polygon(lat, lon, size=CELL_SIZE_DEG):
     }
 
 
-def build_request(data_grid, unique_lats, unique_lons, valid_mask, input_steps, timestamps, feature_names):
-    recent = data_grid[-input_steps:]  # [input_steps, H, W, F]
+def build_request(data_grid, label_grid, unique_lats, unique_lons, valid_mask, input_steps, timestamps, feature_names):
+    """
+    Build a GeoJSON forecast request whose per-cell observations carry both
+    weather features and is_burning history, concatenated in the same
+    order the model was trained on: FEATURES + ["is_burning"].
+    """
+    recent_weather = data_grid[-input_steps:] # [input_steps, H, W, n_weather]
+    recent_fire = label_grid[-input_steps:] # [input_steps, H, W, 1]
     recent_timestamps = [t.isoformat() for t in timestamps[-input_steps:]]
-    height, width = recent.shape[1], recent.shape[2]
+    height, width = recent_weather.shape[1], recent_weather.shape[2]
 
     features = []
     for row in range(height):
         for col in range(width):
             if not valid_mask[row, col]:
                 continue
-            obs = np.nan_to_num(recent[:, row, col, :], nan=0.0).tolist()
+            weather_obs = recent_weather[:, row, col, :] # [input_steps, n_weather], may have NaN
+            fire_obs = recent_fire[:, row, col, :] # [input_steps, 1], no NaN (built from zeros)
+
+            obs = np.concatenate([weather_obs, fire_obs], axis=-1).tolist()
+
             features.append({
                 "type": "Feature",
                 "geometry": cell_polygon(unique_lats[row], unique_lons[col]),
@@ -113,14 +124,25 @@ def main():
     load_models()
     bundle = get_model(MODEL_ID)
 
-    data_grid = np.load(GRID_CACHE_PATH)  # [T, H, W, F], raw/unscaled
+    data_grid = np.load(GRID_CACHE_PATH) # [T, H, W, n_weather], raw/unscaled
+    label_grid = np.load(LABEL_CACHE_PATH) # [T, H, W, 1], binary is_burning
+
+    assert data_grid.shape[:3] == label_grid.shape[:3], (
+        f"Grid mismatch: weather {data_grid.shape} vs labels {label_grid.shape}"
+    )
+
     valid_mask = ~np.all(np.isnan(data_grid), axis=(0, -1))
     unique_lats, unique_lons = get_or_build_coords()
     timestamps = get_or_build_timestamps()
 
     input_steps = bundle.metadata.get("input_steps", 60)
-    feature_names = bundle.metadata.get("weather_features", DEFAULT_FEATURE_NAMES)
-    request_geojson = build_request(data_grid, unique_lats, unique_lons, valid_mask, input_steps, timestamps, feature_names)
+    feature_names = bundle.metadata.get("input_channel_order") \
+        or bundle.metadata.get("weather_features", DEFAULT_FEATURE_NAMES)
+ 
+    request_geojson = build_request(
+        data_grid, label_grid, unique_lats, unique_lons, valid_mask,
+        input_steps, timestamps, feature_names,
+    )
     print(f"Built request with {len(request_geojson['features'])} cells")
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
