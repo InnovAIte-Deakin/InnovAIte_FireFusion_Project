@@ -11,11 +11,22 @@ services:
         condition: service_healthy 
       cache:
         condition: service_healthy
+      # FireFusion API now depends on aggregator-api because it may retrieve
+      # prepared Data Engineering records through the Backend service layer.
+      aggregator-api:
+        condition: service_started
     environment:
       BROKER_URL: amqp://guest:guest@broker:5672
       CACHE_URL: redis://cache:6379
       DB_URL: postgresql://postgres:postgres@relational-db:5432/postgres
       PYTHONUNBUFFERED: 1
+      # Internal REST URL for Backend -> aggregator-api communication.
+      AGGREGATOR_URL: http://aggregator-api:8080
+
+      # URL for Backend -> AI Modelling FastAPI communication.
+      # Defaults to a model API running on the host machine during development,
+      # but can be overridden through the AI_MODELLING_URL environment variable.
+      AI_MODELLING_URL: ${AI_MODELLING_URL:-http://host.docker.internal:8090}
 
   model-api: # api
     profiles: ["default"]
