@@ -28,6 +28,9 @@ export default function NarrativeCard({ narrative, onReviewNarrative }) {
   const {
     id,
     severity,
+    urgency,
+    confidenceLevel,
+    reviewStatus,
     incidentName,
     headline,
     postCount,
@@ -44,11 +47,24 @@ export default function NarrativeCard({ narrative, onReviewNarrative }) {
   const sharesK =
     shares >= 1000 ? `${(shares / 1000).toFixed(1).replace(/\.0$/, "")}k` : String(shares);
 
+  const statusDisplay = (reviewStatus || "needs_review").replace(/_/g, " ");
+
   return (
     <article className={`misinfo-narrative-card-figma ${severityBarClass(severity)}`}>
       <div className="misinfo-narrative-card-figma__inner">
         <div className="misinfo-narrative-card-figma__top">
-          <span className={severityPillClass(severity)}>{severityLabel(severity)}</span>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className={severityPillClass(severity)}>{severityLabel(severity)}</span>
+            <span className="rounded bg-amber-500/10 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-300">
+              Urgency: {urgency || "High"}
+            </span>
+            <span className="rounded bg-blue-500/10 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:text-blue-300">
+              Confidence: {confidenceLevel || 85}%
+            </span>
+            <span className="rounded bg-purple-500/10 px-2 py-0.5 text-xs font-semibold capitalize text-purple-700 dark:text-purple-300">
+              Status: {statusDisplay}
+            </span>
+          </div>
           <span className="misinfo-narrative-card-figma__incident">{incidentName}</span>
           <div className="misinfo-narrative-card-figma__top-right">
             <span className="misinfo-narrative-card-figma__posts">{postCount} posts</span>

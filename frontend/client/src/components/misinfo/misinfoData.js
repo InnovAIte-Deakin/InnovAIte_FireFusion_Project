@@ -34,6 +34,8 @@ export const FALLBACK_NARRATIVES = [
   {
     id: "nar_001",
     severity: "critical",
+    urgency: "Immediate",
+    confidenceLevel: 94,
     incidentId: "inc_east_gippsland",
     incidentName: "East Gippsland fire complex",
     headline: "False evacuation order for Bairnsdale CBD — posts claim a full CFA evacuation has been ordered when none exists.",
@@ -60,6 +62,8 @@ export const FALLBACK_NARRATIVES = [
   {
     id: "nar_002",
     severity: "high",
+    urgency: "High",
+    confidenceLevel: 88,
     incidentId: "inc_east_gippsland",
     incidentName: "East Gippsland fire complex",
     headline:
@@ -87,6 +91,8 @@ export const FALLBACK_NARRATIVES = [
   {
     id: "nar_003",
     severity: "medium",
+    urgency: "Moderate",
+    confidenceLevel: 76,
     incidentId: "inc_yarra",
     incidentName: "Yarra Ranges watch zone",
     headline: "Unverified wind change claims — posts allege a sudden 90° wind shift without BOM confirmation.",
@@ -162,6 +168,9 @@ export function normalizeNarrative(raw) {
   const postCount = Number(raw.postCount ?? raw.post_count ?? raw.posts?.length ?? 1) || 1;
   const timeRangeLabel =
     raw.timeRangeLabel ?? raw.time_range_label ?? raw.time_label ?? "";
+  const confidenceLevel = Number(raw.confidenceLevel ?? raw.confidence_level ?? raw.confidence ?? 85);
+  const urgency = raw.urgency ?? (raw.severity === "critical" ? "Immediate" : raw.severity === "high" ? "High" : "Moderate");
+  
   const platformsRaw = raw.platformsLabel ?? raw.platforms_label ?? raw.platforms;
   let platformsLabel = "";
   if (typeof platformsRaw === "string") platformsLabel = platformsRaw;
@@ -194,6 +203,8 @@ export function normalizeNarrative(raw) {
   return {
     id,
     severity: normalizeSeverity(raw.severity),
+    urgency,
+    confidenceLevel,
     incidentId: String(raw.incidentId ?? raw.incident_id ?? raw.incidentID ?? ""),
     incidentName:
       raw.incidentName ??
