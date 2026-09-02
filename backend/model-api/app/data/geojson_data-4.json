@@ -1,20 +1,36 @@
 {
   "type": "FeatureCollection",
+  "metadata": {
+    "model_version": "0.4.0",
+    "generated_at": "2024-01-17T06:00:00Z",
+    "forecast_horizon_h": 12,
+    "forecast_interval_h": 12,
+    "grid_resolution_m": 5000,
+    "total_cells": 2,
+    "bbox": [140.9, -37.5, 147.2, -34.1],
+    "crs": "EPSG:4326"
+  },
   "features": [
     {
       "type": "Feature",
-      "properties": { "risk_factor": 3 },
       "geometry": {
         "type": "Polygon",
-        "coordinates": [[
-          [143.8200, -38.5000],
-          [143.6500, -38.6500],
-          [143.8800, -38.7800],
-          [144.1000, -38.7200],
-          [144.1500, -38.5800],
-          [143.9800, -38.4800],
-          [143.8200, -38.5000]
-        ]]
+        "coordinates": [[[142.40,-37.70],[142.55,-37.85],[142.70,-37.75],[142.60,-37.65],[142.40,-37.70]]]
+      },
+      "properties": {
+        "cell_id": "grid_-37.15_145.60",
+        "timestamp": "2024-01-17T00:00:00Z",
+        "interval_h": 12,
+        "severity_class": 3,
+        "confidence": { "severity_class_prob": 0.72 },
+        "environment": {
+          "temperature_c": 31.5,
+          "relative_humidity_pct": 25,
+          "wind_speed_kmh": 40,
+          "wind_direction_deg": 260,
+          "ffdi": 55,
+          "fuel_moisture_pct": 6.2
+        }
       }
     }
   ]
