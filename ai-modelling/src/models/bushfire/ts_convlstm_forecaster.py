@@ -15,10 +15,11 @@ Architecture:
     - Reshape to [batch, horizon, height, width, output_channels]
 """
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Tuple
 import torch
 from torch import Tensor, nn
 
+from .attention import PatchwiseAttention2d
 from .bilstm import PerCellBiLSTMLayer
 from .biconvlstm import BiConvLSTMLayer
 from .convlstm import ConvLSTMCell
@@ -41,6 +42,11 @@ class ForecasterConfig:
         hidden_size_1 (int): Hidden dimension of first ConvLSTM2d layer.
         hidden_size_2 (int): Hidden dimension of second ConvLSTM2d layer.
         dropout (float): Dropout probability applied after each ConvLSTM2d layer.
+        attention (str): Gate operator. "none" uses a standard Conv2d gate; "patchwise" replaces it with patchwise self-attention.
+        footprint (int): Patch side length for patchwise attention. Must be odd.
+        dilation (int): Spacing between sampled cells in the attention patch.
+        share_planes (int): Output channels sharing one attention weight set.
+        attention_layers (Tuple[int, ...]): Which ConvLSTM layers (1 and/or 2) use attention when ``attention`` is not "none".
         use_bilstm (bool): Whether to apply the shared per-cell BiLSTM layer.
         bilstm_hidden_size (int): Hidden dimension per BiLSTM direction.
         use_biconvlstm (bool): Whether to apply the BiConvLSTM layer.
@@ -53,6 +59,11 @@ class ForecasterConfig:
     hidden_size_1: int = 32
     hidden_size_2: int = 16
     dropout: float = 0.2
+    attention: str = "patchwise"
+    footprint: int = 7
+    dilation: int = 1
+    share_planes: int = 8
+    attention_layers: Tuple[int, ...] = (1,)
     use_bilstm: bool = False
     bilstm_hidden_size: int = 8
     use_biconvlstm: bool = False
@@ -149,13 +160,21 @@ class MultivariateTSForecaster(nn.Module):
 
         self.convlstm1 = ConvLSTMCell(
             input_channels=self.input_channels,
-            hidden_channels=config.hidden_size_1
+            hidden_channels=config.hidden_size_1,
+            attention=config.attention if 1 in config.attention_layers else "none",
+            footprint=config.footprint,
+            dilation=config.dilation,
+            share_planes=config.share_planes,
         )
         self.dropout1 = nn.Dropout2d(config.dropout)
 
         self.convlstm2 = ConvLSTMCell(
             input_channels=config.hidden_size_1,
-            hidden_channels=config.hidden_size_2
+            hidden_channels=config.hidden_size_2,
+            attention=config.attention if 2 in config.attention_layers else "none",
+            footprint=config.footprint,
+            dilation=config.dilation,
+            share_planes=config.share_planes,
         )
         self.dropout2 = nn.Dropout2d(config.dropout)
 
