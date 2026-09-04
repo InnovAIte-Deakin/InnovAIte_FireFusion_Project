@@ -8,5 +8,8 @@ resources:
   - firefusion-api.yaml
   - aggregator-api.yaml
   - model-api.yaml
-commonLabels:
-  app.kubernetes.io/part-of: firefusion
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: firefusion
+    includeSelectors: true
+    includeTemplates: true
