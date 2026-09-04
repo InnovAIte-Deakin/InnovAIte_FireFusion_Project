@@ -24,7 +24,7 @@ Require-Command kind
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path
 $OverlayPath = Join-Path $RepoRoot "backend\deployment\kubernetes\local"
-$DependencyOverlayPath = Join-Path $OverlayPath "dependencies"
+$BootstrapOverlayPath = Join-Path $OverlayPath "bootstrap"
 $NamespacePath = Join-Path $RepoRoot "backend\deployment\kubernetes\base\namespace.yaml"
 
 Push-Location $RepoRoot
@@ -53,18 +53,22 @@ try {
     kind load docker-image firefusion-api:k8s-test aggregator-api:k8s-test model-api:k8s-test --name $ClusterName
     Assert-LastExitCode "kind image load"
 
-    # Ensure the namespace exists before removing a legacy standalone PostgreSQL
-    # pod that may have been created during manual local testing.
     kubectl apply -f $NamespacePath | Out-Null
     Assert-LastExitCode "namespace creation"
+
+    # Local development state is disposable. Recreate deployments so repeated
+    # runs avoid immutable-selector drift from earlier manifest revisions and
+    # always start from the images that were just built and loaded.
+    kubectl delete deployment firefusion-api aggregator-api model-api redis rabbitmq postgres -n firefusion --ignore-not-found=true | Out-Null
+    Assert-LastExitCode "existing local deployment cleanup"
     kubectl delete pod postgres -n firefusion --ignore-not-found=true | Out-Null
 
-    # Start infrastructure dependencies first. The APIs establish RabbitMQ/DB
-    # connections during FastAPI startup, so starting them concurrently can
-    # cause transient AMQP connection-refused crashes on a fresh cluster.
-    Write-Host "Applying local infrastructure dependencies..."
-    kubectl apply -k $DependencyOverlayPath
-    Assert-LastExitCode "local dependency deployment"
+    # Apply the complete local configuration with API replicas temporarily set
+    # to zero. This creates services, config, secrets and dependencies without
+    # allowing FastAPI startup to race RabbitMQ/PostgreSQL readiness.
+    Write-Host "Bootstrapping local infrastructure dependencies..."
+    kubectl apply -k $BootstrapOverlayPath
+    Assert-LastExitCode "local bootstrap deployment"
 
     $dependencies = @("redis", "rabbitmq", "postgres")
     foreach ($dependency in $dependencies) {
@@ -72,12 +76,7 @@ try {
         Assert-LastExitCode "$dependency rollout"
     }
 
-    # Recreate API deployments so a repeated local run always starts pods from
-    # the images that were just rebuilt and loaded into the kind node.
-    kubectl delete deployment firefusion-api aggregator-api model-api -n firefusion --ignore-not-found=true | Out-Null
-    Assert-LastExitCode "existing API deployment cleanup"
-
-    Write-Host "Applying full local Kubernetes overlay..."
+    Write-Host "Dependencies are ready. Starting Backend APIs..."
     kubectl apply -k $OverlayPath
     Assert-LastExitCode "local Kubernetes deployment"
 
