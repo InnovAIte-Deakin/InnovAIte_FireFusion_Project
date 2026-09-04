@@ -1,31 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-resources:
-  - ..
-
-# Bootstrap the full local stack with API replicas disabled. This lets
-# RabbitMQ, Redis and PostgreSQL become Ready before the FastAPI services
-# attempt their startup-time dependency connections.
-patches:
-  - target:
-      kind: Deployment
-      name: firefusion-api
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 0
-  - target:
-      kind: Deployment
-      name: aggregator-api
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 0
-  - target:
-      kind: Deployment
-      name: model-api
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 0
+# Deprecated compatibility stub.
+# Use ../../local-bootstrap instead. Keeping this file avoids directory-deletion
+# issues on some Windows/OneDrive workspaces while removing the previous cycle.
+resources: []
