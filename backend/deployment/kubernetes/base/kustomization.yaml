@@ -11,5 +11,5 @@ resources:
 labels:
   - pairs:
       app.kubernetes.io/part-of: firefusion
-    includeSelectors: true
+    includeSelectors: false
     includeTemplates: true
