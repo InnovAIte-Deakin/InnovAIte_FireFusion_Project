@@ -24,7 +24,7 @@ Require-Command kind
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path
 $OverlayPath = Join-Path $RepoRoot "backend\deployment\kubernetes\local"
-$BootstrapOverlayPath = Join-Path $OverlayPath "bootstrap"
+$BootstrapOverlayPath = Join-Path $RepoRoot "backend\deployment\kubernetes\local-bootstrap"
 $NamespacePath = Join-Path $RepoRoot "backend\deployment\kubernetes\base\namespace.yaml"
 
 Push-Location $RepoRoot
