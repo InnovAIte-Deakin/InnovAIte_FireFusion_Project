@@ -1,32 +1,39 @@
 from datetime import datetime
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field
+
 
 class MisinformationPostIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    id: str
+    id: str = Field(min_length=1)
     author_name: str = ""
     platform: str = ""
-    content: str
+    content: str = Field(min_length=1)
     share_count: int = Field(default=0, ge=0)
     ts: datetime | None = None
     post_url: str = ""
+
+
 class MisinformationBatchIn(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
     posts: list[MisinformationPostIn] = Field(min_length=1, max_length=100)
 
 
 class TaskPrediction(BaseModel):
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid")
 
-    label: str
+    label_id: int = Field(ge=0)
+    label: str = Field(min_length=1)
+    confidence: float = Field(ge=0.0, le=1.0)
     probabilities: dict[str, float]
 
 
 class MisinformationTaskOut(TaskPrediction):
-    confidence: float
-    risk_score: float
-    severity: str
+    risk_score: float = Field(ge=0.0, le=1.0)
+    severity: Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
 
 class MisinformationPostOut(BaseModel):
@@ -45,7 +52,10 @@ class MisinformationPostOut(BaseModel):
     urgency: TaskPrediction | None = None
     humanitarian_task: TaskPrediction | None = None
     checkpoint: str
+
+
 class MisinformationBatchOut(BaseModel):
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid")
+
     results: list[MisinformationPostOut]
-    count: int
+    count: int = Field(ge=0)
