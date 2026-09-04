@@ -24,6 +24,7 @@ Require-Command kind
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path
 $OverlayPath = Join-Path $RepoRoot "backend\deployment\kubernetes\local"
+$DependencyOverlayPath = Join-Path $OverlayPath "dependencies"
 $NamespacePath = Join-Path $RepoRoot "backend\deployment\kubernetes\base\namespace.yaml"
 
 Push-Location $RepoRoot
@@ -58,22 +59,32 @@ try {
     Assert-LastExitCode "namespace creation"
     kubectl delete pod postgres -n firefusion --ignore-not-found=true | Out-Null
 
-    Write-Host "Applying local Kubernetes overlay..."
+    # Start infrastructure dependencies first. The APIs establish RabbitMQ/DB
+    # connections during FastAPI startup, so starting them concurrently can
+    # cause transient AMQP connection-refused crashes on a fresh cluster.
+    Write-Host "Applying local infrastructure dependencies..."
+    kubectl apply -k $DependencyOverlayPath
+    Assert-LastExitCode "local dependency deployment"
+
+    $dependencies = @("redis", "rabbitmq", "postgres")
+    foreach ($dependency in $dependencies) {
+        kubectl rollout status "deployment/$dependency" -n firefusion --timeout=180s
+        Assert-LastExitCode "$dependency rollout"
+    }
+
+    # Recreate API deployments so a repeated local run always starts pods from
+    # the images that were just rebuilt and loaded into the kind node.
+    kubectl delete deployment firefusion-api aggregator-api model-api -n firefusion --ignore-not-found=true | Out-Null
+    Assert-LastExitCode "existing API deployment cleanup"
+
+    Write-Host "Applying full local Kubernetes overlay..."
     kubectl apply -k $OverlayPath
     Assert-LastExitCode "local Kubernetes deployment"
 
-    $deployments = @(
-        "redis",
-        "rabbitmq",
-        "postgres",
-        "firefusion-api",
-        "aggregator-api",
-        "model-api"
-    )
-
-    foreach ($deployment in $deployments) {
-        kubectl rollout status "deployment/$deployment" -n firefusion --timeout=180s
-        Assert-LastExitCode "$deployment rollout"
+    $apis = @("firefusion-api", "aggregator-api", "model-api")
+    foreach ($api in $apis) {
+        kubectl rollout status "deployment/$api" -n firefusion --timeout=180s
+        Assert-LastExitCode "$api rollout"
     }
 
     Write-Host ""
