@@ -23,11 +23,13 @@ spec:
             exec:
               command: ["rabbitmq-diagnostics", "-q", "check_port_connectivity"]
             initialDelaySeconds: 10
+            timeoutSeconds: 5
             periodSeconds: 10
           livenessProbe:
             exec:
               command: ["rabbitmq-diagnostics", "-q", "ping"]
             initialDelaySeconds: 20
+            timeoutSeconds: 5
             periodSeconds: 20
           resources:
             requests:
