@@ -17,11 +17,46 @@ The base deployment includes:
 - resource requests and limits
 - image-tag based deployment and Kubernetes rollout rollback
 
-PostgreSQL is deliberately not provisioned here. The application deployment consumes database connection URLs so the target environment can use either a managed cloud database or another approved database deployment.
+PostgreSQL is deliberately not provisioned in the cloud base. The application deployment consumes database connection URLs so the target environment can use either a managed cloud database or another approved database deployment.
 
 The AI Modelling inference API is also a separate cross-stream service. `AI_MODELLING_URL` is a placeholder in the base ConfigMap and must be overridden when the shared AI service endpoint is known.
 
-## Prerequisites
+## Local Kubernetes validation on Windows
+
+The `local/` overlay is for a disposable developer `kind` cluster only. It adds a local PostgreSQL instance, test-only credentials, the three locally built `k8s-test` API images and `imagePullPolicy: Never` so Kubernetes uses images loaded directly into the kind node.
+
+Prerequisites:
+
+- Docker Desktop
+- `kubectl`
+- `kind`
+- Windows PowerShell
+
+From the repository root, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend/deployment/kubernetes/scripts/deploy-local.ps1
+```
+
+This script creates or reuses the `firefusion` kind cluster, builds the three API images, loads them into the node, applies the local Kustomize overlay and waits for all deployments to complete.
+
+Run the internal Kubernetes DNS/service smoke test with:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File backend/deployment/kubernetes/scripts/verify-local.ps1
+```
+
+For browser testing of the public Backend entry point on a development machine where port 8080 is already in use, forward another local port, for example:
+
+```powershell
+kubectl port-forward svc/firefusion-api -n firefusion 18080:80
+```
+
+Then open `http://localhost:18080/health`.
+
+The credentials and PostgreSQL deployment under `local/` are intentionally development-only and must not be used in a shared or production environment.
+
+## Shared/cloud deployment prerequisites
 
 1. A working Kubernetes cluster and configured `kubectl` context.
 2. Access to the FireFusion GHCR images.
@@ -83,3 +118,4 @@ The Backend workflow renders the Kustomize package on pull requests and builds a
 - `aggregator-api`, `model-api`, Redis and RabbitMQ are internal-only services.
 - Only `firefusion-api` is exposed with a cloud load balancer.
 - GHCR authentication can be supplied at deploy time and is stored as a Kubernetes image-pull secret rather than in the repository.
+- The credentials under `local/` are fixed test values for disposable local clusters only.
