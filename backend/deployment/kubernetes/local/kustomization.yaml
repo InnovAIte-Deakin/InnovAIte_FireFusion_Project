@@ -1,0 +1,55 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../base
+  - postgres.yaml
+
+# Local-only credentials for the disposable kind development cluster.
+# Never copy these values to a shared or production environment.
+secretGenerator:
+  - name: firefusion-backend-secrets
+    namespace: firefusion
+    literals:
+      - DB_URL=postgresql://firefusion:firefusion@postgres:5432/firefusion
+      - RELATIONAL_DB_URL=postgresql://firefusion:firefusion@postgres:5432/firefusion
+      - API_KEY=local-test-key
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: ghcr.io/innovaite-deakin/innovaite_firefusion_project/firefusion-api
+    newName: firefusion-api
+    newTag: k8s-test
+  - name: ghcr.io/innovaite-deakin/innovaite_firefusion_project/aggregator-api
+    newName: aggregator-api
+    newTag: k8s-test
+  - name: ghcr.io/innovaite-deakin/innovaite_firefusion_project/model-api
+    newName: model-api
+    newTag: k8s-test
+
+# The images above are loaded directly into the kind node by deploy-local.ps1.
+# Prevent Kubernetes from attempting to pull those development tags from a registry.
+patches:
+  - target:
+      kind: Deployment
+      name: firefusion-api
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: aggregator-api
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
+  - target:
+      kind: Deployment
+      name: model-api
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Never
