@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base/namespace.yaml
+  - ../../base/redis.yaml
+  - ../../base/rabbitmq.yaml
+  - ../postgres.yaml
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: firefusion
+    includeSelectors: false
+    includeTemplates: true
