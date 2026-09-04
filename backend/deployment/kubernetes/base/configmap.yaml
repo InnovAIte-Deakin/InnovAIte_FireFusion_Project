@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: firefusion-backend-config
+  namespace: firefusion
+data:
+  BROKER_URL: amqp://guest:guest@rabbitmq:5672
+  CACHE_URL: redis://redis:6379
+  AGGREGATOR_URL: http://aggregator-api:8080
+  # The AI Modelling inference API is deployed by a separate stream.
+  # Override this value in the cloud overlay when its shared service URL is known.
+  AI_MODELLING_URL: http://ai-modelling-api:8000
