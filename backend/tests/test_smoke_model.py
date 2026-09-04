@@ -4,6 +4,12 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
+def test_health(model, http):
+    r = http.get(f"{model}/health")
+    assert r.status_code == 200
+    assert r.json() == {"status": "healthy", "service": "model-api"}
+
+
 def test_model_hello(model, http):
     r = http.get(f"{model}/model/hello")
     assert r.status_code == 200

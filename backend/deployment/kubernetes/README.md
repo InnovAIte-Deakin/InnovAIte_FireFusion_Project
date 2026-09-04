@@ -15,6 +15,7 @@ The base deployment includes:
 - DB URLs and API key supplied through a Kubernetes Secret created at deploy time
 - liveness/readiness probes using `/health`
 - resource requests and limits
+- image-tag based deployment and Kubernetes rollout rollback
 
 PostgreSQL is deliberately not provisioned here. The application deployment consumes database connection URLs so the target environment can use either a managed cloud database or another approved database deployment.
 
@@ -35,12 +36,31 @@ export RELATIONAL_DB_URL='postgresql://...'
 export API_KEY='...'
 ```
 
-Then deploy:
+If GHCR packages are private, also export:
+
+```bash
+export GHCR_USERNAME='your-github-user'
+export GHCR_TOKEN='your-package-read-token'
+```
+
+Deploy the default `latest` images:
 
 ```bash
 cd backend/deployment/kubernetes/scripts
 ./deploy.sh
 ./verify.sh
+```
+
+For a reproducible deployment, use a versioned image tag produced by CI:
+
+```bash
+IMAGE_TAG=sha-abcdef1 ./deploy.sh
+```
+
+Rollback the three Backend API deployments to their previous ReplicaSet revisions:
+
+```bash
+./rollback.sh
 ```
 
 Clean up the application namespace with:
@@ -53,9 +73,13 @@ Clean up the application namespace with:
 
 The base manifests avoid provider-specific Kubernetes resources. The same application package is intended to sit on top of the Terraform-provisioned EKS, AKS or GKE environment. Provider-specific ingress, DNS, TLS, secret-store integration or autoscaling can be added later as overlays once the team confirms the reference cloud platform.
 
+## CI integration
+
+The Backend workflow renders the Kustomize package on pull requests and builds all three Backend API images. `model-api` publishing is enabled because the Kubernetes deployment requires a registry image rather than a local Docker build.
+
 ## Security notes
 
 - No production secrets belong in Git.
 - `aggregator-api`, `model-api`, Redis and RabbitMQ are internal-only services.
 - Only `firefusion-api` is exposed with a cloud load balancer.
-- GHCR authentication should be configured through the cluster or an `imagePullSecret` if the package visibility requires it.
+- GHCR authentication can be supplied at deploy time and is stored as a Kubernetes image-pull secret rather than in the repository.
