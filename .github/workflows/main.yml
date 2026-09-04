@@ -53,13 +53,21 @@ jobs:
       - name: Set up kubectl
         uses: azure/setup-kubectl@v4
 
-      - name: Render FireFusion Kubernetes package
+      - name: Render FireFusion Kubernetes packages
         run: |
           kubectl kustomize backend/deployment/kubernetes/base > /tmp/firefusion-k8s.yaml
+          kubectl kustomize backend/deployment/kubernetes/local > /tmp/firefusion-k8s-local.yaml
+          kubectl kustomize backend/deployment/kubernetes/local-bootstrap > /tmp/firefusion-k8s-bootstrap.yaml
+
           test -s /tmp/firefusion-k8s.yaml
+          test -s /tmp/firefusion-k8s-local.yaml
+          test -s /tmp/firefusion-k8s-bootstrap.yaml
+
           grep -q "name: firefusion-api" /tmp/firefusion-k8s.yaml
           grep -q "name: aggregator-api" /tmp/firefusion-k8s.yaml
           grep -q "name: model-api" /tmp/firefusion-k8s.yaml
+          grep -q "name: postgres" /tmp/firefusion-k8s-local.yaml
+          grep -q "name: rabbitmq" /tmp/firefusion-k8s-bootstrap.yaml
 
   backend-tests:
     name: Backend Integration Tests
