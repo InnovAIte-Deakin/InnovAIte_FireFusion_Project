@@ -14,7 +14,7 @@
 ## Overview
 
 The **AI Modelling API** is a FastAPI-based REST service that exposes machine learning models for:
-- **Misinformation Detection**: Binary classification of social media posts using DeBERTa v3-large
+- **Misinformation Detection**: Multi-task classification of misinformation, urgency, and humanitarian categories using DeBERTa v3-large
 - **Bushfire Forecasting**: Time-series prediction of environmental variables using ConvLSTM
 - **Bushfire Risk Classification**: Multi-step risk classification using TCN (Temporal Convolutional Networks)
 
@@ -162,8 +162,8 @@ curl http://localhost:8000/predict/models
     {
       "model_id": "misinfo-deberta",
       "domain": "misinformation",
-      "kind": "deberta_sequence_binary",
-      "checkpoint": "/path/to/deberta"
+      "kind": "deberta_multitask",
+      "checkpoint": "/path/to/deberta_multitask"
     },
     {
       "model_id": "bushfire-forecaster-v1",
@@ -212,25 +212,81 @@ Classify a single social media post for misinformation.
   "id": "post-1",
   "author_name": "Alice",
   "platform": "twitter",
-  "content": "Vaccines contain microchips...",
-  "label_id": 1,
-  "label": "misinformation",
-  "confidence": 0.92,
-  "probabilities": {
-    "non_misinformation": 0.08,
-    "misinformation": 0.92
+  "content": "Emergency warning near the bushfire zone",
+  "share_count": 25,
+  "ts": "2026-09-04T10:30:00Z",
+  "post_url": "https://example.com/post-1",
+  "misinformation": {
+    "label_id": 1,
+    "label": "TRUE",
+    "confidence": 0.92,
+    "probabilities": {
+      "FALSE": 0.08,
+      "TRUE": 0.92
+    },
+    "risk_score": 0.92,
+    "severity": "CRITICAL"
   },
-  "risk_score": 0.92,
-  "severity": "HIGH",
-  "checkpoint": "/path/to/deberta"
+  "urgency": {
+    "label_id": 2,
+    "label": "URGENT",
+    "confidence": 0.81,
+    "probabilities": {
+      "NOT_USEFUL": 0.04,
+      "NOT_URGENT": 0.15,
+      "URGENT": 0.81
+    }
+  },
+  "humanitarian_task": {
+    "label_id": 2,
+    "label": "WARN",
+    "confidence": 0.73,
+    "probabilities": {
+      "HMN_DMG": 0.05,
+      "MAT_DMG": 0.08,
+      "WARN": 0.73,
+      "EVAC": 0.07,
+      "HMN_MISS": 0.03,
+      "VOLUNTEER": 0.04
+    }
+  },
+  "checkpoint": "/path/to/deberta_multitask"
 }
 ```
 
-**Severity Mapping:**
+The response is organised by classification task. When a multi-task checkpoint is loaded, `misinformation`, `urgency`, and `humanitarian_task` are produced from one shared DeBERTa encoder pass. Every task contains a label ID, label, confidence, and probability distribution. The misinformation result also contains the derived risk score and severity. Legacy binary checkpoints remain supported by the inference adapter, in which case `urgency` and `humanitarian_task` are returned as `null`.
+
+**Severity Mapping** (derived from `misinformation.risk_score`):
 - `risk_score < 0.6` → `LOW`
 - `0.6 ≤ risk_score < 0.75` → `MEDIUM`
 - `0.75 ≤ risk_score < 0.9` → `HIGH`
 - `risk_score ≥ 0.9` → `CRITICAL`
+
+#### `POST /predict/misinformation/batch`
+Classify multiple social media posts in a single request. This exists so callers processing a batch of posts (e.g. a feed page, an ingestion job) don't have to make one HTTP round-trip per post — the model still runs one post at a time internally, but the network/auth overhead is paid once for the whole batch.
+
+**Request Body:**
+```json
+{
+  "results": [
+    {
+      "id": "post-1",
+      "misinformation": { "label": "TRUE", "...": "..." },
+      "urgency": { "label": "URGENT", "...": "..." },
+      "humanitarian_task": { "label": "WARN", "...": "..." }
+    },
+    {
+      "id": "post-2",
+      "misinformation": { "label": "FALSE", "...": "..." },
+      "urgency": { "label": "NOT_URGENT", "...": "..." },
+      "humanitarian_task": { "label": "EVAC", "...": "..." }
+    }
+  ],
+  "count": 2
+}
+```
+
+Each entry in `results` is the exact same object shape as the single-post response. `count` is the number of posts processed. The single-post route (`/predict/misinformation`) is unchanged and still exists for callers that only need to classify one post at a time.
 
 ---
 

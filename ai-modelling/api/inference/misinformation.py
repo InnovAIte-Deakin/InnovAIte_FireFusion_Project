@@ -1,12 +1,14 @@
 """
-Misinformation scoring: pure functions over a ``LoadedModel`` bundle.
+Misinformation scoring functions operating on a LoadedModel bundle.
 
-Routers call this after resolving ``model_id`` via ``model_loader``.
+The adapter supports both the legacy binary DeBERTa classifier and the
+multi-task DeBERTa model.
 """
+
 from typing import Any, Literal
-import math
+
 from api.model_loader import LoadedModel
-from src.models.misinformation.deberta import classify_text
+from src.models.misinformation.deberta import classify_multitask, classify_text
 
 Severity = Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
@@ -15,6 +17,7 @@ def risk_score_max_softmax(probabilities: dict[str, float]) -> float:
     if not probabilities:
         return 0.0
     return float(max(probabilities.values()))
+
 
 def severity_from_risk(risk_score: float) -> Severity:
     if risk_score >= 0.9:
@@ -26,23 +29,65 @@ def severity_from_risk(risk_score: float) -> Severity:
     return "LOW"
 
 
-def predict_misinformation(post: dict[str, Any], bundle: LoadedModel) -> dict[str, Any]:
+def _with_misinformation_risk(prediction: dict[str, Any]) -> dict[str, Any]:
+    result = dict(prediction)
+    probabilities = result.get("probabilities", {})
+    risk_score = risk_score_max_softmax(probabilities)
+    result["risk_score"] = risk_score
+    result["severity"] = severity_from_risk(risk_score)
+    return result
+
+
+def _predict_tasks(
+    content: str,
+    bundle: LoadedModel,
+) -> tuple[dict[str, Any], dict[str, Any] | None, dict[str, Any] | None]:
+    common_args = {
+        "tokenizer": bundle.tokenizer,
+        "model": bundle.model,
+        "device": bundle.device,
+        "max_len": bundle.max_len,
+    }
+
+    if bundle.kind == "deberta_sequence_binary":
+        binary_result = classify_text(content, **common_args)
+        return _with_misinformation_risk(binary_result), None, None
+
+    if bundle.kind == "deberta_multitask":
+        task_results = classify_multitask(content, **common_args)
+
+        misinformation = task_results.get("misinformation") or task_results.get("misinfo")
+        if misinformation is None:
+            raise ValueError("multi-task model did not return a misinformation prediction")
+
+        urgency = task_results.get("urgency")
+        humanitarian = (
+            task_results.get("humanitarian_task")
+            or task_results.get("humanitarian")
+        )
+        return _with_misinformation_risk(misinformation), urgency, humanitarian
+
+    raise ValueError(f"unsupported misinformation model kind: {bundle.kind!r}")
+
+
+def predict_misinformation(
+    post: dict[str, Any],
+    bundle: LoadedModel,
+) -> dict[str, Any]:
     """
-    Classify a single social post. Required keys: ``id``, ``content``.
+    Classify one social post.
+
+    Required keys are ``id`` and ``content``. A multi-task model returns
+    misinformation, urgency, and humanitarian predictions in one pass.
     """
     if "id" not in post or "content" not in post:
         raise KeyError("post must include 'id' and 'content'")
 
-    cls_out = classify_text(
-        str(post["content"]),
-        tokenizer=bundle.tokenizer,
-        model=bundle.model,
-        device=bundle.device,
-        max_len=bundle.max_len,
-    )
-    probs = cls_out["probabilities"]
-    risk = risk_score_max_softmax(probs)
-    severity = severity_from_risk(risk)
+    content = post["content"]
+    if not isinstance(content, str) or not content.strip():
+        raise ValueError("post content must be a non-empty string")
+
+    misinformation, urgency, humanitarian = _predict_tasks(content, bundle)
 
     return {
         "model_id": bundle.model_id,
@@ -50,15 +95,12 @@ def predict_misinformation(post: dict[str, Any], bundle: LoadedModel) -> dict[st
         "id": post["id"],
         "author_name": post.get("author_name"),
         "platform": post.get("platform"),
-        "content": post["content"],
+        "content": content,
         "share_count": post.get("share_count"),
         "ts": post.get("ts"),
         "post_url": post.get("post_url"),
-        "label_id": cls_out["label_id"],
-        "label": cls_out["label"],
-        "confidence": cls_out["confidence"],
-        "probabilities": probs,
-        "risk_score": risk,
-        "severity": severity,
+        "misinformation": misinformation,
+        "urgency": urgency,
+        "humanitarian_task": humanitarian,
         "checkpoint": str(bundle.checkpoint_path),
     }
