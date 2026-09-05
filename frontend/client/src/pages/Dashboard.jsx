@@ -118,14 +118,45 @@ const adviceCards = [
 
 export default function Dashboard() {
   const [activeFilter, setActiveFilter] = useState("ALL");
+  const [selectedZone, setSelectedZone] = useState("East Gippsland");
+  const [riskLevel, setRiskLevel] = useState("Extreme");
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [sirenActive, setSirenActive] = useState(false);
 
   const filteredUpdates = activeFilter === "ALL"
     ? officialUpdates
     : officialUpdates.filter((item) => item.type === activeFilter);
 
+  const zonesData = {
+    "Grampians": { risk: "High", color: "#f97316", temp: "38°C", wind: "36 km/h W", threat: "Bushfire smoke & spotting" },
+    "Dandenong Ranges": { risk: "Moderate", color: "#eab308", temp: "34°C", wind: "24 km/h SW", threat: "High fuel load, alert standby" },
+    "Latrobe Valley": { risk: "Moderate", color: "#eab308", temp: "35°C", wind: "28 km/h S", threat: "Industrial perimeter patrol" },
+    "East Gippsland": { risk: "Extreme", color: "#ef4444", temp: "41°C", wind: "45 km/h NW", threat: "Uncontrolled front, Evacuate Now" },
+  };
+
+  const handleSimulateAlert = () => {
+    setIsSimulating(true);
+    setSirenActive(true);
+    setTimeout(() => {
+      setIsSimulating(false);
+    }, 4000);
+  };
+
   return (
     <Layout title="Dashboard">
       <div className="ff-dashboard">
+        {/* Simulation Banner Notice if siren or simulation is active */}
+        {sirenActive && (
+          <div className="ff-live-broadcast-banner">
+            <div className="ff-broadcast-content">
+              <span className="ff-beacon-ping"></span>
+              <strong>🚨 LIVE EMERGENCY BROADCAST ACTIVE:</strong>
+              <span>Immediate evacuation recommended for East Gippsland & Alpine sectors. Emergency sirens sounding.</span>
+            </div>
+            <button className="ff-broadcast-dismiss" onClick={() => setSirenActive(false)}>Dismiss Alarm</button>
+          </div>
+        )}
+
         <section className="ff-hero">
           <div className="ff-hero-overlay"></div>
           <div className="ff-fire-particles">
@@ -140,20 +171,48 @@ export default function Dashboard() {
           </div>
 
           <div className="ff-hero-content">
-            <div>
-              <h1>FireFusion Emergency Intelligence Dashboard</h1>
-              <p>
-                AI-powered bushfire forecasting and misinformation monitoring
-                interface for Victoria.
-              </p>
+            <div className="ff-hero-header-flex">
+              <div>
+                <div className="ff-system-badge">
+                  <span className="ff-live-radar-dot"></span>
+                  DEFCON-1 LEVEL SURVEILLANCE • VICTORIA COMMAND
+                </div>
+                <h1>FireFusion Emergency Intelligence Dashboard</h1>
+                <p>
+                  AI-powered bushfire forecasting and misinformation monitoring
+                  interface for Victoria.
+                </p>
+              </div>
+
+              {/* Quick Command Actions */}
+              <div className="ff-hero-actions">
+                <button 
+                  className={`ff-action-btn ff-siren-btn ${sirenActive ? "active" : ""}`}
+                  onClick={() => setSirenActive(!sirenActive)}
+                  title="Toggle Emergency Siren"
+                >
+                  <Radio size={16} className={sirenActive ? "ff-spin-slow" : ""} />
+                  <span>{sirenActive ? "Siren Muted" : "Alert Siren"}</span>
+                </button>
+
+                <button 
+                  className={`ff-action-btn ff-sim-btn ${isSimulating ? "simulating" : ""}`}
+                  onClick={handleSimulateAlert}
+                  disabled={isSimulating}
+                >
+                  <Flame size={16} />
+                  <span>{isSimulating ? "Broadcasting..." : "Simulate Alert"}</span>
+                </button>
+              </div>
             </div>
 
             <div className="ff-summary-grid">
               <SummaryCard
                 icon={AlertTriangle}
                 label="Current Risk"
-                value="Extreme"
+                value={riskLevel}
                 tone="danger"
+                isPulsing={true}
               />
               <SummaryCard
                 icon={Bell}
@@ -213,36 +272,95 @@ export default function Dashboard() {
               </div>
             </Panel>
 
-            <Panel className="ff-map-panel">
+            {/* UPGRADED INTERACTIVE MAP PANEL */}
+            <Panel className="ff-map-panel ff-map-enhanced">
               <div className="ff-map-head">
-                <h3>Victoria Fire Risk Overview</h3>
-                <button>
-                  <Maximize2 size={16} />
-                </button>
+                <div className="ff-map-title-wrap">
+                  <Flame size={18} className="ff-map-flame-icon" />
+                  <div>
+                    <h3>Victoria Real-Time Fire Risk Map</h3>
+                    <small>Click zones to inspect live telemetry & conditions</small>
+                  </div>
+                </div>
+                <div className="ff-map-head-controls">
+                  <span className="ff-map-live-tag">● RADAR LIVE</span>
+                  <button title="Full Map View">
+                    <Maximize2 size={16} />
+                  </button>
+                </div>
               </div>
 
-              <div className="ff-map-area">
+              <div className="ff-map-area ff-map-interactive-box">
+                {/* Radar sweep animation effect */}
+                <div className="ff-radar-sweep"></div>
+
                 <div className="ff-map-legend">
+                  <span className="legend-title">Risk Scale</span>
                   <span><i className="extreme"></i>Extreme</span>
                   <span><i className="high"></i>High</span>
                   <span><i className="moderate"></i>Moderate</span>
                   <span><i className="low"></i>Low</span>
-                  <span><i className="none"></i>No Data</span>
                 </div>
 
                 <div className="ff-victoria-map">
-                  <div className="zone zone-1">Grampians<br /><small>High</small></div>
-                  <div className="zone zone-2">Dandenong Ranges<br /><small>Moderate</small></div>
-                  <div className="zone zone-3">Latrobe Valley<br /><small>Moderate</small></div>
-                  <div className="zone zone-4">East Gippsland<br /><small>Extreme</small></div>
+                  {/* Glowing Interactive Zone Nodes */}
+                  <div 
+                    className={`zone zone-1 ${selectedZone === "Grampians" ? "zone-active" : ""}`}
+                    onClick={() => setSelectedZone("Grampians")}
+                  >
+                    <span className="zone-pulse-beacon"></span>
+                    Grampians<br /><small>High Risk</small>
+                  </div>
+
+                  <div 
+                    className={`zone zone-2 ${selectedZone === "Dandenong Ranges" ? "zone-active" : ""}`}
+                    onClick={() => setSelectedZone("Dandenong Ranges")}
+                  >
+                    Dandenong Ranges<br /><small>Moderate</small>
+                  </div>
+
+                  <div 
+                    className={`zone zone-3 ${selectedZone === "Latrobe Valley" ? "zone-active" : ""}`}
+                    onClick={() => setSelectedZone("Latrobe Valley")}
+                  >
+                    Latrobe Valley<br /><small>Moderate</small>
+                  </div>
+
+                  <div 
+                    className={`zone zone-4 ${selectedZone === "East Gippsland" ? "zone-active" : ""}`}
+                    onClick={() => setSelectedZone("East Gippsland")}
+                  >
+                    <span className="zone-pulse-beacon critical-beacon"></span>
+                    East Gippsland<br /><small>🔥 Extreme</small>
+                  </div>
                 </div>
 
-                <button className="ff-map-btn">View Full Map</button>
+                {/* Live Zone Telemetry Card (Interactive on map click) */}
+                <div className="ff-map-telemetry-card">
+                  <div className="ff-telemetry-header">
+                    <strong>{selectedZone}</strong>
+                    <span 
+                      className="ff-telemetry-badge"
+                      style={{ backgroundColor: zonesData[selectedZone]?.color || '#ef4444' }}
+                    >
+                      {zonesData[selectedZone]?.risk}
+                    </span>
+                  </div>
+                  <div className="ff-telemetry-details">
+                    <div><span>Wind:</span> <b>{zonesData[selectedZone]?.wind}</b></div>
+                    <div><span>Temp:</span> <b>{zonesData[selectedZone]?.temp}</b></div>
+                    <div className="full-width"><span>Notice:</span> <small>{zonesData[selectedZone]?.threat}</small></div>
+                  </div>
+                </div>
+
+                <button className="ff-map-btn">
+                  Open Interactive Map View
+                </button>
               </div>
             </Panel>
 
             <Panel className="ff-decision-panel">
-              <PanelHeader icon={Shield} title="Decision Support" />
+              <PanelHeader icon={Shield} title="Decision Support & Automated Safeguards" />
 
               <div className="ff-decision-grid">
                 <DecisionCard
@@ -271,7 +389,13 @@ export default function Dashboard() {
 
             <Panel className="ff-chart-panel">
               <div className="ff-panel-title-row">
-                <h3>Fire Risk Trend (Next 24 Hours)</h3>
+                <div className="ff-chart-title-wrap">
+                  <Activity size={18} style={{ color: "#ef233c" }} />
+                  <div>
+                    <h3 style={{ margin: 0 }}>Fire Risk Trend & Predictive Surge (24h)</h3>
+                    <small style={{ color: "#94a3b8" }}>AI Neural Forecast based on BoM wind & fuel load projections</small>
+                  </div>
+                </div>
                 <a>View Full Analytics</a>
               </div>
 
@@ -283,16 +407,31 @@ export default function Dashboard() {
                   <span>Low</span>
                 </div>
 
-                <svg viewBox="0 0 700 170" preserveAspectRatio="none">
-                  <polyline
-                    className="ff-trend-line-animated"
-                    points="0,95 45,85 85,55 120,70 160,45 205,35 250,22 300,42 345,36 390,65 440,80 490,110 535,120 575,95 620,100 660,135 700,150"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="5"
-                    strokeLinecap="round"
-                  />
-                </svg>
+                <div className="ff-chart-svg-container">
+                  <svg viewBox="0 0 700 170" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#ef233c" stopOpacity="0.45" />
+                        <stop offset="100%" stopColor="#ef233c" stopOpacity="0.0" />
+                      </linearGradient>
+                    </defs>
+                    {/* Shaded area underneath */}
+                    <polygon
+                      points="0,95 45,85 85,55 120,70 160,45 205,35 250,22 300,42 345,36 390,65 440,80 490,110 535,120 575,95 620,100 660,135 700,150 700,170 0,170"
+                      fill="url(#chartGradient)"
+                    />
+                    <polyline
+                      className="ff-trend-line-animated"
+                      points="0,95 45,85 85,55 120,70 160,45 205,35 250,22 300,42 345,36 390,65 440,80 490,110 535,120 575,95 620,100 660,135 700,150"
+                      fill="none"
+                      stroke="#ef233c"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                    />
+                    {/* Peak Marker Dot */}
+                    <circle cx="250" cy="22" r="5" fill="#ffffff" stroke="#ef233c" strokeWidth="3" className="ff-pulse-circle" />
+                  </svg>
+                </div>
 
                 <div className="ff-x-labels">
                   <span>15:00</span>
@@ -310,33 +449,69 @@ export default function Dashboard() {
           </div>
 
           <div className="ff-column-right">
-            <Panel className="ff-incident-panel">
+            <Panel className="ff-incident-panel ff-incident-glow">
               <PanelHeader icon={Activity} title="Incident Overview" />
 
               <div className="ff-risk-header">
-                <span>Current Risk Level</span>
-                <strong>EXTREME</strong>
+                <span className="ff-risk-label-group">
+                  Current Threat Assessment
+                  <small>Victoria Command Matrix</small>
+                </span>
+                <strong className="ff-extreme-badge">
+                  <span className="ff-dot-glow"></span>
+                  EXTREME
+                </strong>
               </div>
 
               <div className="ff-risk-meter">
-                <span></span>
+                <span className="ff-risk-meter-pin"></span>
               </div>
 
               <div className="ff-metric-grid">
-                <Metric icon={Wind} title="Wind Speed" value="45 km/h NW" />
-                <Metric icon={Thermometer} title="Temperature" value="41°C" />
-                <Metric icon={Droplets} title="Humidity" value="12%" />
-                <Metric icon={Users} title="Evacuation Status" value="Active (2 zones)" />
+                {/* UPGRADED DYNAMIC WIND GAUGE */}
+                <div className="ff-metric-card ff-wind-gauge-card">
+                  <div className="ff-wind-compass-circle">
+                    <div className="ff-compass-arrow"></div>
+                    <span className="ff-compass-deg">NW</span>
+                  </div>
+                  <div>
+                    <span>Wind Velocity</span>
+                    <strong>45 km/h NW</strong>
+                    <small className="ff-metric-sub">Gusts up to 68 km/h</small>
+                  </div>
+                </div>
+
+                <Metric 
+                  icon={Thermometer} 
+                  title="Temperature" 
+                  value="41°C" 
+                  sub="Extreme Heat Wave" 
+                  accent="red" 
+                />
+                <Metric 
+                  icon={Droplets} 
+                  title="Humidity" 
+                  value="12%" 
+                  sub="Critical dryness" 
+                  accent="orange" 
+                />
+                <Metric 
+                  icon={Users} 
+                  title="Evacuation Status" 
+                  value="Active (2 zones)" 
+                  sub="4,120 residents affected" 
+                  accent="alert" 
+                />
               </div>
 
               <div className="ff-source-row">
-                <span>Data sources: BoM, CFA, VicEmergency</span>
+                <span>Data sources: BoM, CFA, VicEmergency Satellite Link</span>
                 <b>Updated: 14:30</b>
               </div>
             </Panel>
 
             <Panel className="ff-resource-panel">
-              <PanelHeader icon={Truck} title="Resource Allocation" action="View All" />
+              <PanelHeader icon={Truck} title="Resource Allocation & Readiness" action="View All" />
 
               <div className="ff-resource-list">
                 {resources.map((item) => (
@@ -347,12 +522,12 @@ export default function Dashboard() {
               <div className="ff-legend">
                 <span><i className="safe"></i>Optimal</span>
                 <span><i className="warning"></i>Stretched</span>
-                <span><i className="critical"></i>Critical</span>
+                <span><i className="critical"></i>Critical Shortage</span>
               </div>
             </Panel>
 
             <Panel className="ff-advice-panel">
-              <PanelHeader icon={Radio} title="Emergency Advice" action="View All" />
+              <PanelHeader icon={Radio} title="Emergency Advice & Field Guides" action="View All" />
 
               <div className="ff-advice-grid">
                 {adviceCards.map((card) => (
@@ -412,13 +587,30 @@ function PanelHeader({ icon: Icon, title, action }) {
   );
 }
 
-function SummaryCard({ icon: Icon, label, value, tone }) {
+function SummaryCard({ icon: Icon, label, value, tone, isPulsing }) {
   return (
-    <article className="ff-summary-card">
-      <Icon size={26} />
+    <article className={`ff-summary-card ${isPulsing ? "ff-summary-pulse" : ""}`}>
+      <div className="ff-summary-icon-wrap">
+        <Icon size={24} />
+      </div>
       <div>
         <span>{label}</span>
         <strong className={`ff-tone-${tone}`}>{value}</strong>
+      </div>
+    </article>
+  );
+}
+
+function Metric({ icon: Icon, title, value, sub, accent = "blue" }) {
+  return (
+    <article className={`ff-metric-card ff-metric-card-${accent}`}>
+      <div className="ff-metric-icon-box">
+        <Icon size={22} />
+      </div>
+      <div>
+        <span>{title}</span>
+        <strong>{value}</strong>
+        {sub && <small className="ff-metric-sub">{sub}</small>}
       </div>
     </article>
   );
@@ -485,17 +677,6 @@ function UpdateCard({ agency, title, text, time, type, color }) {
   );
 }
 
-function Metric({ icon: Icon, title, value }) {
-  return (
-    <article className="ff-metric-card">
-      <Icon size={28} />
-      <div>
-        <span>{title}</span>
-        <strong>{value}</strong>
-      </div>
-    </article>
-  );
-}
 
 function ResourceRow({ icon: Icon, name, percent, value, status }) {
   return (
