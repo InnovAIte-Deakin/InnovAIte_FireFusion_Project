@@ -471,8 +471,9 @@ export default function Dashboard() {
                 {/* UPGRADED DYNAMIC WIND GAUGE */}
                 <div className="ff-metric-card ff-wind-gauge-card">
                   <div className="ff-wind-compass-circle">
-                    <div className="ff-compass-arrow"></div>
                     <span className="ff-compass-deg">NW</span>
+                    <div className="ff-compass-arrow"></div>
+                    <div className="ff-compass-center-dot"></div>
                   </div>
                   <div>
                     <span>Wind Velocity</span>
