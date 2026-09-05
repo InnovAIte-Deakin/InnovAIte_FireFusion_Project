@@ -41,6 +41,34 @@ jobs:
             pip install -r backend/model-api/requirements.txt
           fi
 
+  kubernetes-manifest-validation:
+    name: Kubernetes Manifest Validation
+    runs-on: ubuntu-latest
+    needs: ci
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Render FireFusion Kubernetes packages
+        run: |
+          kubectl kustomize backend/deployment/kubernetes/base > /tmp/firefusion-k8s.yaml
+          kubectl kustomize backend/deployment/kubernetes/local > /tmp/firefusion-k8s-local.yaml
+          kubectl kustomize backend/deployment/kubernetes/local-bootstrap > /tmp/firefusion-k8s-bootstrap.yaml
+
+          test -s /tmp/firefusion-k8s.yaml
+          test -s /tmp/firefusion-k8s-local.yaml
+          test -s /tmp/firefusion-k8s-bootstrap.yaml
+
+          grep -q "name: firefusion-api" /tmp/firefusion-k8s.yaml
+          grep -q "name: aggregator-api" /tmp/firefusion-k8s.yaml
+          grep -q "name: model-api" /tmp/firefusion-k8s.yaml
+          grep -q "name: postgres" /tmp/firefusion-k8s-local.yaml
+          grep -q "name: rabbitmq" /tmp/firefusion-k8s-bootstrap.yaml
+
   backend-tests:
     name: Backend Integration Tests
     runs-on: ubuntu-latest
@@ -79,9 +107,6 @@ jobs:
       - name: Seed a sample prediction so the live-feature checks have data
         working-directory: backend
         run: |
-          # Without a cached prediction the endpoint correctly returns an empty
-          # FeatureCollection, and the per-feature contract checks have nothing to
-          # validate. Seeding a known-good payload makes those checks meaningful.
           python3 - <<'PY' > /tmp/prediction.json
           import json
           print(json.dumps({
@@ -111,10 +136,6 @@ jobs:
 
       - name: Verify the Fire Risk Map contract tests actually ran
         run: |
-          # Integration tests skip when a service is unreachable. A silent skip
-          # would let broken integration work merge, so fail the job instead.
-          # An empty forecast is a valid contract response, so only an
-          # unreachable stack is treated as a failure here.
           pytest backend/tests/test_fire_risk_map_contract.py -q -rs > contract.log 2>&1 || true
           cat contract.log
           if grep -q "not reachable" contract.log; then
@@ -158,11 +179,10 @@ jobs:
             dockerfile: ./backend/aggregator-api/Dockerfile
             image: ghcr.io/${{ github.repository }}/aggregator-api
 
-          # Enable once Dockerfile is added
-          # - service: model-api
-          #   context: ./backend/model-api
-          #   dockerfile: ./backend/model-api/Dockerfile
-          #   image: ghcr.io/${{ github.repository }}/model-api
+          - service: model-api
+            context: ./backend/model-api
+            dockerfile: ./backend/model-api/Dockerfile
+            image: ghcr.io/${{ github.repository }}/model-api
 
     steps:
       - name: Checkout repository

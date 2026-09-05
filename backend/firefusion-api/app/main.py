@@ -6,6 +6,7 @@ from .internal.services.forecast_service import ForecastService
 from .internal.services.messaging_service import MessagingService
 from fastapi.middleware.cors import CORSMiddleware
 
+
 @asynccontextmanager
 async def init_lifespan_objects(app: FastAPI):
     messaging_service = await MessagingService.create()
@@ -17,6 +18,7 @@ async def init_lifespan_objects(app: FastAPI):
 
     await messaging_service.close()
 
+
 app = FastAPI(lifespan=init_lifespan_objects)
 
 app.add_middleware(
@@ -26,6 +28,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
+
+
+@app.get("/health", tags=["health"])
+async def health():
+    """Lightweight liveness endpoint for container and Kubernetes probes."""
+    return {"status": "healthy", "service": "firefusion-api"}
+
 
 app.include_router(hello.router)
 app.include_router(forecast.router)
