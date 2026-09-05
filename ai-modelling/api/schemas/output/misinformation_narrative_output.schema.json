@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "misinformation_narrative_output.schema.json",
+  "title": "Misinformation Narrative Clustering Output",
+  "description": "Output schema for the LLM-based narrative clustering pipeline. Groups social media posts into coherent misinformation narratives with severity ratings for emergency operations triage.",
+  "type": "object",
+  "required": [
+    "narratives"
+  ],
+  "properties": {
+    "narratives": {
+      "type": "array",
+      "description": "List of identified misinformation narrative clusters.",
+      "items": {
+        "type": "object",
+        "required": [
+          "narrative_id",
+          "narrative_summary",
+          "severity",
+          "post_count",
+          "posts",
+          "timestamp_earliest",
+          "timestamp_latest"
+        ],
+        "properties": {
+          "narrative_id": {
+            "type": "string",
+            "description": "Unique identifier for the narrative cluster, e.g. 'nar_001'.",
+            "pattern": "^nar_\\d+$"
+          },
+          "narrative_summary": {
+            "type": "string",
+            "description": "Natural-language summary of the misinformation narrative."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+            "description": "Severity rating. CRITICAL = immediate life-safety harm; HIGH = materially false claims altering decisions; MEDIUM = unverified/speculative with moderate harm; LOW = weak/low-impact misleading content."
+          },
+          "post_count": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of posts in this narrative. Must equal the length of the posts array."
+          },
+          "posts": {
+            "type": "array",
+            "description": "Posts belonging to this narrative cluster.",
+            "items": {
+              "type": "object",
+              "required": [
+                "post_id",
+                "key_claim",
+                "platform"
+              ],
+              "properties": {
+                "post_id": {
+                  "type": "string",
+                  "description": "Identifier of the input post. Must match a post ID from the input data."
+                },
+                "key_claim": {
+                  "type": "string",
+                  "description": "The key misinformation claim extracted from this post."
+                },
+                "platform": {
+                  "type": "string",
+                  "description": "Source platform of the post, e.g. 'TWITTER', 'FACEBOOK'."
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "timestamp_earliest": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp of the earliest post in this narrative cluster."
+          },
+          "timestamp_latest": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 timestamp of the latest post in this narrative cluster."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
