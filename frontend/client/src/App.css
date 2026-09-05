@@ -2015,3 +2015,507 @@ html[data-theme="dark"] .ff-theme-row {
     font-size: 10px;
   }
 }
+
+/* ==========================================================
+   FIRE FUSION EMERGENCY INTELLIGENCE COMMAND UPGRADES
+   ========================================================== */
+
+/* 1. Live Broadcast Alert Banner */
+.ff-live-broadcast-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 18px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #991b1b, #ef233c);
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(239, 35, 60, 0.45);
+  animation: bannerPulse 2s infinite ease-in-out;
+}
+
+@keyframes bannerPulse {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(239, 35, 60, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 28px rgba(239, 35, 60, 0.85);
+  }
+}
+
+.ff-broadcast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+
+.ff-beacon-ping {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  animation: pulseGlow 1.2s infinite;
+}
+
+.ff-broadcast-dismiss {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.25);
+  color: #ffffff;
+  padding: 5px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.ff-broadcast-dismiss:hover {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+/* 2. Hero Header & Quick Command Actions */
+.ff-hero-header-flex {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.ff-system-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239, 35, 60, 0.2);
+  border: 1px solid rgba(239, 35, 60, 0.4);
+  color: #fca5a5;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  backdrop-filter: blur(4px);
+}
+
+.ff-live-radar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef233c;
+  animation: pulseGlow 1.2s infinite;
+}
+
+.ff-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ff-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ff-siren-btn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+}
+
+.ff-siren-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ff-siren-btn.active {
+  background: #ef233c;
+  border-color: #f87171;
+  box-shadow: 0 0 16px rgba(239, 35, 60, 0.6);
+  animation: pulseGlow 1.2s infinite;
+}
+
+.ff-spin-slow {
+  animation: spinSlow 3s linear infinite;
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ff-sim-btn {
+  background: linear-gradient(135deg, #ff5722, #ea580c);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.4);
+}
+
+.ff-sim-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(234, 88, 12, 0.6);
+}
+
+.ff-sim-btn.simulating {
+  background: #dc2626;
+  animation: pulseGlow 1s infinite;
+}
+
+/* 3. Pulsing Summary Card Tone */
+.ff-summary-pulse {
+  border-color: rgba(239, 35, 60, 0.65) !important;
+  box-shadow: 0 0 20px rgba(239, 35, 60, 0.25);
+  animation: summaryCardGlow 2.5s infinite ease-in-out;
+}
+
+@keyframes summaryCardGlow {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(239, 35, 60, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(239, 35, 60, 0.45);
+  }
+}
+
+.ff-summary-icon-wrap {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* 4. Enhanced Interactive Map */
+.ff-map-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+.ff-map-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ff-map-flame-icon {
+  color: #f97316;
+  filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.6));
+}
+
+.ff-map-head-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ff-map-live-tag {
+  font-size: 10px;
+  font-weight: 800;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  padding: 3px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.5px;
+}
+
+.ff-map-interactive-box {
+  position: relative;
+  min-height: 280px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+}
+
+/* Radar Sweep Effect across map */
+.ff-radar-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(34, 197, 94, 0) 0%, rgba(34, 197, 94, 0.08) 50%, rgba(34, 197, 94, 0.25) 100%);
+  pointer-events: none;
+  z-index: 2;
+  animation: radarScan 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes radarScan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+/* Active & Beacons for zones */
+.zone {
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.zone:hover {
+  transform: scale(1.08);
+  filter: brightness(1.2);
+  z-index: 10;
+}
+
+.zone-active {
+  box-shadow: 0 0 0 3px #ffffff, 0 0 25px rgba(255, 255, 255, 0.8) !important;
+  transform: scale(1.1);
+  z-index: 10;
+}
+
+.zone-pulse-beacon {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ffedd5;
+  box-shadow: 0 0 8px #f97316;
+  animation: beaconPulse 1.5s infinite;
+}
+
+.zone-pulse-beacon.critical-beacon {
+  background: #fee2e2;
+  box-shadow: 0 0 10px #ef4444;
+  animation: beaconPulse 0.9s infinite;
+}
+
+@keyframes beaconPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+}
+
+/* Map Telemetry Inspector Card */
+.ff-map-telemetry-card {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 5;
+  background: rgba(6, 24, 50, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  width: 210px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  animation: slideUpFade 0.3s ease-out;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ff-telemetry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ff-telemetry-header strong {
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.ff-telemetry-badge {
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.ff-telemetry-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.ff-telemetry-details span {
+  color: #64748b;
+}
+
+.ff-telemetry-details b {
+  color: #f1f5f9;
+}
+
+.ff-telemetry-details .full-width {
+  grid-column: 1 / -1;
+  margin-top: 3px;
+  line-height: 1.3;
+}
+
+.ff-telemetry-details small {
+  color: #fca5a5;
+  font-weight: 600;
+}
+
+/* 5. Wind Compass / Radar Gauge */
+.ff-wind-gauge-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(30, 41, 59, 0.45));
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.1);
+}
+
+.ff-wind-compass-circle {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.ff-compass-arrow {
+  position: absolute;
+  width: 3px;
+  height: 28px;
+  background: linear-gradient(to top, #ef4444 50%, #38bdf8 50%);
+  border-radius: 2px;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+  animation: compassSway 4s ease-in-out infinite alternate;
+}
+
+@keyframes compassSway {
+  0% {
+    transform: rotate(-48deg);
+  }
+  50% {
+    transform: rotate(-42deg);
+  }
+  100% {
+    transform: rotate(-50deg);
+  }
+}
+
+.ff-compass-deg {
+  position: absolute;
+  font-size: 8px;
+  font-weight: 900;
+  color: #ffffff;
+  top: 1px;
+}
+
+.ff-metric-sub {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.ff-metric-icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ff-metric-card-red .ff-metric-icon-box {
+  background: rgba(239, 35, 60, 0.15);
+  color: #ef233c;
+}
+
+.ff-metric-card-orange .ff-metric-icon-box {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+.ff-metric-card-alert .ff-metric-icon-box {
+  background: rgba(220, 38, 38, 0.2);
+  color: #dc2626;
+  animation: pulseGlow 1.5s infinite;
+}
+
+/* 6. Chart Enhancements */
+.ff-chart-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ff-chart-svg-container {
+  position: relative;
+  width: 100%;
+}
+
+.ff-pulse-circle {
+  animation: beaconPulse 1.2s infinite;
+}
+
+/* 7. Incident Panel Extreme Glow */
+.ff-extreme-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 7px;
+  background: #ef233c;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 16px rgba(239, 35, 60, 0.5);
+  animation: bannerPulse 2s infinite ease-in-out;
+}
+
+.ff-dot-glow {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.ff-risk-label-group small {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
