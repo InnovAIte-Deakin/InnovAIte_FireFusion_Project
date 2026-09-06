@@ -19,38 +19,81 @@ from sklearn.metrics import (
 from torch.utils.data import DataLoader
 
 from src.models.misinformation.deberta import (
-    DEFAULT_ID2LABEL,
-    DEFAULT_LABEL2ID,
-    TextClsDataset,
-    collate_text_cls_batch,
-    load_classifier_from_checkpoint,
-    load_table,
+    DEFAULT_TASKS,
+    MISSING_LABEL,
+    MultiTaskDeberta,
+    MultiTaskTextClsDataset,
+    collate_multitask_batch,
+    load_multitask_from_checkpoint,
+    load_multitask_table,
 )
 
 LOGGER = logging.getLogger(__name__)
 
 TEXT_COLUMN = "claim"
-LABEL_COLUMN = "label"
-LABEL_IDS = sorted(DEFAULT_ID2LABEL)
-TARGET_NAMES = [DEFAULT_ID2LABEL[label_id] for label_id in LABEL_IDS]
+
+# Maps each task name to the label column expected in the test file. A task
+# whose column is missing from the file is simply skipped for every row
+# (see load_multitask_table) rather than failing the whole run - useful when
+# a given test set only covers e.g. misinfo + urgency.
+TASK_LABEL_COLUMNS = {
+    "misinfo": "misinfo_label",
+    "urgency": "urgency_label",
+    "humanitarian": "humanitarian_label",
+}
+
+ALL_TASK_NAMES = tuple(task.name for task in DEFAULT_TASKS)
+
+# Which class name counts as "positive" for a binary task's precision/recall/
+# binary-F1. Looked up by name (not by id) so it stays correct no matter how
+# deberta.py's TaskSpec happens to encode a task - misinfo uses truth-value
+# labels ({0: "FALSE", 1: "TRUE"}): "FALSE" means the claim is false, i.e. it
+# IS misinformation, so "FALSE" - not "TRUE" - is the positive class here.
+BINARY_POSITIVE_LABEL = {"misinfo": "FALSE"}
+
+
+def _resolve_positive_id(task: str, id2label: dict[int, str]) -> int | None:
+    """Find the label id matching this task's configured positive class name.
+
+    Returns None (skip binary metrics for this task) if the task has no
+    configured positive class, or if none of its labels match by name -
+    never falls back to guessing a label id by position.
+    """
+    target_name = BINARY_POSITIVE_LABEL.get(task)
+    if target_name is None:
+        return None
+    for label_id, name in id2label.items():
+        if name.strip().lower() == target_name.strip().lower():
+            return label_id
+    LOGGER.warning(
+        "Task %r is binary but no label matches configured positive class "
+        "%r (labels present: %s); skipping binary precision/recall/F1.",
+        task,
+        target_name,
+        list(id2label.values()),
+    )
+    return None
 
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(
-        description="Evaluate a trained DeBERTa misinformation classifier."
+        description="Evaluate a trained multi-task DeBERTa checkpoint "
+        "(misinfo / urgency / humanitarian heads)."
     )
     parser.add_argument(
         "--checkpoint",
         type=Path,
         required=True,
-        help="Path to the trained Hugging Face checkpoint directory.",
+        help="Path to a multi-task checkpoint directory saved by "
+        "save_multitask_checkpoint (must contain tasks.json + model.pt).",
     )
     parser.add_argument(
         "--test-data",
         type=Path,
         required=True,
-        help="Path to a CSV or JSON test dataset containing claim and label columns.",
+        help="Path to a CSV or JSON test dataset with a shared text column "
+        "and one label column per task being evaluated.",
     )
     parser.add_argument(
         "--output-json",
@@ -59,10 +102,19 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         help="Path where evaluation metrics will be saved as JSON.",
     )
     parser.add_argument(
-        "--confusion-matrix-image",
+        "--tasks",
+        nargs="+",
+        choices=ALL_TASK_NAMES,
+        default=None,
+        help="Which task heads to evaluate (default: every task present in "
+        "both the checkpoint and the test data).",
+    )
+    parser.add_argument(
+        "--confusion-matrix-dir",
         type=Path,
         default=None,
-        help="Optional path for a PNG/JPG/PDF confusion-matrix image.",
+        help="Optional directory for per-task confusion-matrix images "
+        "(written as <task>_confusion_matrix.png).",
     )
     parser.add_argument(
         "--batch-size",
@@ -73,8 +125,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--max-len",
         type=int,
-        default=256,
-        help="Maximum token sequence length (default: 256).",
+        default=None,
+        help="Maximum token sequence length. Defaults to the value stored "
+        "in the checkpoint's tasks.json.",
     )
     parser.add_argument(
         "--num-workers",
@@ -112,11 +165,17 @@ def validate_args(args: argparse.Namespace) -> None:
         raise NotADirectoryError(
             f"Checkpoint path must be a directory: {args.checkpoint}"
         )
+    if not (args.checkpoint / "tasks.json").is_file():
+        raise FileNotFoundError(
+            f"{args.checkpoint} has no tasks.json - this looks like an older "
+            "single-task checkpoint. Re-save it with save_multitask_checkpoint, "
+            "or evaluate it with the single-task script instead."
+        )
     if not args.test_data.is_file():
         raise FileNotFoundError(f"Test dataset does not exist: {args.test_data}")
     if args.batch_size <= 0:
         raise ValueError("batch-size must be greater than zero")
-    if args.max_len <= 0:
+    if args.max_len is not None and args.max_len <= 0:
         raise ValueError("max-len must be greater than zero")
     if args.num_workers < 0:
         raise ValueError("num-workers must be zero or greater")
@@ -139,91 +198,122 @@ def make_json_serializable(value: Any) -> Any:
 
 def generate_predictions(
     *,
-    model: Any,
+    model: MultiTaskDeberta,
     data_loader: DataLoader,
     device: torch.device,
-) -> tuple[list[int], list[int]]:
-    """Run batched inference and return true and predicted label IDs."""
+    tasks: Sequence[str],
+) -> dict[str, tuple[list[int], list[int]]]:
+    """
+    Run batched inference across every requested head and return, per task,
+    the true and predicted label IDs - restricted to rows that actually carry
+    a label for that task (MISSING_LABEL rows are excluded per task, not
+    dropped from the batch as a whole).
+    """
     model.to(device)
     model.eval()
 
-    true_labels: list[int] = []
-    predicted_labels: list[int] = []
+    true_labels: dict[str, list[int]] = {task: [] for task in tasks}
+    predicted_labels: dict[str, list[int]] = {task: [] for task in tasks}
 
     with torch.inference_mode():
         for batch in data_loader:
-            labels = batch.pop("labels").to(device)
+            task_label_tensors = {
+                task: batch.pop(f"labels_{task}").to(device) for task in tasks
+            }
             inputs = {name: tensor.to(device) for name, tensor in batch.items()}
-            logits = model(**inputs).logits
-            predictions = torch.argmax(logits, dim=-1)
+            all_logits = model(**inputs, tasks=list(tasks))
 
-            true_labels.extend(labels.cpu().tolist())
-            predicted_labels.extend(predictions.cpu().tolist())
+            for task in tasks:
+                labels = task_label_tensors[task]
+                keep = labels != MISSING_LABEL
+                if not torch.any(keep):
+                    continue
+                predictions = torch.argmax(all_logits[task], dim=-1)
+                true_labels[task].extend(labels[keep].cpu().tolist())
+                predicted_labels[task].extend(predictions[keep].cpu().tolist())
 
-    return true_labels, predicted_labels
+    return {task: (true_labels[task], predicted_labels[task]) for task in tasks}
 
 
-def calculate_metrics(
+def calculate_task_metrics(
+    task: str,
     true_labels: Sequence[int],
     predicted_labels: Sequence[int],
+    id2label: dict[int, str],
 ) -> dict[str, Any]:
-    """Calculate the requested binary and macro evaluation metrics."""
+    """
+    Calculate metrics for a single task head. Binary precision/recall/F1 are
+    only added for 2-class heads with a configured positive class (misinfo);
+    multi-class heads (urgency, humanitarian) rely on macro/weighted F1
+    instead, since "binary" precision isn't meaningful once there are 3+
+    classes.
+    """
     if len(true_labels) != len(predicted_labels):
         raise ValueError("true_labels and predicted_labels must have the same length")
     if not true_labels:
-        raise ValueError("Cannot calculate metrics for an empty test dataset")
+        raise ValueError(
+            "No labelled examples for this task in the test dataset - check "
+            "that its label column is present and populated."
+        )
 
-    matrix = confusion_matrix(true_labels, predicted_labels, labels=LABEL_IDS)
+    label_ids = sorted(id2label)
+    target_names = [id2label[label_id] for label_id in label_ids]
+
+    matrix = confusion_matrix(true_labels, predicted_labels, labels=label_ids)
     report = classification_report(
         true_labels,
         predicted_labels,
-        labels=LABEL_IDS,
-        target_names=TARGET_NAMES,
+        labels=label_ids,
+        target_names=target_names,
         output_dict=True,
         zero_division=0,
     )
 
-    metrics = {
+    metrics: dict[str, Any] = {
+        "num_examples": len(true_labels),
         "accuracy": accuracy_score(true_labels, predicted_labels),
-        "precision": precision_score(
-            true_labels,
-            predicted_labels,
-            pos_label=1,
-            average="binary",
-            zero_division=0,
-        ),
-        "recall": recall_score(
-            true_labels,
-            predicted_labels,
-            pos_label=1,
-            average="binary",
-            zero_division=0,
-        ),
-        "binary_f1_score": f1_score(
-            true_labels,
-            predicted_labels,
-            pos_label=1,
-            average="binary",
-            zero_division=0,
-        ),
         "macro_f1_score": f1_score(
             true_labels,
             predicted_labels,
-            labels=LABEL_IDS,
+            labels=label_ids,
             average="macro",
+            zero_division=0,
+        ),
+        "weighted_f1_score": f1_score(
+            true_labels,
+            predicted_labels,
+            labels=label_ids,
+            average="weighted",
             zero_division=0,
         ),
         "confusion_matrix": matrix,
         "classification_report": report,
     }
+
+    if len(label_ids) == 2:
+        pos_id = _resolve_positive_id(task, id2label)
+        if pos_id is not None:
+            metrics["positive_class"] = id2label[pos_id]
+            metrics["precision"] = precision_score(
+                true_labels, predicted_labels, pos_label=pos_id, average="binary", zero_division=0
+            )
+            metrics["recall"] = recall_score(
+                true_labels, predicted_labels, pos_label=pos_id, average="binary", zero_division=0
+            )
+            metrics["binary_f1_score"] = f1_score(
+                true_labels, predicted_labels, pos_label=pos_id, average="binary", zero_division=0
+            )
+
     return make_json_serializable(metrics)
 
 
 def save_confusion_matrix(
     matrix: Sequence[Sequence[int]],
+    target_names: Sequence[str],
+    title: str,
     output_path: Path,
 ) -> None:
-    """Save a labelled confusion matrix as an image."""
+    """Save a labelled confusion matrix as an image for one task."""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -233,11 +323,11 @@ def save_confusion_matrix(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     display = ConfusionMatrixDisplay(
         confusion_matrix=np.asarray(matrix, dtype=int),
-        display_labels=TARGET_NAMES,
+        display_labels=list(target_names),
     )
     figure, axis = plt.subplots(figsize=(7, 6))
     display.plot(ax=axis, cmap="Blues", values_format="d", colorbar=False)
-    axis.set_title("DeBERTa Test Confusion Matrix")
+    axis.set_title(title)
     figure.tight_layout()
     figure.savefig(output_path, dpi=200, bbox_inches="tight")
     plt.close(figure)
@@ -249,33 +339,52 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
     device = select_device(args.device)
     LOGGER.info("Using device: %s", device)
 
-    tokenizer, model = load_classifier_from_checkpoint(args.checkpoint)
+    tokenizer, model, checkpoint_max_len = load_multitask_from_checkpoint(
+        args.checkpoint, device=device
+    )
+    max_len = args.max_len if args.max_len is not None else checkpoint_max_len
 
-    # Keep evaluation output aligned with the project's shared binary mapping,
-    # even if an older checkpoint contains generic LABEL_0/LABEL_1 names.
-    model.config.id2label = dict(DEFAULT_ID2LABEL)
-    model.config.label2id = dict(DEFAULT_LABEL2ID)
-
-    num_labels = int(getattr(model.config, "num_labels", len(LABEL_IDS)))
-    if num_labels != len(LABEL_IDS):
+    requested_tasks = args.tasks if args.tasks is not None else list(model.tasks)
+    unknown = [task for task in requested_tasks if task not in model.tasks]
+    if unknown:
         raise ValueError(
-            f"Expected a binary classifier with {len(LABEL_IDS)} labels, "
-            f"but checkpoint reports {num_labels}"
+            f"Checkpoint has no head(s) for {unknown}; "
+            f"available heads: {sorted(model.tasks)}"
         )
 
-    test_frame = load_table(
+    task_label_cols = {
+        task: TASK_LABEL_COLUMNS[task]
+        for task in requested_tasks
+        if task in TASK_LABEL_COLUMNS
+    }
+    test_frame = load_multitask_table(
         args.test_data,
         text_col=TEXT_COLUMN,
-        label_col=LABEL_COLUMN,
+        task_label_cols=task_label_cols,
     )
-    if test_frame.empty:
-        raise ValueError(f"Test dataset is empty: {args.test_data}")
 
-    dataset = TextClsDataset(
+    # Drop any requested task that turned out to have zero usable labels in
+    # this particular file, rather than failing the whole evaluation run.
+    tasks = [
+        task
+        for task in requested_tasks
+        if not bool((test_frame[f"label_{task}"] == MISSING_LABEL).all())
+    ]
+    skipped = sorted(set(requested_tasks) - set(tasks))
+    if skipped:
+        LOGGER.warning(
+            "Skipping task(s) with no usable labels in %s: %s",
+            args.test_data,
+            skipped,
+        )
+    if not tasks:
+        raise ValueError(f"No requested task has usable labels in {args.test_data}")
+
+    dataset = MultiTaskTextClsDataset(
         texts=test_frame["text"].tolist(),
-        labels=test_frame["label"].tolist(),
+        task_labels={task: test_frame[f"label_{task}"].tolist() for task in tasks},
         tokenizer=tokenizer,
-        max_len=args.max_len,
+        max_len=max_len,
     )
     data_loader = DataLoader(
         dataset,
@@ -283,28 +392,48 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         shuffle=False,
         num_workers=args.num_workers,
         pin_memory=device.type == "cuda",
-        collate_fn=collate_text_cls_batch,
+        collate_fn=collate_multitask_batch,
     )
 
-    true_labels, predicted_labels = generate_predictions(
+    predictions = generate_predictions(
         model=model,
         data_loader=data_loader,
         device=device,
+        tasks=tasks,
     )
-    metrics = calculate_metrics(true_labels, predicted_labels)
 
     results: dict[str, Any] = {
         "checkpoint": str(args.checkpoint.resolve()),
         "test_dataset": str(args.test_data.resolve()),
-        "num_test_examples": len(true_labels),
         "device": str(device),
         "text_field": TEXT_COLUMN,
-        "target_field": LABEL_COLUMN,
-        "label_mapping": {
-            str(label_id): DEFAULT_ID2LABEL[label_id] for label_id in LABEL_IDS
-        },
-        "metrics": metrics,
+        "tasks": {},
     }
+
+    if args.confusion_matrix_dir is not None:
+        args.confusion_matrix_dir.mkdir(parents=True, exist_ok=True)
+
+    for task in tasks:
+        true_l, pred_l = predictions[task]
+        id2label = model.tasks[task].id2label
+        task_metrics = calculate_task_metrics(task, true_l, pred_l, id2label)
+
+        results["tasks"][task] = {
+            "label_mapping": {str(k): v for k, v in id2label.items()},
+            "num_test_examples": task_metrics["num_examples"],
+            "metrics": task_metrics,
+        }
+
+        if args.confusion_matrix_dir is not None:
+            label_ids = sorted(id2label)
+            image_path = args.confusion_matrix_dir / f"{task}_confusion_matrix.png"
+            save_confusion_matrix(
+                task_metrics["confusion_matrix"],
+                [id2label[i] for i in label_ids],
+                f"{task} - Test Confusion Matrix",
+                image_path,
+            )
+            LOGGER.info("Saved %s confusion matrix to %s", task, image_path)
 
     args.output_json.parent.mkdir(parents=True, exist_ok=True)
     args.output_json.write_text(
@@ -312,15 +441,6 @@ def evaluate(args: argparse.Namespace) -> dict[str, Any]:
         encoding="utf-8",
     )
     LOGGER.info("Saved evaluation metrics to %s", args.output_json)
-
-    if args.confusion_matrix_image is not None:
-        save_confusion_matrix(
-            metrics["confusion_matrix"],
-            args.confusion_matrix_image,
-        )
-        LOGGER.info(
-            "Saved confusion matrix image to %s", args.confusion_matrix_image
-        )
 
     return results
 
@@ -334,15 +454,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parse_args(argv)
     results = evaluate(args)
 
-    metrics = results["metrics"]
-    LOGGER.info(
-        "Accuracy=%.4f | Precision=%.4f | Recall=%.4f | Binary F1=%.4f | Macro F1=%.4f",
-        metrics["accuracy"],
-        metrics["precision"],
-        metrics["recall"],
-        metrics["binary_f1_score"],
-        metrics["macro_f1_score"],
-    )
+    for task, task_results in results["tasks"].items():
+        metrics = task_results["metrics"]
+        if "binary_f1_score" in metrics:
+            LOGGER.info(
+                "[%s] n=%d Accuracy=%.4f | Precision=%.4f | Recall=%.4f | "
+                "Binary F1=%.4f | Macro F1=%.4f",
+                task,
+                metrics["num_examples"],
+                metrics["accuracy"],
+                metrics["precision"],
+                metrics["recall"],
+                metrics["binary_f1_score"],
+                metrics["macro_f1_score"],
+            )
+        else:
+            LOGGER.info(
+                "[%s] n=%d Accuracy=%.4f | Macro F1=%.4f | Weighted F1=%.4f",
+                task,
+                metrics["num_examples"],
+                metrics["accuracy"],
+                metrics["macro_f1_score"],
+                metrics["weighted_f1_score"],
+            )
     return 0
 
 
