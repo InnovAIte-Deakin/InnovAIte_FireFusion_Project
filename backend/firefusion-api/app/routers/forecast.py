@@ -1,9 +1,9 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
+from redis.exceptions import RedisError
 from ..internal.services.forecast_service import ForecastService
 from ..internal.services.websocket_connection_manager import ws_manager
-from ..internal.services.caching_service import cache_client
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,11 @@ async def websocket_endpoint(websocket: WebSocket):
         503: {"description": "Forecast data temporarily unavailable"},
     },
 )
-async def get_bushfire_forecast(service: ForecastService = Depends(ForecastService)):
+
+
+async def get_bushfire_forecast(
+    service: ForecastService = Depends(ForecastService),
+):
     """Serve Fire Risk Map data as a GeoJSON FeatureCollection.
 
     Always returns a valid FeatureCollection so the map can render without
@@ -63,6 +67,11 @@ async def get_bushfire_forecast(service: ForecastService = Depends(ForecastServi
     """
     try:
         return await service.fetch_predictions()
-    except Exception:
-        logger.exception("Failed to fetch bushfire forecast")
-        raise HTTPException(status_code=503, detail="Forecast data temporarily unavailable")
+    except RedisError as exc:
+        logger.exception(
+            "Failed to fetch bushfire forecast from Redis"
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Forecast data temporarily unavailable",
+        ) from exc

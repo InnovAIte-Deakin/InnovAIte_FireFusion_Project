@@ -1,6 +1,8 @@
 import json
 import logging
 
+from pydantic import ValidationError
+
 from .caching_service import cache_client
 from .websocket_connection_manager import ws_manager
 from ..models.geojson import FeatureCollection
@@ -97,10 +99,10 @@ class ForecastService:
             return FeatureCollection(**payload).model_dump(
                 exclude_none=True
             )
-        except Exception:
+        except ValidationError:
             logger.warning(
                 "Cached prediction did not match the GeoJSON schema; "
                 "returning empty FeatureCollection"
             )
             return _empty()
-        
+
