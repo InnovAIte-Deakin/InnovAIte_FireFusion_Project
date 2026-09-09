@@ -1,6 +1,5 @@
 .env
-logs/
-data/raw/*
-data/processed/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
+# Ignore generated ENSO data files
+data/raw/*.ascii
+data/processed/*.csv
+datasets/enso/*.csv
