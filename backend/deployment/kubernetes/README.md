@@ -23,7 +23,7 @@ The AI Modelling inference API is also a separate cross-stream service. `AI_MODE
 
 ## Local Kubernetes validation on Windows
 
-The `local/` overlay is for a disposable developer `kind` cluster only. It adds a local PostgreSQL instance, test-only credentials, the three locally built `k8s-test` API images and `imagePullPolicy: Never` so Kubernetes uses images loaded directly into the kind node.
+The `local/` overlay is for a disposable developer `kind` cluster only. It adds a local PostgreSQL instance, test-only credentials, local browser CORS origins, the three locally built `k8s-test` API images and `imagePullPolicy: Never` so Kubernetes uses images loaded directly into the kind node.
 
 Prerequisites:
 
@@ -54,22 +54,28 @@ kubectl port-forward svc/firefusion-api -n firefusion 18080:80
 
 Then open `http://localhost:18080/health`.
 
-The credentials and PostgreSQL deployment under `local/` are intentionally development-only and must not be used in a shared or production environment.
+The credentials, local CORS origins and PostgreSQL deployment under `local/` are intentionally development-only and must not be used in a shared or production environment.
 
 ## Shared/cloud deployment prerequisites
 
 1. A working Kubernetes cluster and configured `kubectl` context.
 2. Access to the FireFusion GHCR images.
 3. Reachable PostgreSQL connection URLs for FireFusion and Aggregator.
-4. An Aggregator API key.
+4. An API key for protected internal service-to-service routes.
+5. The allowed dashboard browser origin or origins for the target environment.
 
-Export the required secret values:
+Export the required environment-specific values:
 
 ```bash
 export DB_URL='postgresql://...'
 export RELATIONAL_DB_URL='postgresql://...'
 export API_KEY='...'
+export CORS_ALLOWED_ORIGINS='https://dashboard.example.com'
 ```
+
+`API_KEY` is injected into the Kubernetes Secret at deploy time and is consumed by the protected internal services, including `aggregator-api` and `model-api`. It must not be committed to the repository. For a managed cloud environment, the provider-specific deployment layer should source this value from the approved secret manager such as AWS Secrets Manager, Azure Key Vault or the GCP equivalent.
+
+`CORS_ALLOWED_ORIGINS` is non-secret but environment-specific. The cloud-neutral base defaults to no allowed browser origins, and `deploy.sh` requires the real value to be provided explicitly for a shared deployment.
 
 If GHCR packages are private, also export:
 
@@ -115,6 +121,8 @@ The Backend workflow renders the Kustomize package on pull requests and builds a
 ## Security notes
 
 - No production secrets belong in Git.
+- `API_KEY` is supplied at runtime and should originate from the target cloud platform's approved secret manager for shared deployments.
+- `CORS_ALLOWED_ORIGINS` must be explicitly set to the real dashboard origin or origins for each shared environment.
 - `aggregator-api`, `model-api`, Redis and RabbitMQ are internal-only services.
 - Only `firefusion-api` is exposed with a cloud load balancer.
 - GHCR authentication can be supplied at deploy time and is stored as a Kubernetes image-pull secret rather than in the repository.

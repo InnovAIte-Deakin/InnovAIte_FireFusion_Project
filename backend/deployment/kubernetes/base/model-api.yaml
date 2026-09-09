@@ -22,6 +22,12 @@ spec:
           envFrom:
             - configMapRef:
                 name: firefusion-backend-config
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: firefusion-backend-secrets
+                  key: API_KEY
           readinessProbe:
             httpGet:
               path: /health

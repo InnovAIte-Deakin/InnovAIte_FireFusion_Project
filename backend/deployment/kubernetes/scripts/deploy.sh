@@ -6,7 +6,7 @@ IMAGE_TAG="${IMAGE_TAG:-latest}"
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../base" && pwd)"
 IMAGE_ROOT="ghcr.io/innovaite-deakin/innovaite_firefusion_project"
 
-required=(kubectl DB_URL RELATIONAL_DB_URL API_KEY)
+required=(kubectl DB_URL RELATIONAL_DB_URL API_KEY CORS_ALLOWED_ORIGINS)
 for item in "${required[@]}"; do
   if [[ "$item" == "kubectl" ]]; then
     command -v kubectl >/dev/null 2>&1 || { echo "kubectl is required" >&2; exit 1; }
@@ -39,6 +39,12 @@ if [[ -n "${GHCR_USERNAME:-}" && -n "${GHCR_TOKEN:-}" ]]; then
 fi
 
 kubectl apply -k "$BASE_DIR"
+
+# CORS is environment-specific and must be explicitly supplied for shared/cloud
+# deployments. An explicit Deployment env value overrides the fail-closed base
+# ConfigMap value without storing a real environment origin in Git.
+kubectl set env deployment/firefusion-api \
+  CORS_ALLOWED_ORIGINS="$CORS_ALLOWED_ORIGINS" -n "$NAMESPACE"
 
 kubectl set image deployment/firefusion-api \
   firefusion-api="$IMAGE_ROOT/firefusion-api:$IMAGE_TAG" -n "$NAMESPACE"
