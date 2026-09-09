@@ -22,3 +22,6 @@ venv/
 *.csv
 
 .vscode/
+
+# Local DB Backups
+backend/.local-db-backups/
