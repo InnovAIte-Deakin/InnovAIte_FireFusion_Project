@@ -23,6 +23,7 @@ from .attention import PatchwiseAttention2d
 from .bilstm import PerCellBiLSTMLayer
 from .biconvlstm import BiConvLSTMLayer
 from .convlstm import ConvLSTMCell
+from torch.utils.checkpoint import checkpoint
 
 __all__ = [
     "ForecasterConfig",
@@ -262,10 +263,19 @@ class MultivariateTSForecaster(nn.Module):
         x = x.permute(0, 1, 4, 2, 3)
         
         # First ConvLSTM2d processes all timesteps
-        h1_state = None
+        def _convlstm1_step(x_t: Tensor, h_prev: Tensor, c_prev: Tensor) -> Tuple[Tensor, Tensor]:
+            _, (h_new, c_new) = self.convlstm1(x_t, (h_prev, c_prev))
+            return h_new, c_new
+
+        h1 = torch.zeros(batch_size, self.convlstm1.hidden_channels, grid_height, grid_width, device=x.device, dtype=x.dtype)
+        c1 = torch.zeros(batch_size, self.convlstm1.hidden_channels, grid_height, grid_width, device=x.device, dtype=x.dtype)
         h1_outputs = []
         for t in range(seq_len):
-            h1, h1_state = self.convlstm1(x[:, t, :, :, :], h1_state)
+            x_t = x[:, t, :, :, :]
+            if self.training:
+                h1, c1 = checkpoint(_convlstm1_step, x_t, h1, c1, use_reentrant=False)
+            else:
+                h1, c1 = _convlstm1_step(x_t, h1, c1)
             h1_outputs.append(h1)
         
         h1_outputs_dropped = [self.dropout1(h) for h in h1_outputs]

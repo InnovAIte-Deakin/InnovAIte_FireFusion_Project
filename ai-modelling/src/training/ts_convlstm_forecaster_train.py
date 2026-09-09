@@ -33,7 +33,7 @@ LABEL_CACHE = "src/data/bushfire/label_grid_cache.npy"
 # Model hyperparameters
 INPUT_STEPS = 30
 HORIZON = 1
-BATCH_SIZE = 8
+BATCH_SIZE = 8 # Reduced batch size to fit GPU memory constraints.
 EPOCHS = 50
 LEARNING_RATE = 0.001
 
