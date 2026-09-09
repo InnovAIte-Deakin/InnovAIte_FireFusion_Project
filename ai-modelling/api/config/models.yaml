@@ -17,7 +17,7 @@ models:
     domain: misinformation
     kind: deberta_sequence_binary
     enabled: true
-    checkpoint: src/models/misinformation/checkpoints/deberta
+    checkpoint: src/models/misinformation/checkpoints/misinfo-deberta
 
   - id: bushfire-forecaster-v1
     domain: bushfire
@@ -31,4 +31,9 @@ models:
     kind: bushfire_classifier
     enabled: true
     checkpoint: src/models/bushfire/checkpoints/tcn_classifier.pth
-    scaler_checkpoint: null
+    scaler_checkpoint: src/models/bushfire/checkpoints/tcn_scaler.pkl
+
+  # - id: misinformation-humanitarian-v1
+  #   domain: misinformation
+  #   kind: misinformation_humanitarian
+  #   checkpoint: "src/models/misinformation/checkpoints"

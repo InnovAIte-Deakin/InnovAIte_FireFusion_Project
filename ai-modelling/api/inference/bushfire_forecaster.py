@@ -63,7 +63,9 @@ def predict_bushfire_forecast(geojson_dict: dict, bundle: LoadedModel) -> dict:
     else:
         # Fall back to batch processing: [n_samples, seq_len, n_features]
         x_input = np.stack(observations_list, axis=0)
-    
+
+    if bundle.scaler is not None:
+        x_input = _apply_scaler(x_input, bundle.scaler)
     # Apply scaler if available
     if bundle.scaler is not None:
         x_input = _apply_scaler(x_input, bundle.scaler)
