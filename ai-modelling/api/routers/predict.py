@@ -9,7 +9,12 @@ from api.inference.misinformation import predict_misinformation
 from api.inference.bushfire_classifier import predict_bushfire_classify, predict_bushfire_classify_from_forecast
 from api.inference.bushfire_forecaster import predict_bushfire_forecast
 from api.model_loader import default_model_id_for_domain, get_model, list_models
-from api.schemas.misinformation import MisinformationPostIn, MisinformationPostOut
+from api.schemas.misinformation import (
+    MisinformationPostIn,
+    MisinformationPostOut,
+    MisinformationBatchIn,
+    MisinformationBatchOut,
+)
 from api.schemas.bushfire import ForecastRequest
 
 router = APIRouter(prefix="/predict", tags=["predict"])
@@ -36,6 +41,31 @@ def predict_misinformation_route(
     payload = body.model_dump(mode="json")
     return predict_misinformation(payload, bundle)
 
+
+# --- Misinformation Detection (Batch) ---
+@router.post("/misinformation/batch", response_model=MisinformationBatchOut)
+def predict_misinformation_batch_route(
+    body: MisinformationBatchIn,
+    model_id: str | None = Query(
+        default=None,
+        description="Registry id from config/models.yaml; defaults to first misinformation model",
+    ),
+) -> dict[str, Any]:
+    mid = model_id or default_model_id_for_domain("misinformation")
+    try:
+        bundle = get_model(mid)
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    if bundle.domain != "misinformation":
+        raise HTTPException(
+            status_code=400,
+            detail=f"model {mid!r} is domain={bundle.domain!r}, expected misinformation",
+        )
+    results = [
+        predict_misinformation(post.model_dump(mode="json"), bundle)
+        for post in body.posts
+    ]
+    return {"results": results, "count": len(results)}
 
 # --- Bushfire Forecasting ---
 @router.post("/bushfire/forecast", response_model=dict)

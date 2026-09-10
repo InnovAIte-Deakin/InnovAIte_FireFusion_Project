@@ -7,6 +7,7 @@
 #
 # kind (loader dispatch):
 #   deberta_sequence_binary — HF sequence classification checkpoint (misinformation)
+#   deberta_multitask       — shared DeBERTa encoder with misinfo, urgency, and humanitarian heads
 #   bushfire_forecaster     — ConvLSTM spatiotemporal forecaster
 #   bushfire_classifier     — TCN binary fire occurrence classifier
 #   placeholder             — reserved; skipped at load time
@@ -17,9 +18,9 @@ defaults:
 models:
   - id: misinfo-deberta
     domain: misinformation
-    kind: deberta_sequence_binary
+    kind: deberta_multitask
     enabled: true
-    checkpoint: src/models/misinformation/checkpoints/deberta
+    checkpoint: src/models/misinformation/checkpoints/deberta_multitask
     output_schema: api/schemas/output/misinformation_detection_output.schema.json
 
   - id: bushfire-forecaster-v1

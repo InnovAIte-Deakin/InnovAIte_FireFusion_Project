@@ -23,6 +23,7 @@ if str(_AI_MODELLING_ROOT) not in sys.path:
 from src.models.misinformation.deberta import (
     DebertaMisinfoTrainConfig,
     load_classifier_from_checkpoint,
+    load_multitask_from_checkpoint,
 )
 
 
@@ -78,6 +79,40 @@ def _load_deberta_sequence_binary(model_id: str, domain: str, ckpt: Path) -> Loa
         checkpoint_path=ckpt,
     )
 
+def _load_deberta_multitask(
+    model_id: str,
+    domain: str,
+    ckpt: Path,
+) -> LoadedModel:
+    if not ckpt.is_dir():
+        raise FileNotFoundError(f"Checkpoint not found for '{model_id}': {ckpt}")
+
+    required_files = ("tasks.json", "model.pt")
+    missing_files = [name for name in required_files if not (ckpt / name).is_file()]
+    if missing_files:
+        raise FileNotFoundError(
+            f"Multi-task checkpoint for '{model_id}' is missing: "
+            f"{', '.join(missing_files)}"
+        )
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    tokenizer, model, max_len = load_multitask_from_checkpoint(
+        ckpt,
+        device=device,
+    )
+    model.eval()
+
+    return LoadedModel(
+        model_id=model_id,
+        domain=domain,
+        kind="deberta_multitask",
+        tokenizer=tokenizer,
+        model=model,
+        device=device,
+        max_len=max_len,
+        checkpoint_path=ckpt,
+        metadata={"tasks": list(model.tasks.keys())},
+    )
 
 def _load_one(entry: dict[str, Any]) -> LoadedModel | None:
     model_id = str(entry["id"])
@@ -90,6 +125,14 @@ def _load_one(entry: dict[str, Any]) -> LoadedModel | None:
 
     if kind == "placeholder":
         return None
+
+    if kind == "deberta_multitask":
+        ckpt = _resolve_checkpoint(entry.get("checkpoint"))
+        if ckpt is None:
+            raise ValueError(
+                f"model '{model_id}': deberta_multitask requires checkpoint"
+            )
+        return _load_deberta_multitask(model_id, domain, ckpt)
 
     if kind == "deberta_sequence_binary":
         ckpt = _resolve_checkpoint(entry.get("checkpoint"))
