@@ -75,8 +75,8 @@ def test_multitask_inference_returns_all_three_predictions(monkeypatch):
     validated = MisinformationPostOut.model_validate(result)
 
     assert validated.misinformation.label == "TRUE"
-    assert validated.misinformation.risk_score == pytest.approx(0.90)
-    assert validated.misinformation.severity == "CRITICAL"
+    assert validated.misinformation.risk_score == pytest.approx(0.10)
+    assert validated.misinformation.severity == "LOW"
     assert validated.urgency is not None
     assert validated.urgency.label == "URGENT"
     assert validated.humanitarian_task is not None

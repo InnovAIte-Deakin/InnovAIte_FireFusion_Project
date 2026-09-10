@@ -224,8 +224,8 @@ Classify a single social media post for misinformation.
       "FALSE": 0.08,
       "TRUE": 0.92
     },
-    "risk_score": 0.92,
-    "severity": "CRITICAL"
+    "risk_score": 0.08,
+    "severity": "LOW"
   },
   "urgency": {
     "label_id": 2,
@@ -255,6 +255,8 @@ Classify a single social media post for misinformation.
 ```
 
 The response is organised by classification task. When a multi-task checkpoint is loaded, `misinformation`, `urgency`, and `humanitarian_task` are produced from one shared DeBERTa encoder pass. Every task contains a label ID, label, confidence, and probability distribution. The misinformation result also contains the derived risk score and severity. Legacy binary checkpoints remain supported by the inference adapter, in which case `urgency` and `humanitarian_task` are returned as `null`.
+
+For the multi-task model, `misinformation.risk_score` is the probability of the `FALSE` class because `FALSE` represents misinformation. For a legacy binary checkpoint, it is the probability of the `misinformation` class. Therefore, the risk score measures misinformation risk rather than general model confidence.
 
 **Severity Mapping** (derived from `misinformation.risk_score`):
 - `risk_score < 0.6` → `LOW`

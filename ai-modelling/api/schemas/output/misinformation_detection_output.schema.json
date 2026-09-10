@@ -27,6 +27,7 @@
           "type": "object"
         },
         "risk_score": {
+          "description": "Probability that the content is misinformation. This uses the FALSE probability for the multi-task model and the misinformation probability for the legacy binary model.",
           "maximum": 1.0,
           "minimum": 0.0,
           "title": "Risk Score",

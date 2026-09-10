@@ -32,7 +32,15 @@ class TaskPrediction(BaseModel):
 
 
 class MisinformationTaskOut(TaskPrediction):
-    risk_score: float = Field(ge=0.0, le=1.0)
+    risk_score: float = Field(
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Probability that the content is misinformation. This uses the "
+            "FALSE probability for the multi-task model and the misinformation "
+            "probability for the legacy binary model."
+        ),
+    )
     severity: Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
 

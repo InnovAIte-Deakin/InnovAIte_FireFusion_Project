@@ -13,10 +13,26 @@ from src.models.misinformation.deberta import classify_multitask, classify_text
 Severity = Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
 
-def risk_score_max_softmax(probabilities: dict[str, float]) -> float:
-    if not probabilities:
-        return 0.0
-    return float(max(probabilities.values()))
+def misinformation_risk_score(probabilities: dict[str, float]) -> float:
+    """
+    Returns the probability that the content is misinformation.
+
+    The multi-task model uses FALSE for misinformation, while the legacy
+    binary model uses misinformation as the class label.
+    """
+    normalized = {
+        str(label).strip().lower(): float(probability)
+        for label, probability in probabilities.items()
+    }
+
+    for label in ("false", "misinformation"):
+        if label in normalized:
+            return normalized[label]
+
+    raise ValueError(
+        "Misinformation probabilities must include either "
+        "'FALSE' or 'misinformation'"
+    )
 
 
 def severity_from_risk(risk_score: float) -> Severity:
@@ -32,7 +48,7 @@ def severity_from_risk(risk_score: float) -> Severity:
 def _with_misinformation_risk(prediction: dict[str, Any]) -> dict[str, Any]:
     result = dict(prediction)
     probabilities = result.get("probabilities", {})
-    risk_score = risk_score_max_softmax(probabilities)
+    risk_score = misinformation_risk_score(probabilities)
     result["risk_score"] = risk_score
     result["severity"] = severity_from_risk(risk_score)
     return result
