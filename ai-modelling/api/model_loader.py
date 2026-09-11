@@ -12,8 +12,6 @@ from typing import Any
 
 import torch
 import yaml
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-
 from api.schemas.bushfire import DEFAULT_FEATURE_NAMES
 
 _API_DIR = Path(__file__).resolve().parent
@@ -57,39 +55,18 @@ def _resolve_checkpoint(path_value: str | None) -> Path | None:
     return (_AI_MODELLING_ROOT / p).resolve()
 
 
-def _load_deberta_sequence_binary(
-    model_id: str,
-    domain: str,
-    ckpt: Path
-) -> LoadedModel:
+def _load_deberta_sequence_binary(model_id: str, domain: str, ckpt: Path) -> LoadedModel:
     if not ckpt.is_dir():
-        raise FileNotFoundError(
-            f"Checkpoint not found for '{model_id}': {ckpt}"
-        )
-
+        raise FileNotFoundError(f"Checkpoint not found for '{model_id}': {ckpt}")
     tokenizer, model = load_classifier_from_checkpoint(ckpt)
-
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() else "cpu"
-    )
-
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-
     meta_path = ckpt / "training_meta.json"
-
     if meta_path.is_file():
-        meta = json.loads(
-            meta_path.read_text(encoding="utf-8")
-        )
-        max_len = int(
-            meta.get(
-                "max_len",
-                DebertaMisinfoTrainConfig.max_len
-            )
-        )
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        max_len = int(meta.get("max_len", DebertaMisinfoTrainConfig.max_len))
     else:
         max_len = DebertaMisinfoTrainConfig.max_len
-
     return LoadedModel(
         model_id=model_id,
         domain=domain,
@@ -99,54 +76,6 @@ def _load_deberta_sequence_binary(
         device=device,
         max_len=max_len,
         checkpoint_path=ckpt,
-    )
-
-
-# Humanitarian DistilBERT classifier
-def _load_misinformation_humanitarian(
-    model_id: str,
-    domain: str,
-    ckpt: Path
-) -> LoadedModel:
-    if not ckpt.is_dir():
-        raise FileNotFoundError(
-            f"Checkpoint directory not found for '{model_id}': {ckpt}"
-        )
-
-    tokenizer = AutoTokenizer.from_pretrained(
-        str(ckpt)
-    )
-
-    model = AutoModelForSequenceClassification.from_pretrained(
-        str(ckpt)
-    )
-
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() else "cpu"
-    )
-
-    model.to(device)
-    model.eval()
-
-    # Same MAX_LENGTH used during humanitarian model training
-    max_len = 128
-
-    metadata = {
-        "num_labels": model.config.num_labels,
-        "id2label": model.config.id2label,
-        "label2id": model.config.label2id,
-    }
-
-    return LoadedModel(
-        model_id=model_id,
-        domain=domain,
-        kind="misinformation_humanitarian",
-        tokenizer=tokenizer,
-        model=model,
-        device=device,
-        max_len=max_len,
-        checkpoint_path=ckpt,
-        metadata=metadata,
     )
 
 
@@ -164,199 +93,88 @@ def _load_one(entry: dict[str, Any]) -> LoadedModel | None:
 
     if kind == "deberta_sequence_binary":
         ckpt = _resolve_checkpoint(entry.get("checkpoint"))
-
         if ckpt is None:
-            raise ValueError(
-                f"model '{model_id}': "
-                "deberta_sequence_binary requires checkpoint"
-            )
-
-        return _load_deberta_sequence_binary(
-            model_id,
-            domain,
-            ckpt
-        )
-
-    if kind == "misinformation_humanitarian":
-        ckpt = _resolve_checkpoint(entry.get("checkpoint"))
-
-        if ckpt is None:
-            raise ValueError(
-                f"model '{model_id}': "
-                "misinformation_humanitarian requires checkpoint"
-            )
-
-        return _load_misinformation_humanitarian(
-            model_id,
-            domain,
-            ckpt
-        )
-
+            raise ValueError(f"model '{model_id}': deberta_sequence_binary requires checkpoint")
+        return _load_deberta_sequence_binary(model_id, domain, ckpt)
+    
     if kind == "bushfire_forecaster":
         ckpt = _resolve_checkpoint(entry.get("checkpoint"))
-
         if ckpt is None:
-            raise ValueError(
-                f"model '{model_id}': "
-                "bushfire_forecaster requires checkpoint"
-            )
-
-        scaler_ckpt = _resolve_checkpoint(
-            entry.get("scaler_checkpoint")
-        )
-
-        return _load_bushfire_forecaster(
-            model_id,
-            domain,
-            ckpt,
-            scaler_ckpt
-        )
+            raise ValueError(f"model '{model_id}': bushfire_forecaster requires checkpoint")
+        scaler_ckpt = _resolve_checkpoint(entry.get("scaler_checkpoint"))
+        return _load_bushfire_forecaster(model_id, domain, ckpt, scaler_ckpt)
 
     if kind == "bushfire_classifier":
         ckpt = _resolve_checkpoint(entry.get("checkpoint"))
-
         if ckpt is None:
-            raise ValueError(
-                f"model '{model_id}': "
-                "bushfire_classifier requires checkpoint"
-            )
+            raise ValueError(f"model '{model_id}': bushfire_classifier requires checkpoint")
+        scaler_ckpt = _resolve_checkpoint(entry.get("scaler_checkpoint"))
+        return _load_bushfire_classifier(model_id, domain, ckpt, scaler_ckpt)
 
-        scaler_ckpt = _resolve_checkpoint(
-            entry.get("scaler_checkpoint")
-        )
-
-        return _load_bushfire_classifier(
-            model_id,
-            domain,
-            ckpt,
-            scaler_ckpt
-        )
-
-    raise ValueError(
-        f"model '{model_id}': unknown kind '{kind}'"
-    )
+    raise ValueError(f"model '{model_id}': unknown kind '{kind}'")
 
 
-def load_models(
-    config_path: Path | None = None
-) -> dict[str, LoadedModel]:
+def load_models(config_path: Path | None = None) -> dict[str, LoadedModel]:
     """
-    Load all enabled models from YAML.
-    Safe to call from FastAPI lifespan.
+    Load all enabled models from YAML. Safe to call from FastAPI lifespan.
     """
     global _REGISTRY, _LOAD_ERRORS
-
     _REGISTRY = {}
     _LOAD_ERRORS = []
 
-    cfg_path = (
-        config_path
-        or (_API_DIR / "config" / "models.yaml")
-    )
-
-    raw = yaml.safe_load(
-        cfg_path.read_text(encoding="utf-8")
-    )
-
+    cfg_path = config_path or (_API_DIR / "config" / "models.yaml")
+    raw = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or "models" not in raw:
-        raise ValueError(
-            f"{cfg_path} must be a mapping "
-            "with a 'models' list"
-        )
+        raise ValueError(f"{cfg_path} must be a mapping with a 'models' list")
 
     for entry in raw["models"]:
         if not isinstance(entry, dict):
             continue
-
         try:
             loaded = _load_one(entry)
-
             if loaded is not None:
                 mid = loaded.model_id
-
                 if mid in _REGISTRY:
-                    raise ValueError(
-                        f"duplicate model id: {mid}"
-                    )
-
+                    raise ValueError(f"duplicate model id: {mid}")
                 _REGISTRY[mid] = loaded
-
         except Exception as e:  # noqa: BLE001
-            _LOAD_ERRORS.append(
-                f"{entry.get('id', '?')}: {e}"
-            )
+            _LOAD_ERRORS.append(f"{entry.get('id', '?')}: {e}")
 
     return _REGISTRY.copy()
 
 
-def _load_bushfire_forecaster(
-    model_id: str,
-    domain: str,
-    ckpt: Path,
-    scaler_path: Path | None = None
-) -> LoadedModel:
-
+def _load_bushfire_forecaster(model_id: str, domain: str, ckpt: Path, scaler_path: Path | None = None) -> LoadedModel:
     if not ckpt.is_file():
-        raise FileNotFoundError(
-            f"Forecaster checkpoint not found "
-            f"for '{model_id}': {ckpt}"
-        )
-
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() else "cpu"
-    )
-
+        raise FileNotFoundError(f"Forecaster checkpoint not found for '{model_id}': {ckpt}")
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     # Load forecaster checkpoint
-    from src.models.bushfire.ts_convlstm_forecaster import (
-        MultivariateTSForecaster
-    )
-
-    model = MultivariateTSForecaster.load(
-        str(ckpt),
-        map_location=str(device)
-    )
-
+    from src.models.bushfire.ts_convlstm_forecaster import MultivariateTSForecaster
+    model = MultivariateTSForecaster.load(str(ckpt), map_location=str(device))
     model.to(device)
     model.eval()
-
+    
     # Load scaler if provided
     scaler = None
     scaler_data = None
-
     if scaler_path:
         scaler_path = Path(scaler_path)
-
         if scaler_path.is_file():
             scaler_data = joblib.load(scaler_path)
-
             if isinstance(scaler_data, dict):
-                scaler = scaler_data.get(
-                    "scaler",
-                    scaler_data
-                )
+                scaler = scaler_data.get("scaler", scaler_data)
             else:
                 scaler = scaler_data
-
+    
     # Extract metadata from scaler or set defaults
     metadata = {}
-
-    if scaler_data and isinstance(scaler_data, dict):
+    if scaler_data and isinstance(scaler_data, dict):  # <-- Now safe
         metadata = {
-            "features": scaler_data.get(
-                "features",
-                DEFAULT_FEATURE_NAMES
-            ),
-            "input_steps": scaler_data.get(
-                "input_steps",
-                60
-            ),
-            "horizon": scaler_data.get(
-                "horizon",
-                2
-            ),
-            "grid_shape": scaler_data.get(
-                "grid_shape"
-            ),
+            "features": scaler_data.get("features", DEFAULT_FEATURE_NAMES),
+            "input_steps": scaler_data.get("input_steps", 60),
+            "horizon": scaler_data.get("horizon", 2),
+            "grid_shape": scaler_data.get("grid_shape"),
         }
     else:
         metadata = {
@@ -365,7 +183,7 @@ def _load_bushfire_forecaster(
             "horizon": 2,
             "grid_shape": None,
         }
-
+    
     return LoadedModel(
         model_id=model_id,
         domain=domain,
@@ -380,102 +198,49 @@ def _load_bushfire_forecaster(
     )
 
 
-def _load_bushfire_classifier(
-    model_id: str,
-    domain: str,
-    ckpt: Path,
-    scaler_path: Path | None = None
-) -> LoadedModel:
-
+def _load_bushfire_classifier(model_id: str, domain: str, ckpt: Path, scaler_path: Path | None = None) -> LoadedModel:
     if not ckpt.is_file():
-        raise FileNotFoundError(
-            f"Classifier checkpoint not found "
-            f"for '{model_id}': {ckpt}"
-        )
-
-    device = torch.device(
-        "cuda" if torch.cuda.is_available() else "cpu"
-    )
-
+        raise FileNotFoundError(f"Classifier checkpoint not found for '{model_id}': {ckpt}")
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
     # Load PyTorch checkpoint
-    checkpoint = torch.load(
-        ckpt,
-        map_location=str(device),
-        weights_only=False
-    )
-
+    checkpoint = torch.load(ckpt, map_location=str(device), weights_only=False)
+    
     # Reconstruct model from config
     if "config" in checkpoint:
-        from src.models.bushfire.tcn_classifier import (
-            TCNClassifier,
-            ClassifierConfig
-        )
-
+        from src.models.bushfire.tcn_classifier import TCNClassifier, ClassifierConfig
         config = checkpoint.get("config")
-
-        model = TCNClassifier(
-            config=config
-        )
-
-        model.load_state_dict(
-            checkpoint["model_state_dict"]
-        )
-
+        model = TCNClassifier(config=config)
+        model.load_state_dict(checkpoint["model_state_dict"])
     else:
         # Fallback: load directly if checkpoint is just state dict
-        from src.models.bushfire.tcn_classifier import (
-            TCNClassifier,
-            ClassifierConfig
-        )
-
+        from src.models.bushfire.tcn_classifier import TCNClassifier, ClassifierConfig
         config = ClassifierConfig()
-
-        model = TCNClassifier(
-            config=config
-        )
-
-        model.load_state_dict(
-            checkpoint
-        )
-
+        model = TCNClassifier(config=config)
+        model.load_state_dict(checkpoint)
+    
     model.to(device)
     model.eval()
-
+    
     # Load scaler if provided
     scaler = None
-
     if scaler_path:
         scaler_path = Path(scaler_path)
-
         if scaler_path.is_file():
-            scaler_data = joblib.load(
-                scaler_path
-            )
-
+            scaler_data = joblib.load(scaler_path)
             if isinstance(scaler_data, dict):
-                scaler = scaler_data.get(
-                    "scaler",
-                    scaler_data
-                )
+                scaler = scaler_data.get("scaler", scaler_data)
             else:
                 scaler = scaler_data
-
+    
     # Build metadata dict
     metadata = {
-        "lookback_steps":
-            config.lookback_steps
-            if "config" in checkpoint
-            else 60,
-
-        "n_features":
-            config.n_features
-            if "config" in checkpoint
-            else 7,
-
-        "feature_names":
-            DEFAULT_FEATURE_NAMES,
+        "lookback_steps": config.lookback_steps if "config" in checkpoint else 60,
+        "n_features": config.n_features if "config" in checkpoint else 7,
+        "feature_names": DEFAULT_FEATURE_NAMES,
     }
-
+    
     return LoadedModel(
         model_id=model_id,
         domain=domain,
@@ -492,44 +257,21 @@ def _load_bushfire_classifier(
 
 def get_model(model_id: str) -> LoadedModel:
     if model_id not in _REGISTRY:
-        raise KeyError(
-            f"unknown model_id={model_id!r}; "
-            f"loaded: {list(_REGISTRY.keys())}"
-        )
-
+        raise KeyError(f"unknown model_id={model_id!r}; loaded: {list(_REGISTRY.keys())}")
     return _REGISTRY[model_id]
 
 
-def list_models(
-    *,
-    domain: str | None = None
-) -> list[LoadedModel]:
-
+def list_models(*, domain: str | None = None) -> list[LoadedModel]:
     out = list(_REGISTRY.values())
-
     if domain is not None:
-        out = [
-            m
-            for m in out
-            if m.domain == domain
-        ]
-
+        out = [m for m in out if m.domain == domain]
     return out
 
 
-def default_model_id_for_domain(
-    domain: str
-) -> str:
-
-    models = list_models(
-        domain=domain
-    )
-
+def default_model_id_for_domain(domain: str) -> str:
+    models = list_models(domain=domain)
     if not models:
-        raise RuntimeError(
-            f"no loaded models for domain={domain!r}"
-        )
-
+        raise RuntimeError(f"no loaded models for domain={domain!r}")
     return models[0].model_id
 
 
