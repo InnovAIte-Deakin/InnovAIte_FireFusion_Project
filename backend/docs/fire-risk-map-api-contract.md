@@ -208,7 +208,7 @@ Still open:
 - Redis cache writes complete before WebSocket broadcast begins.
 - Failure to deliver to one WebSocket client is logged and does not prevent delivery
   to healthy clients.
-- The endpoint and its `503` response are documented in Swagger/OpenAPI.
+- The endpoint publishes its `200` `FeatureCollection` response schema, and its `503` response is documented in Swagger/OpenAPI.
 - Automated tests cover valid data, missing data, corrupted cache data, Redis
   failures, prediction ordering and WebSocket delivery resilience.
 - Front-end rendering with live data remains a cross-stream integration validation

@@ -90,7 +90,7 @@ def prediction_cache():
 
     try:
         client.ping()
-    except RedisError
+    except RedisError:
         client.close()
         pytest.skip(
             "Redis test dependency is not reachable"

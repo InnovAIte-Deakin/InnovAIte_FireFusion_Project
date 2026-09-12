@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from redis.exceptions import RedisError
+from ..internal.models.geojson import FeatureCollection
 from ..internal.services.forecast_service import (
     ForecastCacheCorruptionError,
     ForecastService,
@@ -27,6 +28,8 @@ async def websocket_endpoint(websocket: WebSocket):
     "/bushfire-forecast",
     tags=["bushfire"],
     summary="Fire Risk Map data",
+    response_model=FeatureCollection,
+    response_model_exclude_none=True,
     response_description="GeoJSON FeatureCollection of bushfire risk polygons (risk_factor 1=extreme to 5=very low)",
     responses={
         200: {

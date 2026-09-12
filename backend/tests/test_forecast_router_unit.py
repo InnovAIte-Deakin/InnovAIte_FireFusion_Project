@@ -122,6 +122,40 @@ def test_openapi_documents_forecast_503_response(forecast_router):
     )
 
 
+def test_openapi_documents_forecast_response_model(
+    forecast_router,
+):
+    """The success response publishes the formal GeoJSON schema."""
+
+    app = FastAPI()
+    app.include_router(forecast_router.router)
+
+    spec = app.openapi()
+    success_response = spec["paths"][
+        "/api/bushfire-forecast"
+    ]["get"]["responses"]["200"]
+
+    assert success_response["content"][
+        "application/json"
+    ]["schema"] == {
+        "$ref": "#/components/schemas/FeatureCollection"
+    }
+
+    properties_schema = spec["components"]["schemas"][
+        "Properties"
+    ]
+
+    assert "risk_factor" in properties_schema["required"]
+    assert (
+        "fire_probability"
+        not in properties_schema["required"]
+    )
+    assert (
+        "fire_probability"
+        in properties_schema["properties"]
+    )
+
+
 @pytest.mark.asyncio
 async def test_router_does_not_misreport_unexpected_error_as_503(
     forecast_router,
