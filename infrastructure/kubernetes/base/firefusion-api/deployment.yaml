@@ -6,6 +6,7 @@ metadata:
   labels:
     app.kubernetes.io/name: firefusion-api
     app.kubernetes.io/part-of: firefusion-platform
+
 spec:
   replicas: 2
 
@@ -20,8 +21,24 @@ spec:
         app.kubernetes.io/part-of: firefusion-platform
 
     spec:
+      serviceAccountName: firefusion-backend
+
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
       containers:
         - name: firefusion-api
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
           image: firefusion/firefusion-api:latest
           imagePullPolicy: Always
 
@@ -39,8 +56,8 @@ spec:
 
             - name: CACHE_URL
               valueFrom:
-                configMapKeyRef:
-                  name: firefusion-runtime-config
+                secretKeyRef:
+                  name: firefusion-runtime-secrets
                   key: CACHE_URL
 
             - name: DB_URL

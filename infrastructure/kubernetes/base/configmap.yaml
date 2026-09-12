@@ -6,6 +6,6 @@ metadata:
   labels:
     app.kubernetes.io/name: firefusion-runtime-config
     app.kubernetes.io/part-of: firefusion-platform
+
 data:
   PYTHONUNBUFFERED: "1"
-  CACHE_URL: "redis://cache:6379"
