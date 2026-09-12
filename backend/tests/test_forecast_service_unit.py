@@ -114,58 +114,37 @@ async def test_returns_cached_prediction_when_available(service):
 
 
 @pytest.mark.asyncio
-async def test_invalid_cached_json_falls_back_to_empty(service):
-    """Contract: unusable cached data must not produce a malformed response."""
-    svc, cache = service
-    cache.get.return_value = "not-json-at-all"
-
-    result = await svc.fetch_predictions()
-
-    assert result == EMPTY_FEATURE_COLLECTION
-
-
-@pytest.mark.asyncio
-async def test_json_null_does_not_escape_as_none(service):
-    """Regression: Redis holding the literal string "null".
-
-    json.loads("null") succeeds and yields None, so a naive parse-then-fallback
-    lets None through and the map client receives an invalid body.
-    """
-    svc, cache = service
-    cache.get.return_value = "null"
-
-    result = await svc.fetch_predictions()
-
-    assert result is not None, 'cached "null" escaped as None'
-    assert result == EMPTY_FEATURE_COLLECTION
-
-
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "cached",
     [
-        None,             # nothing cached
-        "",               # empty string
-        "garbage",        # not JSON
-        "null",           # valid JSON, decodes to None
-        "123",            # valid JSON, decodes to an int
-        '"a string"',     # valid JSON, decodes to a str
-        "[]",             # valid JSON, decodes to a list
-        "{}",             # object, but not a FeatureCollection
-        '{"type": "Feature"}',  # wrong GeoJSON type
+        pytest.param("", id="empty-string"),
+        pytest.param("not-json-at-all", id="malformed-json"),
+        pytest.param("null", id="json-null"),
+        pytest.param("123", id="json-number"),
+        pytest.param('"a string"', id="json-string"),
+        pytest.param("[]", id="json-array"),
+        pytest.param("{}", id="missing-feature-collection-fields"),
+        pytest.param(
+            '{"type": "Feature"}',
+            id="wrong-geojson-type",
+        ),
     ],
 )
-async def test_never_returns_a_non_feature_collection(service, cached):
-    """Contract: whatever the cache holds, the result is a FeatureCollection."""
+async def test_corrupt_cached_prediction_raises_explicit_error(
+    service,
+    forecast_module,
+    cached,
+):
+    """Present but unusable cached data must be reported as corruption."""
     svc, cache = service
     cache.get.return_value = cached
 
-    result = await svc.fetch_predictions()
+    with pytest.raises(
+        forecast_module.ForecastCacheCorruptionError,
+    ):
+        await svc.fetch_predictions()
 
-    assert result is not None, f"cache value {cached!r} produced None"
-    assert isinstance(result, dict), f"cache value {cached!r} produced {type(result).__name__}"
-    assert result.get("type") == "FeatureCollection", f"cache value {cached!r} produced {result!r}"
-    assert isinstance(result.get("features"), list)
+    cache.get.assert_awaited_once_with("predictions")
 
 
 @pytest.mark.asyncio

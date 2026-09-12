@@ -78,6 +78,35 @@ async def test_router_returns_503_for_redis_failure(
     service.fetch_predictions.assert_awaited_once_with()
 
 
+@pytest.mark.asyncio
+async def test_router_returns_503_for_corrupt_cached_prediction(
+    forecast_router,
+):
+    """Corrupt cached forecast data must be reported as unavailable."""
+    from app.internal.services.forecast_service import (
+        ForecastCacheCorruptionError,
+    )
+
+    service = AsyncMock(spec=forecast_router.ForecastService)
+    service.fetch_predictions.side_effect = (
+        ForecastCacheCorruptionError(
+            "cached prediction was invalid"
+        )
+    )
+
+    with pytest.raises(HTTPException) as exc_info:
+        await forecast_router.get_bushfire_forecast(
+            service=service,
+        )
+
+    assert exc_info.value.status_code == 503
+    assert (
+        exc_info.value.detail
+        == "Forecast data temporarily unavailable"
+    )
+    service.fetch_predictions.assert_awaited_once_with()
+
+
 def test_openapi_documents_forecast_503_response(forecast_router):
     app = FastAPI()
     app.include_router(forecast_router.router)

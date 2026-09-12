@@ -2,7 +2,10 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from redis.exceptions import RedisError
-from ..internal.services.forecast_service import ForecastService
+from ..internal.services.forecast_service import (
+    ForecastCacheCorruptionError,
+    ForecastService,
+)
 from ..internal.services.websocket_connection_manager import ws_manager
 
 logger = logging.getLogger(__name__)
@@ -62,14 +65,27 @@ async def get_bushfire_forecast(
 ):
     """Serve Fire Risk Map data as a GeoJSON FeatureCollection.
 
-    Always returns a valid FeatureCollection so the map can render without
-    special-casing missing data. See docs/fire-risk-map-api-contract.md.
+    Missing prediction data returns an empty FeatureCollection. Redis
+    dependency failures and corrupted cached predictions are reported as
+    temporary service unavailability.
+
+    See docs/fire-risk-map-api-contract.md.
     """
+
     try:
         return await service.fetch_predictions()
     except RedisError as exc:
         logger.exception(
-            "Failed to fetch bushfire forecast from Redis"
+            "Redis failure while fetching bushfire forecast"
+        )
+        raise HTTPException(
+            status_code=503,
+            detail="Forecast data temporarily unavailable",
+        ) from exc
+    except ForecastCacheCorruptionError as exc:
+        logger.warning(
+            "Cached bushfire forecast was invalid: %s",
+            exc,
         )
         raise HTTPException(
             status_code=503,
