@@ -263,12 +263,35 @@ def test_feature_structure_runs_against_model_sample(
 
 
 def test_endpoint_is_documented_in_openapi(ff, http):
-    """The published running API documents the forecast endpoint."""
+    """The running API publishes the formal forecast response schema."""
 
-    spec = http.get(f"{ff}/openapi.json").json()
+    response = http.get(f"{ff}/openapi.json")
 
-    assert ENDPOINT in spec.get("paths", {})
-    assert "get" in spec["paths"][ENDPOINT]
+    assert response.status_code == 200
+
+    spec = response.json()
+    operation = spec["paths"][ENDPOINT]["get"]
+    success_schema = operation["responses"]["200"][
+        "content"
+    ]["application/json"]["schema"]
+
+    assert success_schema == {
+        "$ref": "#/components/schemas/FeatureCollection"
+    }
+
+    properties_schema = spec["components"]["schemas"][
+        "Properties"
+    ]
+
+    assert "risk_factor" in properties_schema["required"]
+    assert (
+        "fire_probability"
+        not in properties_schema["required"]
+    )
+    assert (
+        "fire_probability"
+        in properties_schema["properties"]
+    )
 
 
 def test_openapi_documents_503_response(ff, http):
