@@ -1,8 +1,8 @@
 """Contract tests for the production Fire Risk Map GeoJSON models.
 
 These tests import and validate the real Pydantic models used by
-ForecastService. They intentionally avoid unresolved decisions about
-fire_probability and malformed Redis cache HTTP behaviour.
+ForecastService. They enforce the confirmed Fire Risk Map contract, including
+optional fire_probability validation when that field is supplied.
 """
 
 from copy import deepcopy
@@ -59,7 +59,63 @@ def assert_invalid(payload):
 def test_accepts_valid_feature_collection(valid_payload):
     result = FeatureCollection.model_validate(valid_payload)
 
-    assert result.model_dump() == valid_payload
+    assert result.model_dump(exclude_none=True) == valid_payload
+
+
+def test_preserves_optional_fire_probability(valid_payload):
+    valid_payload["features"][0]["properties"]["fire_probability"] = 0.78
+
+    result = FeatureCollection.model_validate(valid_payload)
+
+    assert (
+        result.features[0].properties.fire_probability
+        == 0.78
+    )
+
+
+@pytest.mark.parametrize("fire_probability", [0, 1])
+def test_accepts_fire_probability_boundaries(
+    valid_payload,
+    fire_probability,
+):
+    valid_payload["features"][0]["properties"][
+        "fire_probability"
+    ] = fire_probability
+
+    result = FeatureCollection.model_validate(valid_payload)
+
+    assert (
+        result.features[0].properties.fire_probability
+        == fire_probability
+    )
+
+
+@pytest.mark.parametrize("fire_probability", [-0.01, 1.01])
+def test_rejects_fire_probability_outside_zero_to_one(
+    valid_payload,
+    fire_probability,
+):
+    valid_payload["features"][0]["properties"][
+        "fire_probability"
+    ] = fire_probability
+
+    assert_invalid(valid_payload)
+
+
+@pytest.mark.parametrize(
+    "fire_probability",
+    [True, "0.78"],
+    ids=["boolean", "numeric-string"],
+)
+def test_rejects_non_numeric_fire_probability(
+    valid_payload,
+    fire_probability,
+):
+    valid_payload["features"][0]["properties"][
+        "fire_probability"
+    ] = fire_probability
+
+    assert_invalid(valid_payload)
 
 
 def test_accepts_empty_feature_collection():

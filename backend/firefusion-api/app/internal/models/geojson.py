@@ -64,6 +64,20 @@ class Geometry(BaseModel):
 
 class Properties(BaseModel):
     risk_factor: StrictInt = Field(ge=1, le=5)
+    fire_probability: StrictInt | StrictFloat | None = None
+
+    @field_validator("fire_probability")
+    @classmethod
+    def validate_fire_probability(
+        cls,
+        probability: StrictInt | StrictFloat | None,
+    ) -> StrictInt | StrictFloat | None:
+        if probability is not None and not 0 <= probability <= 1:
+            raise ValueError(
+                "fire_probability must be between 0 and 1"
+            )
+
+        return probability
 
 
 class Feature(BaseModel):
