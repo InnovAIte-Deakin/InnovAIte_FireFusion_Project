@@ -1,32 +1,84 @@
-from fastapi import FastAPI
-from app.routers import hello, misinformation_controller
-from app.routers import forecast
 from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.routers import forecast, hello, misinformation_controller
 from .internal.services.forecast_service import ForecastService
 from .internal.services.messaging_service import MessagingService
-from fastapi.middleware.cors import CORSMiddleware
+
 
 @asynccontextmanager
 async def init_lifespan_objects(app: FastAPI):
+    # Kubernetes readiness must remain false until the application's
+    # required startup dependencies have been successfully initialised.
+    app.state.ready = False
+
+    # Initialise the messaging connection and forecasting service used
+    # by the FireFusion API during its application lifecycle.
     messaging_service = await MessagingService.create()
     forecast_service = ForecastService()
 
-    await messaging_service.consume_predictions(forecast_service.on_prediction_message)
+    try:
+        # Start consuming model prediction messages before marking the
+        # application as ready to receive Kubernetes-managed traffic.
+        await messaging_service.consume_predictions(
+            forecast_service.on_prediction_message
+        )
 
-    yield
+        app.state.ready = True
+        yield
 
-    await messaging_service.close()
+    finally:
+        # Remove the pod from ready service endpoints during shutdown
+        # and cleanly close the messaging connection.
+        app.state.ready = False
+        await messaging_service.close()
 
-app = FastAPI(lifespan=init_lifespan_objects)
+
+app = FastAPI(
+    title="FireFusion API",
+    version="1.0.0",
+    lifespan=init_lifespan_objects,
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
+
+# Kubernetes liveness probe endpoint.
+# A successful response confirms that the FastAPI process is operational.
+@app.get("/health", tags=["Operations"])
+async def health():
+    return {
+        "status": "healthy",
+        "service": "firefusion-api",
+    }
+
+
+# Kubernetes readiness probe endpoint.
+# Traffic should only be routed to this instance after application
+# startup dependencies have been successfully initialised.
+@app.get("/ready", tags=["Operations"])
+async def ready():
+    if not getattr(app.state, "ready", False):
+        raise HTTPException(
+            status_code=503,
+            detail="FireFusion API is not ready",
+        )
+
+    return {
+        "status": "ready",
+        "service": "firefusion-api",
+    }
+
+
+# Register the existing FireFusion application routers.
 app.include_router(hello.router)
 app.include_router(forecast.router)
 app.include_router(misinformation_controller.router)
