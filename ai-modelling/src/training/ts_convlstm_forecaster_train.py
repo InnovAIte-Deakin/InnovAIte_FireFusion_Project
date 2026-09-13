@@ -33,9 +33,11 @@ LABEL_CACHE = "src/data/bushfire/label_grid_cache.npy"
 # Model hyperparameters
 INPUT_STEPS = 30
 HORIZON = 1
-BATCH_SIZE = 8
+# 4 keeps the patchwise-attention peak (the [B, groups, planes, n_pos, cells]
+# gate tensor) within a 16 GB card; 8 OOMs on M2. M1 is unaffected in quality.
+BATCH_SIZE = 4
 EPOCHS = 50
-LEARNING_RATE = 0.001
+LEARNING_RATE = 0.005
 
 # Attention (patchwise / M3). ATTENTION="none" reproduces the M1 baseline.
 ATTENTION = "none"          # "none" | "patchwise"
@@ -48,6 +50,12 @@ TRAIN_VAL_RATIO = 0.9
 FIRE_THRESHOLD = 0.5
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# cuDNN autotuning: the grid shape is fixed across batches, so let cuDNN
+# benchmark once and cache the fastest convolution algorithms for every
+# ConvLSTM gate. Automatic mixed precision (AMP) is enabled on CUDA only.
+torch.backends.cudnn.benchmark = True
+USE_AMP = DEVICE.type == "cuda"
 
 # Environmental features
 FEATURES = [
@@ -234,17 +242,20 @@ def create_grid_sequences(feature_grid, label_grid, input_steps, horizon):
     print(f"  X shape: {X.shape}, y shape: {y.shape}")
     return X, y
 
-def train_one_epoch(model, dataloader, criterion, optimizer, device):
+def train_one_epoch(model, dataloader, criterion, optimizer, device, scaler):
     """
     Execute one complete training epoch on the training dataloader.
-    
+
     Inputs:
         model (nn.Module): The neural network model to train
         dataloader (DataLoader): Training dataloader with (X, y) batches
         criterion (nn.Module): Loss function (Tversky)
         optimizer (torch.optim.Optimizer): Optimizer for parameter updates (e.g., Adam)
         device (torch.device): Device to run training on (cuda or cpu)
-    
+        scaler (torch.amp.GradScaler): Gradient scaler for mixed precision. When
+            disabled (CPU), autocast and scaling are no-ops, so the loop behaves
+            exactly as full-precision training.
+
     Outputs:
         float: Mean loss across all batches in the epoch
     """
@@ -255,10 +266,15 @@ def train_one_epoch(model, dataloader, criterion, optimizer, device):
         X_batch = X_batch.to(device)
         y_batch = y_batch.to(device)
         optimizer.zero_grad()
-        preds = model(X_batch)
-        loss = criterion(preds, y_batch)
-        loss.backward()
-        optimizer.step()
+        # Only the expensive model forward runs in half precision; the loss is
+        # computed in fp32 so the masked Tversky/Focal reductions over the full
+        # grid keep full-precision accumulation.
+        with torch.autocast(device_type=device.type, enabled=scaler.is_enabled()):
+            preds = model(X_batch)
+        loss = criterion(preds.float(), y_batch)
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
         batch_size = X_batch.size(0)
         total_loss += loss.item() * batch_size
         total_samples += batch_size
@@ -284,8 +300,9 @@ def evaluate(model, dataloader, criterion, device):
         for X_batch, y_batch in dataloader:
             X_batch = X_batch.to(device)
             y_batch = y_batch.to(device)
-            preds = model(X_batch)
-            loss = criterion(preds, y_batch)
+            with torch.autocast(device_type=device.type, enabled=USE_AMP):
+                preds = model(X_batch)
+            loss = criterion(preds.float(), y_batch)
             batch_size = X_batch.size(0)
             total_loss += loss.item() * batch_size
             total_samples += batch_size
@@ -311,7 +328,9 @@ def predict(model, dataloader, device):
     with torch.no_grad():
         for X_batch, y_batch in dataloader:
             X_batch = X_batch.to(device)
-            preds = model.predict(X_batch).cpu().numpy()
+            with torch.autocast(device_type=device.type, enabled=USE_AMP):
+                preds = model.predict(X_batch)
+            preds = preds.float().cpu().numpy()
             predictions.append(preds)
             actuals.append(y_batch.numpy())
     return np.concatenate(predictions), np.concatenate(actuals)
@@ -691,28 +710,35 @@ def main():
     
     valid_mask_tensor = torch.tensor(valid_mask, dtype=torch.bool)
     
-    # Class imbalance ratio for the loss function (training split only, to avoid leaking val/test distribution).
-    pos_weight, _, _, _ = compute_pos_weight(train_labels, valid_mask)
-    alpha = pos_weight / (1 + pos_weight)
-    
-    criterion = MaskedTverskyLoss(valid_mask_tensor, alpha=0.3, beta=0.7).to(DEVICE)
+    # Log the training-split class balance (training split only, to avoid
+    # leaking the val/test distribution). Focal loss handles the imbalance via
+    # alpha/gamma rather than an explicit pos_weight.
+    compute_pos_weight(train_labels, valid_mask)
+
+    # Focal loss: down-weights the overwhelming majority of easy "no fire"
+    # cells (gamma) and up-weights the rare fire class (alpha), which is more
+    # stable than Tversky at ~0.1% positives. alpha near 1 puts almost all the
+    # weight on fire cells; gamma=2 is the standard focusing strength.
+    criterion = MaskedFocalLoss(valid_mask_tensor, alpha=0.9, gamma=2.0).to(DEVICE)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
-    
+    grad_scaler = torch.amp.GradScaler("cuda", enabled=USE_AMP)
+
     best_val_loss = float("inf")
     best_state = None
     patience = 10
     patience_counter = 0
     
     print(f"Training config:")
-    print(f"Loss: Tversky")
+    print(f"Loss: Focal (alpha=0.9, gamma=2.0)")
     print(f"Learning Rate: {LEARNING_RATE}")
     print(f"Epochs: {EPOCHS}")
     print(f"Early stopping patience: {patience}")
+    print(f"Mixed precision (AMP): {USE_AMP}")
     
     print(f"\n{'Epoch':<8} {'Train Loss':<15} {'Val Loss':<15} {'Status':<15}")
     print("-" * 60)
     for epoch in range(1, EPOCHS + 1):
-        train_loss = train_one_epoch(model, train_loader, criterion, optimizer, DEVICE)
+        train_loss = train_one_epoch(model, train_loader, criterion, optimizer, DEVICE, grad_scaler)
         val_loss = evaluate(model, val_loader, criterion, DEVICE)
         
         if val_loss < best_val_loss:
