@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   AlertTriangle,
   Bell,
@@ -22,6 +22,11 @@ import {
   BarChart3,
   Maximize2,
   ExternalLink,
+  RefreshCw,
+  Search,
+  Printer,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 
 import Layout from "../components/Layout";
@@ -90,6 +95,7 @@ const adviceCards = [
     icon: Home,
     title: "Home fire prevention",
     text: "Reduce risk and protect your property.",
+    link: "/emergency-advice",
     image:
       "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=900&q=80",
   },
@@ -97,6 +103,7 @@ const adviceCards = [
     icon: MapPin,
     title: "Find emergency services near you",
     text: "Locate hospitals, relief centres, and evacuation points.",
+    link: "/fire-map",
     image:
       "https://images.unsplash.com/photo-1587745416684-47953f16f02f?auto=format&fit=crop&w=900&q=80",
   },
@@ -104,6 +111,7 @@ const adviceCards = [
     icon: Smartphone,
     title: "Mobile phone safety warnings",
     text: "Stay informed and avoid network congestion.",
+    link: "/emergency-advice",
     image:
       "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=900&q=80",
   },
@@ -111,6 +119,7 @@ const adviceCards = [
     icon: HeartHandshake,
     title: "Recovery support after an emergency",
     text: "Access support services and community resources.",
+    link: "/data-sources",
     image:
       "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=900&q=80",
   },
@@ -118,21 +127,130 @@ const adviceCards = [
 
 export default function Dashboard() {
   const [activeFilter, setActiveFilter] = useState("ALL");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedZone, setSelectedZone] = useState("East Gippsland");
-  const [riskLevel, setRiskLevel] = useState("Extreme");
   const [isSimulating, setIsSimulating] = useState(false);
   const [sirenActive, setSirenActive] = useState(false);
-
-  const filteredUpdates = activeFilter === "ALL"
-    ? officialUpdates
-    : officialUpdates.filter((item) => item.type === activeFilter);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState("Just now");
+  const audioContextRef = useRef(null);
+  const sirenOscillatorRef = useRef(null);
+  const sirenGainRef = useRef(null);
+  const sirenIntervalRef = useRef(null);
 
   const zonesData = {
-    "Grampians": { risk: "High", color: "#f97316", temp: "38°C", wind: "36 km/h W", threat: "Bushfire smoke & spotting" },
-    "Dandenong Ranges": { risk: "Moderate", color: "#eab308", temp: "34°C", wind: "24 km/h SW", threat: "High fuel load, alert standby" },
-    "Latrobe Valley": { risk: "Moderate", color: "#eab308", temp: "35°C", wind: "28 km/h S", threat: "Industrial perimeter patrol" },
-    "East Gippsland": { risk: "Extreme", color: "#ef4444", temp: "41°C", wind: "45 km/h NW", threat: "Uncontrolled front, Evacuate Now" },
+    "Grampians": { 
+      risk: "High", 
+      color: "#f97316", 
+      temp: "38°C", 
+      wind: "36 km/h W", 
+      humidity: "18%",
+      evacStatus: "Watch & Act",
+      evacDetail: "1,200 residents alert",
+      threat: "Bushfire smoke & spotting front" 
+    },
+    "Dandenong Ranges": { 
+      risk: "Moderate", 
+      color: "#eab308", 
+      temp: "34°C", 
+      wind: "24 km/h SW", 
+      humidity: "26%",
+      evacStatus: "Advice Only",
+      evacDetail: "Precautionary patrol",
+      threat: "High fuel load, alert standby" 
+    },
+    "Latrobe Valley": { 
+      risk: "Moderate", 
+      color: "#eab308", 
+      temp: "35°C", 
+      wind: "28 km/h S", 
+      humidity: "22%",
+      evacStatus: "Monitored",
+      evacDetail: "Industrial asset protection",
+      threat: "Industrial perimeter patrol" 
+    },
+    "East Gippsland": { 
+      risk: "Extreme", 
+      color: "#ef4444", 
+      temp: "41°C", 
+      wind: "45 km/h NW", 
+      humidity: "12%",
+      evacStatus: "Active (2 zones)",
+      evacDetail: "4,120 residents affected",
+      threat: "Uncontrolled front, Evacuate Now" 
+    },
   };
+
+  const currentZoneData = zonesData[selectedZone] || zonesData["East Gippsland"];
+
+  // Web Audio API Emergency Siren generator (Realistic and requires zero assets)
+  useEffect(() => {
+    if (sirenActive) {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!audioContextRef.current && AudioCtx) {
+          audioContextRef.current = new AudioCtx();
+        }
+
+        const ctx = audioContextRef.current;
+        if (ctx && ctx.state === "suspended") {
+          ctx.resume();
+        }
+
+        if (ctx) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+
+          osc.type = "sawtooth";
+          osc.frequency.setValueAtTime(650, ctx.currentTime);
+
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+
+          sirenOscillatorRef.current = osc;
+          sirenGainRef.current = gain;
+
+          let high = true;
+          sirenIntervalRef.current = setInterval(() => {
+            if (sirenOscillatorRef.current && ctx) {
+              const freq = high ? 920 : 620;
+              sirenOscillatorRef.current.frequency.exponentialRampToValueAtTime(
+                freq,
+                ctx.currentTime + 0.35
+              );
+              high = !high;
+            }
+          }, 450);
+        }
+      } catch (err) {
+        console.warn("Audio siren unavailable:", err);
+      }
+    } else {
+      if (sirenIntervalRef.current) {
+        clearInterval(sirenIntervalRef.current);
+        sirenIntervalRef.current = null;
+      }
+      if (sirenOscillatorRef.current) {
+        try {
+          sirenOscillatorRef.current.stop();
+          sirenOscillatorRef.current.disconnect();
+        } catch (e) {}
+        sirenOscillatorRef.current = null;
+      }
+    }
+
+    return () => {
+      if (sirenIntervalRef.current) clearInterval(sirenIntervalRef.current);
+      if (sirenOscillatorRef.current) {
+        try {
+          sirenOscillatorRef.current.stop();
+        } catch (e) {}
+      }
+    };
+  }, [sirenActive]);
 
   const handleSimulateAlert = () => {
     setIsSimulating(true);
@@ -141,6 +259,36 @@ export default function Dashboard() {
       setIsSimulating(false);
     }, 4000);
   };
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setLastUpdated(timeString);
+      setIsRefreshing(false);
+    }, 700);
+  };
+
+  const handlePrintReport = () => {
+    window.print();
+  };
+
+  const navigateTo = (url) => {
+    window.location.href = url;
+  };
+
+  const filteredUpdates = officialUpdates
+    .filter((item) => (activeFilter === "ALL" ? true : item.type === activeFilter))
+    .filter((item) => {
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        item.title.toLowerCase().includes(q) ||
+        item.text.toLowerCase().includes(q) ||
+        item.agency.toLowerCase().includes(q)
+      );
+    });
 
   return (
     <Layout title="Dashboard">
@@ -172,7 +320,7 @@ export default function Dashboard() {
 
           <div className="ff-hero-content">
             <div className="ff-hero-header-flex">
-              <div>
+              <div className="ff-hero-title-area">
                 <div className="ff-system-badge">
                   <span className="ff-live-radar-dot"></span>
                   DEFCON-1 LEVEL SURVEILLANCE • VICTORIA COMMAND
@@ -187,12 +335,30 @@ export default function Dashboard() {
               {/* Quick Command Actions */}
               <div className="ff-hero-actions">
                 <button 
+                  className={`ff-action-btn ff-refresh-btn ${isRefreshing ? "refreshing" : ""}`}
+                  onClick={handleRefresh}
+                  title="Refresh Live Sensor Data"
+                >
+                  <RefreshCw size={15} className={isRefreshing ? "ff-spin-slow" : ""} />
+                  <span>{isRefreshing ? "Syncing..." : "Sync Live Data"}</span>
+                </button>
+
+                <button 
+                  className={`ff-action-btn ff-print-btn`}
+                  onClick={handlePrintReport}
+                  title="Print Emergency Incident Summary"
+                >
+                  <Printer size={15} />
+                  <span>Export Brief</span>
+                </button>
+
+                <button 
                   className={`ff-action-btn ff-siren-btn ${sirenActive ? "active" : ""}`}
                   onClick={() => setSirenActive(!sirenActive)}
-                  title="Toggle Emergency Siren"
+                  title="Toggle Emergency Siren Alert"
                 >
-                  <Radio size={16} className={sirenActive ? "ff-spin-slow" : ""} />
-                  <span>{sirenActive ? "Siren Muted" : "Alert Siren"}</span>
+                  {sirenActive ? <Volume2 size={16} className="ff-spin-slow" /> : <VolumeX size={16} />}
+                  <span>{sirenActive ? "Siren Sounding" : "Test Siren"}</span>
                 </button>
 
                 <button 
@@ -210,32 +376,35 @@ export default function Dashboard() {
               <SummaryCard
                 icon={AlertTriangle}
                 label="Current Risk"
-                value={riskLevel}
-                tone="danger"
-                isPulsing={true}
+                value={currentZoneData.risk}
+                tone={currentZoneData.risk === "Extreme" ? "danger" : currentZoneData.risk === "High" ? "orange" : "yellow"}
+                isPulsing={currentZoneData.risk === "Extreme"}
               />
               <SummaryCard
                 icon={Bell}
                 label="Active Alerts"
                 value="31"
                 tone="red"
+                onClick={() => navigateTo("/fire-map")}
               />
               <SummaryCard
                 icon={Flag}
                 label="Misinformation Flags"
                 value="14"
                 tone="purple"
+                onClick={() => navigateTo("/misinfo-review")}
               />
               <SummaryCard
                 icon={Users}
                 label="Resources Deployed"
                 value="65%"
                 tone="green"
+                onClick={() => navigateTo("/data-sources")}
               />
               <SummaryCard
                 icon={Clock}
                 label="Last Updated"
-                value="14:30"
+                value={lastUpdated}
                 tone="blue"
               />
             </div>
@@ -248,27 +417,51 @@ export default function Dashboard() {
               <PanelHeader
                 icon={Megaphone}
                 title="Latest Official Updates"
-                action="View All"
+                action="View All (31)"
+                onAction={() => navigateTo("/bushfire-forecast")}
               />
 
-              <div className="ff-filter-tabs">
-                {["ALL", "CRITICAL", "WARNING", "ADVISORY"].map((filter) => (
-                  <button
-                    key={filter}
-                    className={`ff-filter-btn ff-filter-btn-${filter.toLowerCase()} ${
-                      activeFilter === filter ? "active" : ""
-                    }`}
-                    onClick={() => setActiveFilter(filter)}
-                  >
-                    {filter}
-                  </button>
-                ))}
+              <div className="ff-filter-row-wrap">
+                <div className="ff-filter-tabs">
+                  {["ALL", "CRITICAL", "WARNING", "ADVISORY"].map((filter) => (
+                    <button
+                      key={filter}
+                      className={`ff-filter-btn ff-filter-btn-${filter.toLowerCase()} ${
+                        activeFilter === filter ? "active" : ""
+                      }`}
+                      onClick={() => setActiveFilter(filter)}
+                    >
+                      {filter}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="ff-update-search-wrap">
+                  <Search size={14} className="ff-search-icon" />
+                  <input
+                    type="text"
+                    placeholder="Filter updates or agency..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="ff-update-search-input"
+                  />
+                  {searchQuery && (
+                    <button className="ff-search-clear-btn" onClick={() => setSearchQuery("")}>×</button>
+                  )}
+                </div>
               </div>
 
               <div className="ff-update-list">
-                {filteredUpdates.map((item) => (
-                  <UpdateCard key={item.title} {...item} />
-                ))}
+                {filteredUpdates.length > 0 ? (
+                  filteredUpdates.map((item) => (
+                    <UpdateCard key={item.title} {...item} />
+                  ))
+                ) : (
+                  <div className="ff-no-updates-notice">
+                    <p>No updates matching filter &quot;{searchQuery}&quot;</p>
+                    <button onClick={() => { setActiveFilter("ALL"); setSearchQuery(""); }}>Reset Filters</button>
+                  </div>
+                )}
               </div>
             </Panel>
 
@@ -284,7 +477,7 @@ export default function Dashboard() {
                 </div>
                 <div className="ff-map-head-controls">
                   <span className="ff-map-live-tag">● RADAR LIVE</span>
-                  <button title="Full Map View">
+                  <button title="Full Map View" onClick={() => navigateTo("/fire-map")}>
                     <Maximize2 size={16} />
                   </button>
                 </div>
@@ -307,6 +500,7 @@ export default function Dashboard() {
                   <div 
                     className={`zone zone-1 ${selectedZone === "Grampians" ? "zone-active" : ""}`}
                     onClick={() => setSelectedZone("Grampians")}
+                    title="Click to view Grampians telemetry"
                   >
                     <span className="zone-pulse-beacon"></span>
                     Grampians<br /><small>High Risk</small>
@@ -315,6 +509,7 @@ export default function Dashboard() {
                   <div 
                     className={`zone zone-2 ${selectedZone === "Dandenong Ranges" ? "zone-active" : ""}`}
                     onClick={() => setSelectedZone("Dandenong Ranges")}
+                    title="Click to view Dandenong Ranges telemetry"
                   >
                     Dandenong Ranges<br /><small>Moderate</small>
                   </div>
@@ -322,6 +517,7 @@ export default function Dashboard() {
                   <div 
                     className={`zone zone-3 ${selectedZone === "Latrobe Valley" ? "zone-active" : ""}`}
                     onClick={() => setSelectedZone("Latrobe Valley")}
+                    title="Click to view Latrobe Valley telemetry"
                   >
                     Latrobe Valley<br /><small>Moderate</small>
                   </div>
@@ -329,6 +525,7 @@ export default function Dashboard() {
                   <div 
                     className={`zone zone-4 ${selectedZone === "East Gippsland" ? "zone-active" : ""}`}
                     onClick={() => setSelectedZone("East Gippsland")}
+                    title="Click to view East Gippsland telemetry"
                   >
                     <span className="zone-pulse-beacon critical-beacon"></span>
                     East Gippsland<br /><small>🔥 Extreme</small>
@@ -341,19 +538,19 @@ export default function Dashboard() {
                     <strong>{selectedZone}</strong>
                     <span 
                       className="ff-telemetry-badge"
-                      style={{ backgroundColor: zonesData[selectedZone]?.color || '#ef4444' }}
+                      style={{ backgroundColor: currentZoneData.color }}
                     >
-                      {zonesData[selectedZone]?.risk}
+                      {currentZoneData.risk}
                     </span>
                   </div>
                   <div className="ff-telemetry-details">
-                    <div><span>Wind:</span> <b>{zonesData[selectedZone]?.wind}</b></div>
-                    <div><span>Temp:</span> <b>{zonesData[selectedZone]?.temp}</b></div>
-                    <div className="full-width"><span>Notice:</span> <small>{zonesData[selectedZone]?.threat}</small></div>
+                    <div><span>Wind:</span> <b>{currentZoneData.wind}</b></div>
+                    <div><span>Temp:</span> <b>{currentZoneData.temp}</b></div>
+                    <div className="full-width"><span>Notice:</span> <small>{currentZoneData.threat}</small></div>
                   </div>
                 </div>
 
-                <button className="ff-map-btn">
+                <button className="ff-map-btn" onClick={() => navigateTo("/fire-map")}>
                   Open Interactive Map View
                 </button>
               </div>
@@ -369,6 +566,7 @@ export default function Dashboard() {
                   text="2 zones require immediate review"
                   button="Review Zones"
                   tone="red"
+                  onClick={() => navigateTo("/bushfire-forecast")}
                 />
                 <DecisionCard
                   icon={Flame}
@@ -376,6 +574,7 @@ export default function Dashboard() {
                   text="Water bombers critically low"
                   button="View Resources"
                   tone="orange"
+                  onClick={() => navigateTo("/data-sources")}
                 />
                 <DecisionCard
                   icon={Shield}
@@ -383,6 +582,7 @@ export default function Dashboard() {
                   text="14 posts require human review"
                   button="Review Posts"
                   tone="purple"
+                  onClick={() => navigateTo("/misinfo-review")}
                 />
               </div>
             </Panel>
@@ -396,7 +596,7 @@ export default function Dashboard() {
                     <small style={{ color: "#94a3b8" }}>AI Neural Forecast based on BoM wind & fuel load projections</small>
                   </div>
                 </div>
-                <a>View Full Analytics</a>
+                <a onClick={() => navigateTo("/analytics")} style={{ cursor: "pointer" }}>View Full Analytics</a>
               </div>
 
               <div className="ff-trend-chart">
@@ -454,65 +654,81 @@ export default function Dashboard() {
 
               <div className="ff-risk-header">
                 <span className="ff-risk-label-group">
-                  Current Threat Assessment
+                  Current Threat Assessment ({selectedZone})
                   <small>Victoria Command Matrix</small>
                 </span>
-                <strong className="ff-extreme-badge">
+                <strong 
+                  className="ff-extreme-badge"
+                  style={{ 
+                    backgroundColor: currentZoneData.color,
+                    boxShadow: `0 0 16px ${currentZoneData.color}80` 
+                  }}
+                >
                   <span className="ff-dot-glow"></span>
-                  EXTREME
+                  {currentZoneData.risk.toUpperCase()}
                 </strong>
               </div>
 
               <div className="ff-risk-meter">
-                <span className="ff-risk-meter-pin"></span>
+                <span 
+                  className="ff-risk-meter-pin"
+                  style={{
+                    left: currentZoneData.risk === "Extreme" ? "88%" : currentZoneData.risk === "High" ? "64%" : "38%"
+                  }}
+                ></span>
               </div>
 
               <div className="ff-metric-grid">
-                {/* UPGRADED DYNAMIC WIND GAUGE */}
+                {/* DYNAMIC WIND GAUGE SYNCED TO SELECTED ZONE */}
                 <div className="ff-metric-card ff-wind-gauge-card">
                   <div className="ff-wind-compass-circle">
-                    <span className="ff-compass-deg">NW</span>
+                    <span className="ff-compass-deg">{currentZoneData.wind.split(" ").slice(-1)[0] || "NW"}</span>
                     <div className="ff-compass-arrow"></div>
                     <div className="ff-compass-center-dot"></div>
                   </div>
                   <div>
                     <span>Wind Velocity</span>
-                    <strong>45 km/h NW</strong>
-                    <small className="ff-metric-sub">Gusts up to 68 km/h</small>
+                    <strong>{currentZoneData.wind}</strong>
+                    <small className="ff-metric-sub">Local Sector Telemetry</small>
                   </div>
                 </div>
 
                 <Metric 
                   icon={Thermometer} 
                   title="Temperature" 
-                  value="41°C" 
-                  sub="Extreme Heat Wave" 
+                  value={currentZoneData.temp} 
+                  sub="BoM Live Station" 
                   accent="red" 
                 />
                 <Metric 
                   icon={Droplets} 
                   title="Humidity" 
-                  value="12%" 
-                  sub="Critical dryness" 
+                  value={currentZoneData.humidity} 
+                  sub="Fuel moisture index" 
                   accent="orange" 
                 />
                 <Metric 
                   icon={Users} 
                   title="Evacuation Status" 
-                  value="Active (2 zones)" 
-                  sub="4,120 residents affected" 
+                  value={currentZoneData.evacStatus} 
+                  sub={currentZoneData.evacDetail} 
                   accent="alert" 
                 />
               </div>
 
               <div className="ff-source-row">
-                <span>Data sources: BoM, CFA, VicEmergency Satellite Link</span>
-                <b>Updated: 14:30</b>
+                <span>Data sources: BoM, CFA, VicEmergency Link</span>
+                <b>Updated: {lastUpdated}</b>
               </div>
             </Panel>
 
             <Panel className="ff-resource-panel">
-              <PanelHeader icon={Truck} title="Resource Allocation & Readiness" action="View All" />
+              <PanelHeader 
+                icon={Truck} 
+                title="Resource Allocation & Readiness" 
+                action="View All" 
+                onAction={() => navigateTo("/data-sources")}
+              />
 
               <div className="ff-resource-list">
                 {resources.map((item) => (
@@ -528,11 +744,16 @@ export default function Dashboard() {
             </Panel>
 
             <Panel className="ff-advice-panel">
-              <PanelHeader icon={Radio} title="Emergency Advice & Field Guides" action="View All" />
+              <PanelHeader 
+                icon={Radio} 
+                title="Emergency Advice & Field Guides" 
+                action="View All" 
+                onAction={() => navigateTo("/emergency-advice")}
+              />
 
               <div className="ff-advice-grid">
                 {adviceCards.map((card) => (
-                  <AdviceCard key={card.title} {...card} />
+                  <AdviceCard key={card.title} {...card} onNavigate={() => navigateTo(card.link)} />
                 ))}
               </div>
             </Panel>
@@ -540,7 +761,7 @@ export default function Dashboard() {
             <Panel className="ff-misinfo-panel">
               <div className="ff-panel-title-row">
                 <h3>Misinformation Posts by Platform</h3>
-                <a>View Full Analytics</a>
+                <a onClick={() => navigateTo("/misinfo-review")} style={{ cursor: "pointer" }}>View Full Analytics</a>
               </div>
 
               <div className="ff-misinfo-content">
@@ -576,21 +797,32 @@ function Panel({ children, className = "" }) {
   return <section className={`ff-panel ${className}`}>{children}</section>;
 }
 
-function PanelHeader({ icon: Icon, title, action }) {
+function PanelHeader({ icon: Icon, title, action, onAction }) {
   return (
     <div className="ff-panel-header">
       <h3>
         <Icon size={18} />
         {title}
       </h3>
-      {action && <a>{action}</a>}
+      {action && (
+        <a 
+          onClick={onAction} 
+          style={{ cursor: onAction ? "pointer" : "default" }}
+        >
+          {action}
+        </a>
+      )}
     </div>
   );
 }
 
-function SummaryCard({ icon: Icon, label, value, tone, isPulsing }) {
+function SummaryCard({ icon: Icon, label, value, tone, isPulsing, onClick }) {
   return (
-    <article className={`ff-summary-card ${isPulsing ? "ff-summary-pulse" : ""}`}>
+    <article 
+      className={`ff-summary-card ${isPulsing ? "ff-summary-pulse" : ""} ${onClick ? "clickable" : ""}`}
+      onClick={onClick}
+      style={{ cursor: onClick ? "pointer" : "default" }}
+    >
       <div className="ff-summary-icon-wrap">
         <Icon size={24} />
       </div>
@@ -698,14 +930,14 @@ function ResourceRow({ icon: Icon, name, percent, value, status }) {
   );
 }
 
-function DecisionCard({ icon: Icon, title, text, button, tone }) {
+function DecisionCard({ icon: Icon, title, text, button, tone, onClick }) {
   return (
     <article className={`ff-decision-card ${tone}`}>
       <Icon size={32} />
       <div>
         <h4>{title}</h4>
         <p>{text}</p>
-        <button>
+        <button onClick={onClick}>
           <ExternalLink size={14} />
           {button}
         </button>
@@ -714,9 +946,14 @@ function DecisionCard({ icon: Icon, title, text, button, tone }) {
   );
 }
 
-function AdviceCard({ icon: Icon, title, text, image }) {
+function AdviceCard({ icon: Icon, title, text, image, onNavigate }) {
   return (
-    <article className="ff-advice-card">
+    <article 
+      className="ff-advice-card" 
+      onClick={onNavigate}
+      style={{ cursor: onNavigate ? "pointer" : "default" }}
+      title="Click to view guide"
+    >
       <img src={image} alt={title} />
       <div className="ff-advice-cover"></div>
       <div className="ff-advice-text">
