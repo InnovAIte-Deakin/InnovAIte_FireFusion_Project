@@ -293,6 +293,20 @@ export default function Dashboard() {
   return (
     <Layout title="Dashboard">
       <div className="ff-dashboard">
+        {/* Printable Official Letterhead (Visible ONLY during Print / PDF export) */}
+        <div className="ff-print-header">
+          <div className="ff-print-brand">
+            <h2>STATE EMERGENCY SERVICE & CFA COMMAND MATRIX</h2>
+            <p>FireFusion Incident Intelligence & Wildfire Operational Briefing</p>
+          </div>
+          <div className="ff-print-meta">
+            <div><strong>Sector:</strong> Victoria Regional Grid</div>
+            <div><strong>Selected Zone:</strong> {selectedZone} ({currentZoneData.risk} Threat)</div>
+            <div><strong>Generated At:</strong> {new Date().toLocaleString()}</div>
+            <div><strong>Classification:</strong> OFFICIAL EMERGENCY INTELLIGENCE</div>
+          </div>
+        </div>
+
         {/* Simulation Banner Notice if siren or simulation is active */}
         {sirenActive && (
           <div className="ff-live-broadcast-banner">
