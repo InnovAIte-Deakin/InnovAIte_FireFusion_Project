@@ -11,6 +11,8 @@ additionally exercised against a known-good sample from model-api, which always
 has features. Where a check runs over the live endpoint it reports how many
 features it actually validated.
 """
+import os
+
 import pytest
 
 pytestmark = pytest.mark.integration
@@ -20,6 +22,9 @@ pytestmark = pytest.mark.integration
 RISK_MIN, RISK_MAX = 1, 5
 
 ENDPOINT = "/api/bushfire-forecast"
+
+# model-api sample data is behind the shared internal API key.
+API_KEY = os.getenv("API_KEY", "local-development-key")
 
 
 def validate_feature(feature, index=0):
@@ -92,7 +97,7 @@ def test_feature_validation_runs_against_known_good_sample(model, http):
     validation rules themselves are broken, this fails even when the forecast is
     empty.
     """
-    body = http.get(f"{model}/model/geojson").json()
+    body = http.get(f"{model}/model/geojson", headers={"X-API-Key": API_KEY}).json()
     collection = body[0] if isinstance(body, list) else body
     features = collection.get("features", [])
     assert features, "sample GeoJSON has no features; cannot validate the feature rules"
