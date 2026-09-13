@@ -52,3 +52,4 @@ kubeconfig
 secrets.yaml
 # Rendered Kubernetes deployment artifacts
 infrastructure/rendered/
+devsecops-security-success.log
