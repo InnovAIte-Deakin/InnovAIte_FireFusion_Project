@@ -50,3 +50,5 @@ kubeconfig
 # Helm / secrets
 *.secret.yaml
 secrets.yaml
+# Rendered Kubernetes deployment artifacts
+infrastructure/rendered/
