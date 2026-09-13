@@ -823,10 +823,11 @@
 }
 
 .ff-hero p {
-  margin: 7px 0 18px;
+  margin: 6px 0 0 0;
   color: #dbeafe;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
+  max-width: 650px;
 }
 
 .ff-summary-grid {
@@ -1306,13 +1307,19 @@ html[data-theme="dark"] .ff-instructions {
 .ff-metric-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  min-height: 70px;
-  padding: 12px;
+  gap: 14px;
+  min-height: 74px;
+  padding: 12px 14px;
   border-radius: 10px;
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   min-width: 0;
+}
+
+html[data-theme="dark"] .ff-metric-card {
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
 }
 
 .ff-metric-card svg {
@@ -1321,16 +1328,26 @@ html[data-theme="dark"] .ff-instructions {
 
 .ff-metric-card span {
   display: block;
-  color: #475569;
+  color: #64748b;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
+}
+
+html[data-theme="dark"] .ff-metric-card span {
+  color: #94a3b8;
 }
 
 .ff-metric-card strong {
   display: block;
   margin-top: 3px;
   color: #0f172a;
-  font-size: 15px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+html[data-theme="dark"] .ff-metric-card strong {
+  color: #ffffff;
 }
 
 .ff-source-row {
@@ -2083,8 +2100,13 @@ html[data-theme="dark"] .ff-theme-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.ff-hero-title-area {
+  flex: 1;
+  min-width: 280px;
 }
 
 .ff-system-badge {
@@ -2112,33 +2134,42 @@ html[data-theme="dark"] .ff-theme-row {
 }
 
 .ff-hero-actions {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  padding: 5px 6px;
+  background: rgba(6, 18, 40, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  flex-shrink: 0;
 }
 
 .ff-action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 15px;
+  gap: 6px;
+  padding: 7px 13px;
   border-radius: 8px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ff-siren-btn {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .ff-siren-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .ff-siren-btn.active {
@@ -2394,32 +2425,53 @@ html[data-theme="dark"] .ff-theme-row {
 
 /* 5. Wind Compass / Radar Gauge */
 .ff-wind-gauge-card {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.65), rgba(30, 41, 59, 0.45));
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.1);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.75), rgba(30, 41, 59, 0.55)) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.12);
+}
+
+.ff-wind-gauge-card span {
+  color: #94a3b8 !important;
+}
+
+.ff-wind-gauge-card strong {
+  color: #ffffff !important;
 }
 
 .ff-wind-compass-circle {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: 2px solid #38bdf8;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.15) 0%, rgba(15, 23, 42, 0.8) 100%);
-  display: grid;
-  place-items: center;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(15, 23, 42, 0.95) 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
 }
 
 .ff-compass-arrow {
   position: absolute;
   width: 3px;
-  height: 28px;
-  background: linear-gradient(to top, #ef4444 50%, #38bdf8 50%);
+  height: 32px;
+  background: linear-gradient(to top, #ef4444 48%, #38bdf8 52%);
   border-radius: 2px;
   transform: rotate(-45deg);
-  box-shadow: 0 0 6px rgba(56, 189, 248, 0.8);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.9);
   animation: compassSway 4s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+.ff-compass-center-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  z-index: 2;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8);
 }
 
 @keyframes compassSway {
@@ -2438,15 +2490,19 @@ html[data-theme="dark"] .ff-theme-row {
   position: absolute;
   font-size: 8px;
   font-weight: 900;
-  color: #ffffff;
-  top: 1px;
+  color: #38bdf8;
+  top: 3px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .ff-metric-sub {
   display: block;
   font-size: 11px;
-  color: #94a3b8;
-  margin-top: 2px;
+  color: #38bdf8 !important;
+  font-weight: 600;
+  margin-top: 3px;
 }
 
 .ff-metric-icon-box {
@@ -2518,4 +2574,462 @@ html[data-theme="dark"] .ff-theme-row {
   font-size: 11px;
   color: #94a3b8;
   font-weight: 500;
+}
+
+/* 8. Live Sync, Export & Search Additions */
+.ff-refresh-btn {
+  background: rgba(30, 41, 59, 0.7);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.ff-refresh-btn:hover {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: #38bdf8;
+}
+
+.ff-refresh-btn.refreshing {
+  background: rgba(56, 189, 248, 0.25);
+  color: #ffffff;
+}
+
+.ff-print-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.ff-print-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.ff-filter-row-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.ff-update-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+  flex: 1;
+  max-width: 280px;
+}
+
+.ff-search-icon {
+  position: absolute;
+  left: 10px;
+  color: #64748b;
+  pointer-events: none;
+}
+
+.ff-update-search-input {
+  width: 100%;
+  padding: 6px 28px 6px 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.4);
+  color: inherit;
+  font-size: 12px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.ff-update-search-input:focus {
+  border-color: #ef233c;
+  background: rgba(15, 23, 42, 0.6);
+  box-shadow: 0 0 0 2px rgba(239, 35, 60, 0.2);
+}
+
+.ff-search-clear-btn {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ff-no-updates-notice {
+  padding: 24px;
+  text-align: center;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 8px;
+}
+
+.ff-no-updates-notice button {
+  margin-top: 8px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(239, 35, 60, 0.2);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 35, 60, 0.35);
+  cursor: pointer;
+}
+
+.ff-summary-card.clickable:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.3);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.ff-panel-header a {
+  transition: color 0.2s ease;
+}
+
+.ff-panel-header a:hover {
+  color: #ef233c;
+}
+
+/* 9. Print & PDF Export Styling */
+.ff-print-header {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 12mm 14mm;
+  }
+
+  /* Hide interactive/web-only chrome and navigation */
+  .sidebar,
+  .topbar,
+  .footer,
+  .dashboard-shell > aside,
+  .dashboard-shell > header,
+  .dashboard-shell > footer,
+  .topbar-sidebar-toggle,
+  .ff-sidebar,
+  .ff-topbar,
+  .ff-hero-actions,
+  .ff-filter-row-wrap,
+  .ff-map-btn,
+  .ff-broadcast-dismiss,
+  .ff-radar-sweep,
+  .ff-fire-particles,
+  .ff-hero-overlay,
+  .ff-details-btn,
+  .ff-map-head-controls button,
+  .ff-panel-header a {
+    display: none !important;
+  }
+
+  /* Force browsers to print exact colors, gradients and backgrounds */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Reset body and container */
+  html, body {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    font-size: 10.5pt !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    overflow: visible !important;
+  }
+
+  .dashboard-shell,
+  .main,
+  .ff-layout,
+  .ff-dashboard {
+    background: #f8fafc !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Printable Official Letterhead */
+  .ff-print-header {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(135deg, #0b1e36 0%, #1e3a8a 100%) !important;
+    color: #ffffff !important;
+    padding: 16px 20px !important;
+    border-radius: 10px !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .ff-print-brand h2 {
+    margin: 0;
+    font-size: 13pt;
+    font-weight: 900;
+    color: #ffffff !important;
+    letter-spacing: 0.6px;
+  }
+
+  .ff-print-brand p {
+    margin: 4px 0 0 0;
+    font-size: 9pt;
+    color: #cbd5e1 !important;
+    font-weight: 600;
+  }
+
+  .ff-print-meta {
+    text-align: right;
+    font-size: 8pt;
+    color: #e2e8f0 !important;
+    line-height: 1.5;
+  }
+
+  .ff-print-meta strong {
+    color: #ffffff !important;
+  }
+
+  /* Hero Section for PDF: Colorful executive banner */
+  .ff-hero {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+    border: 1px solid #334155 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    margin-bottom: 14px !important;
+    min-height: auto !important;
+    animation: none !important;
+    border-radius: 10px !important;
+  }
+
+  .ff-hero-content {
+    padding: 16px 20px !important;
+  }
+
+  .ff-hero h1 {
+    color: #ffffff !important;
+    font-size: 16pt !important;
+    margin-bottom: 4px !important;
+    font-weight: 800 !important;
+  }
+
+  .ff-hero p {
+    color: #94a3b8 !important;
+    font-size: 9pt !important;
+  }
+
+  .ff-system-badge {
+    background: rgba(239, 35, 60, 0.25) !important;
+    border: 1px solid #ef233c !important;
+    color: #fca5a5 !important;
+    font-size: 7.5pt !important;
+    padding: 2px 8px !important;
+    display: inline-block !important;
+  }
+
+  /* Summary Grid in PDF: Colorful Cards */
+  .ff-summary-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 8px !important;
+    margin-top: 12px !important;
+  }
+
+  .ff-summary-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04) !important;
+    padding: 10px 12px !important;
+    min-height: auto !important;
+    border-radius: 8px !important;
+  }
+
+  .ff-summary-card span {
+    color: #64748b !important;
+    font-size: 7.5pt !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+  }
+
+  .ff-summary-card strong {
+    font-size: 13pt !important;
+    font-weight: 900 !important;
+  }
+
+  .ff-summary-card .ff-tone-danger,
+  .ff-summary-card .ff-tone-red {
+    color: #ef233c !important;
+  }
+
+  .ff-summary-card .ff-tone-purple {
+    color: #8b5cf6 !important;
+  }
+
+  .ff-summary-card .ff-tone-green {
+    color: #10b981 !important;
+  }
+
+  .ff-summary-card .ff-tone-blue {
+    color: #0284c7 !important;
+  }
+
+  /* 2-Column Dashboard Layout in Print */
+  .ff-dashboard-layout {
+    display: grid !important;
+    grid-template-columns: 1.15fr 1fr !important;
+    gap: 12px !important;
+    page-break-inside: avoid;
+  }
+
+  .ff-panel {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+    border-radius: 10px !important;
+    padding: 12px !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .ff-panel-header h3,
+  .ff-map-head h3,
+  .ff-panel-title-row h3 {
+    color: #0f172a !important;
+    font-size: 10.5pt !important;
+    font-weight: 800 !important;
+  }
+
+  /* Official Updates in PDF */
+  .ff-update-card {
+    border: 1px solid #e2e8f0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    margin-bottom: 8px !important;
+    border-left: 4px solid #0284c7 !important;
+    border-radius: 6px !important;
+    page-break-inside: avoid;
+  }
+
+  .ff-update-card.critical {
+    border-left-color: #ef233c !important;
+  }
+
+  .ff-update-card.warning {
+    border-left-color: #f97316 !important;
+  }
+
+  .ff-update-card h4 {
+    color: #0f172a !important;
+    font-size: 9.5pt !important;
+    font-weight: 700 !important;
+  }
+
+  .ff-update-card p {
+    color: #475569 !important;
+    font-size: 8pt !important;
+  }
+
+  .ff-badge {
+    color: #ffffff !important;
+    font-weight: 800 !important;
+  }
+
+  .ff-badge-critical {
+    background: #ef233c !important;
+  }
+
+  .ff-badge-warning {
+    background: #f97316 !important;
+  }
+
+  .ff-badge-advisory {
+    background: #0284c7 !important;
+  }
+
+  .ff-agency {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: 800 !important;
+  }
+
+  /* Incident Metrics in PDF */
+  .ff-extreme-badge {
+    color: #ffffff !important;
+    font-weight: 900 !important;
+  }
+
+  .ff-metric-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .ff-metric-card {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    padding: 8px 10px !important;
+    min-height: auto !important;
+    border-radius: 6px !important;
+  }
+
+  .ff-metric-card span {
+    color: #64748b !important;
+    font-size: 7.5pt !important;
+  }
+
+  .ff-metric-card strong {
+    color: #0f172a !important;
+    font-size: 10.5pt !important;
+  }
+
+  .ff-wind-compass-circle {
+    border-color: #0284c7 !important;
+    background: #e0f2fe !important;
+  }
+
+  /* Resource Rows */
+  .ff-resource-row {
+    border-bottom: 1px solid #f8fafc;
+    padding: 6px 0;
+  }
+
+  .ff-resource-info span {
+    color: #0f172a !important;
+    font-size: 8.5pt !important;
+  }
+
+  .ff-resource-bar {
+    background: #e2e8f0 !important;
+  }
+
+  .ff-resource-bar i.critical {
+    background: #ef233c !important;
+  }
+
+  .ff-resource-bar i.warning {
+    background: #f97316 !important;
+  }
+
+  .ff-resource-bar i.safe {
+    background: #10b981 !important;
+  }
+
+  /* Map and Legend in PDF */
+  .ff-map-area {
+    background: #0b1a30 !important;
+    border-radius: 8px !important;
+  }
+
+  /* SVG Trend Chart print fidelity */
+  .ff-trend-chart {
+    border-top: 1px solid #f1f5f9;
+    padding-top: 8px;
+  }
+
+  .ff-y-labels span,
+  .ff-x-labels span {
+    color: #64748b !important;
+    font-size: 7pt !important;
+  }
 }
