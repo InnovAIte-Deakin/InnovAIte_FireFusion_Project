@@ -74,3 +74,7 @@ variable "labels" {
     component   = "cloud-infrastructure"
   }
 }
+variable "master_authorized_network_cidr" {
+  description = "Approved CIDR allowed to access the GKE Kubernetes API server."
+  type        = string
+}

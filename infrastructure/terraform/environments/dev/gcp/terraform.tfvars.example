@@ -19,3 +19,6 @@ labels = {
   managed_by  = "terraform"
   component   = "cloud-infrastructure"
 }
+# Replace with the university/VPN/management network CIDR approved for
+# Kubernetes API administration before terraform plan/apply.
+master_authorized_network_cidr = "REPLACE_WITH_APPROVED_CIDR"

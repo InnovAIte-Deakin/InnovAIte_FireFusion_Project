@@ -11,6 +11,8 @@ module "kubernetes_platform" {
   pods_cidr     = var.pods_cidr
   services_cidr = var.services_cidr
 
+  master_authorized_network_cidr = var.master_authorized_network_cidr
+
   node_count        = var.node_count
   node_min_count    = var.node_min_count
   node_max_count    = var.node_max_count

@@ -10,8 +10,16 @@ resource "azurerm_kubernetes_cluster" "this" {
     type = "SystemAssigned"
   }
 
+  # Enable OIDC and Azure Workload Identity so workloads can
+  # authenticate to Azure services without long-lived credentials.
   oidc_issuer_enabled       = true
   workload_identity_enabled = true
+
+  # Restrict the Kubernetes API to private network access.
+  private_cluster_enabled = true
+
+  # Explicitly enable Kubernetes RBAC.
+  role_based_access_control_enabled = true
 
   default_node_pool {
     name                 = "system"
@@ -26,6 +34,7 @@ resource "azurerm_kubernetes_cluster" "this" {
 
   network_profile {
     network_plugin = "azure"
+    network_policy = "azure"
   }
 
   tags = var.tags

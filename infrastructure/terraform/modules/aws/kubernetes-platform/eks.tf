@@ -3,14 +3,23 @@ resource "aws_eks_cluster" "this" {
 
   role_arn = aws_iam_role.eks_cluster.arn
 
+  encryption_config {
+    resources = ["secrets"]
+
+    provider {
+      key_arn = aws_kms_key.eks.arn
+    }
+  }
+
+  # Use private subnets and disable the public Kubernetes API endpoint.
   vpc_config {
     subnet_ids = [
-      aws_subnet.public_a.id,
-      aws_subnet.public_b.id
+      aws_subnet.private_a.id,
+      aws_subnet.private_b.id
     ]
 
     endpoint_private_access = true
-    endpoint_public_access  = true
+    endpoint_public_access  = false
   }
 
   depends_on = [
@@ -27,9 +36,10 @@ resource "aws_eks_node_group" "this" {
 
   node_role_arn = aws_iam_role.eks_nodes.arn
 
+  # Worker nodes remain private and use NAT for required outbound access.
   subnet_ids = [
-    aws_subnet.public_a.id,
-    aws_subnet.public_b.id
+    aws_subnet.private_a.id,
+    aws_subnet.private_b.id
   ]
 
   instance_types = [

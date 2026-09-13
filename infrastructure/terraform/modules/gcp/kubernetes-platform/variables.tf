@@ -57,3 +57,7 @@ variable "labels" {
   description = "Common Google Cloud labels."
   type        = map(string)
 }
+variable "master_authorized_network_cidr" {
+  description = "Approved CIDR allowed to access the GKE Kubernetes API server."
+  type        = string
+}

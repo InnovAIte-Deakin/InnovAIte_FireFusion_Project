@@ -21,6 +21,14 @@ resource "google_container_cluster" "this" {
     workload_pool = "${var.project_id}.svc.id.goog"
   }
 
+  # Restrict Kubernetes API access to an explicitly approved network.
+  master_authorized_networks_config {
+    cidr_blocks {
+      cidr_block   = var.master_authorized_network_cidr
+      display_name = "approved-management-network"
+    }
+  }
+
   release_channel {
     channel = "REGULAR"
   }
