@@ -9,7 +9,6 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY ./app /code/app
 
-# TODO: update hardcoded value
-ENV API_KEY=secret_key 
-
+# Runtime configuration such as API_KEY is injected by Docker Compose or
+# Kubernetes rather than baked into the container image.
 CMD ["fastapi", "run", "app/main.py", "--port", "8080"]

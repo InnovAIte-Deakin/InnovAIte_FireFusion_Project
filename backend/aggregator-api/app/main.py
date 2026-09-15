@@ -7,6 +7,7 @@ from .internal.services.aggregator_service import AggregatorService
 from .internal.services.messaging_service import MessagingService
 import asyncio
 
+
 # handling specific object lifecycles
 # similar to @Bean from Spring Boot
 @asynccontextmanager
@@ -21,7 +22,16 @@ async def init_lifespan_objects(app: FastAPI):
     aggregator_task.cancel()
     await messaging_service.close()
 
+
 app = FastAPI(lifespan=init_lifespan_objects)
+
+
+@app.get("/health", tags=["health"])
+async def health():
+    """Lightweight liveness endpoint for container and Kubernetes probes."""
+    return {"status": "healthy", "service": "aggregator-api"}
+
+
 # Existing route.
 app.include_router(hello.router)
 # New internal REST endpoint used by firefusion-api to retrieve
