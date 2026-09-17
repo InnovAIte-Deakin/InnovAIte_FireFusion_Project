@@ -224,7 +224,10 @@ class MultiTaskDeberta(nn.Module):
         super().__init__()
         self.hf_model_id = hf_model_id
         self.config = AutoConfig.from_pretrained(hf_model_id)
-        self.encoder = AutoModel.from_pretrained(hf_model_id)
+        self.encoder = AutoModel.from_pretrained(
+    hf_model_id,
+    dtype=torch.float32,
+)
         self.dropout = nn.Dropout(dropout)
 
         hidden = self.config.hidden_size
