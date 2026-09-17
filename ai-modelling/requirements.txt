@@ -19,3 +19,8 @@ pytest>=8.0.0
 # llm
 openai
 google-genai
+
+# NLP / Deep Learning
+torch>=2.0.0
+transformers>=4.40.0
+sentencepiece>=0.2.0
