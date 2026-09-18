@@ -22,12 +22,4 @@ venv/
 *.geojson
 *.csv
 
-# Misinformation raw/merged datasets (large, sourced from SharePoint)
-ai-modelling/dataset/
-ai-modelling/src/data/misinformation/*.json
-<<<<<<< HEAD
-=======
-ai-modelling/src/models/misinformation/checkpoints/
->>>>>>> d0bb7cf6aa73e0cca3e7f09be9b233ba66e1198e
-
 .vscode/
