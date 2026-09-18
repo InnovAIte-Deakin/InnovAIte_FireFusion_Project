@@ -6,7 +6,10 @@ Routers call this after resolving ``model_id`` via ``model_loader``.
 from typing import Any, Literal
 import math
 from api.model_loader import LoadedModel
-from src.models.misinformation.deberta import classify_text
+from src.models.misinformation.deberta import (
+    classify_multitask,
+    classify_text,
+)
 
 Severity = Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
@@ -33,13 +36,24 @@ def predict_misinformation(post: dict[str, Any], bundle: LoadedModel) -> dict[st
     if "id" not in post or "content" not in post:
         raise KeyError("post must include 'id' and 'content'")
 
-    cls_out = classify_text(
-        str(post["content"]),
-        tokenizer=bundle.tokenizer,
-        model=bundle.model,
-        device=bundle.device,
-        max_len=bundle.max_len,
-    )
+    if bundle.kind == "deberta_multitask":
+        task_predictions = classify_multitask(
+            str(post["content"]),
+            tokenizer=bundle.tokenizer,
+            model=bundle.model,
+            device=bundle.device,
+            max_len=bundle.max_len,
+        )
+        cls_out = task_predictions["misinfo"]
+    else:
+        cls_out = classify_text(
+            str(post["content"]),
+            tokenizer=bundle.tokenizer,
+            model=bundle.model,
+            device=bundle.device,
+            max_len=bundle.max_len,
+        )
+        task_predictions = {"misinfo": cls_out}
     probs = cls_out["probabilities"]
     risk = risk_score_max_softmax(probs)
     severity = severity_from_risk(risk)
@@ -58,6 +72,7 @@ def predict_misinformation(post: dict[str, Any], bundle: LoadedModel) -> dict[st
         "label": cls_out["label"],
         "confidence": cls_out["confidence"],
         "probabilities": probs,
+        "task_predictions": task_predictions,
         "risk_score": risk,
         "severity": severity,
         "checkpoint": str(bundle.checkpoint_path),

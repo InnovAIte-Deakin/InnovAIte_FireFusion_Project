@@ -13,6 +13,13 @@ class MisinformationPostIn(BaseModel):
     post_url: str = ""
 
 
+class TaskPredictionOut(BaseModel):
+    label_id: int
+    label: str
+    confidence: float
+    probabilities: dict[str, float]
+
+
 class MisinformationPostOut(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -29,6 +36,7 @@ class MisinformationPostOut(BaseModel):
     label: str
     confidence: float
     probabilities: dict[str, float]
+    task_predictions: dict[str, TaskPredictionOut]
     risk_score: float
     severity: str
     checkpoint: str

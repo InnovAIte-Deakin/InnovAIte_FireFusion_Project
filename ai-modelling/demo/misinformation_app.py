@@ -142,35 +142,96 @@ def format_label(label: str) -> str:
 
 
 def display_result(result: dict[str, Any]) -> None:
-    """Display the prediction returned by the API."""
-    label = format_label(str(result["label"]))
-    confidence = float(result["confidence"])
-    risk_score = float(result["risk_score"])
-    severity = str(result["severity"]).upper()
-    probabilities = result["probabilities"]
+    """Display single-task or multi-task predictions returned by the API."""
 
-    is_misinformation = str(result["label"]).lower() in {
-        "misinformation",
-        "true",
-    }
+    task_predictions = result.get("task_predictions")
 
-    if is_misinformation:
-        st.error(f"Prediction: {label}")
+    if isinstance(task_predictions, dict) and task_predictions:
+        required_tasks = {"misinfo", "urgency", "humanitarian"}
+        missing_tasks = required_tasks.difference(task_predictions)
+
+        if missing_tasks:
+            raise RuntimeError(
+                "The API response is missing task predictions: "
+                f"{', '.join(sorted(missing_tasks))}"
+            )
+
+        misinfo = task_predictions["misinfo"]
+        is_misinformation = str(misinfo["label"]).lower() in {
+            "misinformation",
+            "true",
+        }
+
+        misinfo_label = format_label(str(misinfo["label"]))
+        if is_misinformation:
+            st.error(f"Misinformation detected: {misinfo_label}")
+        else:
+            st.success(f"Misinformation detected: {misinfo_label}")
+
+        st.subheader("Multi-task analysis")
+
+        task_details = (
+            ("misinfo", "Misinformation"),
+            ("urgency", "Urgency"),
+            ("humanitarian", "Humanitarian category"),
+        )
+        columns = st.columns(3)
+
+        for column, (task_name, title) in zip(columns, task_details):
+            prediction = task_predictions[task_name]
+            label = format_label(str(prediction["label"]))
+            confidence = float(prediction["confidence"])
+
+            with column:
+                st.markdown(f"**{title}**")
+                st.metric("Prediction", label)
+                st.caption(f"Confidence: {confidence:.1%}")
+
+        risk_column, severity_column = st.columns(2)
+        risk_column.metric("Risk score", f"{float(result['risk_score']):.1%}")
+        severity_column.metric("Severity", str(result["severity"]).upper())
+
+        with st.expander("View probabilities for all tasks"):
+            for task_name, title in task_details:
+                st.markdown(f"**{title}**")
+                probabilities = task_predictions[task_name]["probabilities"]
+
+                for probability_label, probability in probabilities.items():
+                    readable_label = format_label(str(probability_label))
+                    probability_value = float(probability)
+                    st.write(f"{readable_label}: {probability_value:.1%}")
+                    st.progress(
+                        min(max(probability_value, 0.0), 1.0)
+                    )
     else:
-        st.success(f"Prediction: {label}")
+        label = format_label(str(result["label"]))
+        confidence = float(result["confidence"])
+        risk_score = float(result["risk_score"])
+        severity = str(result["severity"]).upper()
+        probabilities = result["probabilities"]
 
-    first, second, third = st.columns(3)
-    first.metric("Confidence", f"{confidence:.1%}")
-    second.metric("Risk score", f"{risk_score:.1%}")
-    third.metric("Severity", severity)
+        is_misinformation = str(result["label"]).lower() in {
+            "misinformation",
+            "true",
+        }
 
-    st.subheader("Class probabilities")
+        if is_misinformation:
+            st.error(f"Prediction: {label}")
+        else:
+            st.success(f"Prediction: {label}")
 
-    for probability_label, probability in probabilities.items():
-        readable_label = format_label(str(probability_label))
-        probability_value = float(probability)
-        st.write(f"{readable_label}: {probability_value:.1%}")
-        st.progress(min(max(probability_value, 0.0), 1.0))
+        first, second, third = st.columns(3)
+        first.metric("Confidence", f"{confidence:.1%}")
+        second.metric("Risk score", f"{risk_score:.1%}")
+        third.metric("Severity", severity)
+
+        st.subheader("Class probabilities")
+
+        for probability_label, probability in probabilities.items():
+            readable_label = format_label(str(probability_label))
+            probability_value = float(probability)
+            st.write(f"{readable_label}: {probability_value:.1%}")
+            st.progress(min(max(probability_value, 0.0), 1.0))
 
     st.caption(
         "This result is produced by an AI model and should be verified against "
@@ -232,8 +293,11 @@ def main() -> None:
 
     with st.sidebar:
         st.subheader("Demo information")
-        st.write("Model: DeBERTa misinformation classifier")
-        st.write("Classes: Misinformation / Non-misinformation")
+        st.write("Model: Multi-task DeBERTa classifier")
+        st.write("Tasks:")
+        st.write("• Misinformation detection")
+        st.write("• Urgency classification")
+        st.write("• Humanitarian classification")
         st.write("API server:")
         st.code("localhost:8080", language=None)
         st.write("Prediction endpoint:")

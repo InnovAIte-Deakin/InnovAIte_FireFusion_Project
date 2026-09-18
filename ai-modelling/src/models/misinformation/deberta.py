@@ -230,7 +230,10 @@ class MultiTaskDeberta(nn.Module):
         super().__init__()
         self.hf_model_id = hf_model_id
         self.config = AutoConfig.from_pretrained(hf_model_id)
-        self.encoder = AutoModel.from_pretrained(hf_model_id)
+        self.encoder = AutoModel.from_pretrained(
+            hf_model_id,
+            use_safetensors=True,
+        )
         self.dropout = nn.Dropout(dropout)
 
         hidden = self.config.hidden_size
@@ -361,7 +364,11 @@ def load_multitask_from_checkpoint(
         for t in spec["tasks"]
     )
     model = MultiTaskDeberta(spec["hf_model_id"], tasks=tasks)
-    state = torch.load(path / "model.pt", map_location=device or "cpu")
+    state = torch.load(
+        path / "model.pt",
+        map_location=device or "cpu",
+        weights_only=True,
+    )
     model.load_state_dict(state)
     if device is not None:
         model.to(device)
