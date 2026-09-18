@@ -131,6 +131,7 @@ def build_fresh_classifier(
         num_labels=num_labels,
         id2label=id2label,
         label2id=label2id,
+        torch_dtype=torch.float32,
     )
     return tokenizer, model
 

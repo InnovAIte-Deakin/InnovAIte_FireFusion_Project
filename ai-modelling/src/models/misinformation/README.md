@@ -42,9 +42,6 @@ This module contains two main NLP systems:
    Gemini / OpenAI
    ↓
    Narrative grouping + structured JSON outputs
-```
-
----
 
 # 1. DeBERTa Misinformation Classifier
 
