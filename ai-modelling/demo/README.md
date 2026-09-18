@@ -1,49 +1,18 @@
-# Misinformation Detection Demo
+# Multi-task Misinformation Demo
 
-This folder contains the Streamlit interface used to demonstrate FireFusion’s misinformation-detection workflow.
+This folder contains the Streamlit interface used for the FireFusion text-analysis demonstration.
 
-The user enters a bushfire-related claim, and the interface sends it to the existing `/predict/misinformation` API. The returned result includes the predicted label, confidence, class probabilities, risk score and severity.
+A user enters a bushfire-related claim or selects one of the prepared examples. The interface sends the claim to the existing `/predict/misinformation` API and displays results from the three DeBERTa classification tasks:
 
-## Run the demo
+- misinformation detection
+- urgency classification
+- humanitarian classification
 
-First, start the API from the `ai-modelling` directory:
+Each result includes a predicted label, confidence score and class probabilities. The interface also displays the existing risk score, severity and full technical API response.
 
-```bash
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8080
-```
+## Required checkpoint
 
-In a second terminal, start the interface:
-
-```bash
-streamlit run demo/misinformation_app.py
-```
-
-The interface will open at:
+Download the `multi-task-deberta` checkpoint and place it at:
 
 ```text
-http://localhost:8501
-```
-
-The trained DeBERTa checkpoint configured in `api/config/models.yaml` must be available before starting the API.
-
-## Run the tests
-
-```bash
-python -m pytest tests/test_misinformation_demo.py -v
-```
-
-To run the interface and existing DeBERTa tests together:
-
-```bash
-python -m pytest tests/test_deberta.py tests/test_misinformation_demo.py -v
-```
-
-## Changing the API address
-
-The interface uses the local API on port `8080` by default. To use another address:
-
-```bash
-export FIREFUSION_MISINFORMATION_API_URL="http://host:port/predict/misinformation"
-```
-
-The classifier output is intended for demonstration and decision support. Bushfire information should still be verified through official emergency-service sources.
+src/models/misinformation/checkpoints/multi-task-deberta
