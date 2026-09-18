@@ -44,34 +44,6 @@ This module contains two main NLP systems:
    Narrative grouping + structured JSON outputs
 ```
 
----
-
-# Baseline Results (Single-task DeBERTa)
-
-Fine-tuned `microsoft/deberta-v3-large` (single classification head) on the merged
-Fake News benchmark dataset (COCO, GossipCop, PolitiFact, PHEME, and two Kaggle
-fake-news sets; 44,028 deduplicated examples). Reproduce the merged dataset with
-`src/data/misinformation/prepare_dataset.py`, then train with
-`src/training/deberta_train.py` (see that file's docstring for the CLI).
-
-Evaluated on a stratified 10% held-out test set (4,403 examples) with
-`deberta_evaluate.py`, 4 training epochs, no early stopping triggered:
-
-| Class | Precision | Recall | F1 | Support |
-|---|---|---|---|---|
-| non_misinformation | 0.978 | 0.834 | 0.901 | 2,338 |
-| misinformation | 0.839 | 0.979 | 0.904 | 2,065 |
-| **Accuracy** | | | **0.902** | 4,403 |
-| **Macro avg** | 0.909 | 0.907 | 0.902 | 4,403 |
-
-The model is biased toward flagging content as misinformation: it catches 97.9% of
-true misinformation (high recall on the harmful class) at the cost of misclassifying
-~16.6% of legitimate content as misinformation. Whether that trade-off is acceptable
-depends on how false positives are handled downstream (e.g. human review before any
-action is taken on a flagged post).
-
----
-
 # 1. DeBERTa Misinformation Classifier
 
 The `deberta.py` module contains utilities for:
