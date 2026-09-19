@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from app.routers import hello, misinformation_controller
-from app.routers import forecast
+from app.routers import forecast, alerts
 from contextlib import asynccontextmanager
 from .internal.repositories.database import open_pool, close_pool
 from .internal.services.forecast_service import ForecastService
@@ -47,4 +47,5 @@ app.add_middleware(
 
 app.include_router(hello.router)
 app.include_router(forecast.router)
+app.include_router(alerts.router)
 app.include_router(misinformation_controller.router)
