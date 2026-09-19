@@ -51,5 +51,12 @@ class Environment(BaseSettings):
     otel_exporter_otlp_endpoint: str = "tempo:4317"
     otel_service_name: str = "firefusion-api"
 
+    # Alerting subscriptions API (see docs/risk-escalation-alerts.md). It
+    # decides who is told about a fire, so it is disabled until a key is set.
+    alerts_api_key: str | None = None
+    alerts_max_subscriptions: int = 500
+    # Development only: permit http and private or loopback webhook targets.
+    alerts_allow_insecure_webhooks: bool = False
+
 
 environment = Environment()  # type: ignore

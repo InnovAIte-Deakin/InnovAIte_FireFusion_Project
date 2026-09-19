@@ -1,6 +1,6 @@
 # Risk Escalation Alerts
 
-**Status:** Phase 1 (decision logic) implemented. Delivery is not built yet.
+**Status:** Phase 1 (decision logic) and phase 2 (subscriptions API) implemented. Wiring to live forecasts and delivery are not built yet.
 **Stream:** Back-end only.
 
 ## The gap
@@ -27,12 +27,15 @@ This is built to add to the backend without changing anything other streams own.
   `app/internal/alerting/`, and edits no existing file. It adds no dependency:
   polygon intersection is implemented in pure Python rather than adding a
   geometry library to `requirements.txt`.
-- **Database (later phases).** Persistence will live in its own Postgres schema,
-  `alerting`, created by a single migration file next to the forecast-history
-  one. It adds no columns to existing tables and has no foreign keys into them,
-  so `DROP SCHEMA alerting CASCADE` removes the feature entirely. This depends
-  on `firefusion-api`'s database being backend-owned, which `forecast_history`
-  already assumes; confirm that before the migration is applied anywhere shared.
+- **Database.** None. Subscriptions are stored in Redis under their own
+  `alerting:` key prefix, so there is no schema, no migration and no table of
+  any stream is involved. The prefix keeps them apart from the forecast cache
+  keys (`predictions`, `predictions:generated_at`), and a test asserts every key
+  alerting writes is under it.
+- **Shared files.** Phase 2 makes small additive edits to three shared files:
+  three settings in `config.py`, one router registration in `main.py`, and in
+  `docker-compose.yaml` an `ALERTS_API_KEY` variable and append-only persistence
+  for the Redis container (see [Persistence](#persistence)).
 
 ## How a decision is made
 
@@ -75,13 +78,90 @@ The detector is stateless, so risk oscillating around the threshold
 (a cooldown per subscription), so it belongs to the delivery layer, not the
 decision. A test documents the current behaviour so the gap is explicit.
 
+## Subscriptions API (phase 2)
+
+All routes need the header `X-API-Key`. The API **fails closed**: with
+`ALERTS_API_KEY` unset it returns `503 Alerting is not configured` rather than
+being open, because it decides who is told about a fire. It is for agency
+systems, not browsers; the service's CORS policy already allows only `GET`, so a
+browser on another origin cannot call it.
+
+| Route | Purpose |
+|---|---|
+| `POST /api/alerts/subscriptions` | Create. `201` with the stored subscription |
+| `GET /api/alerts/subscriptions` | List, oldest first |
+| `GET /api/alerts/subscriptions/{id}` | Read one. `404` if unknown |
+| `DELETE /api/alerts/subscriptions/{id}` | Remove. `204`, or `404` if unknown |
+
+Errors: `401` bad or missing key, `409` subscription limit reached, `422` an
+invalid or unacceptable request, `503` Redis unavailable or alerting not
+configured.
+
+```json
+POST /api/alerts/subscriptions
+{
+  "label": "Gippsland duty officer",
+  "bbox": [142.0, -38.0, 143.0, -37.0],
+  "threshold_risk_factor": 2,
+  "webhook_url": "https://ops.example.com/hook",
+  "email": "duty@agency.gov.au"
+}
+```
+
+- **Region:** a `bbox` (`[min_lon, min_lat, max_lon, max_lat]`) or a GeoJSON
+  `geometry` polygon, exactly one. Polygons are limited to 500 vertices.
+- **`threshold_risk_factor`:** alert at this risk or worse; `risk_factor` 1 is
+  most severe, 5 least.
+- **Channels:** at least one of `webhook_url` and `email`. Delivery is a later
+  phase; they are validated and stored now.
+- **Baseline:** on creation the subscription records what the current forecast
+  shows over its region, so the first evaluation only alerts on change from
+  there, not on risk that already existed. If the forecast cannot be read the
+  baseline is empty and the first evaluation may alert, which errs toward
+  telling someone.
+
+### Webhook safety
+
+A subscriber supplies a URL the backend will later call, which is a server-side
+request forgery risk: a caller could aim the backend at cloud metadata endpoints
+or internal services. Creation rejects anything other than `https`, embedded
+credentials, `localhost` and internal-looking names (`.local`, `.internal`, ...),
+private, loopback, link-local, multicast, reserved and unspecified addresses
+(including IPv6 and IPv4-mapped forms), and encoded IPs such as
+`https://2130706433/` or `https://0x7f000001/`.
+
+This cannot catch a public hostname that *resolves* to a private address. **The
+delivery phase must re-check the resolved address at send time**, and must not
+follow redirects to a different host.
+`ALERTS_ALLOW_INSECURE_WEBHOOKS=true` relaxes the scheme and address rules for
+local development only.
+
+### Configuration
+
+| Variable | Default | Notes |
+|---|---|---|
+| `ALERTS_API_KEY` | unset (API disabled) | `docker-compose.yaml` defaults it to `local-development-key` for local use only; set a real secret when deployed |
+| `ALERTS_MAX_SUBSCRIPTIONS` | `500` | Enforced atomically, so concurrent creates cannot exceed it |
+| `ALERTS_ALLOW_INSECURE_WEBHOOKS` | `false` | Development only |
+
+### Persistence
+
+Subscriptions cannot be regenerated if lost, unlike the forecast cache, and Redis
+by default snapshots on a schedule that can lose up to an hour of writes on a
+crash. The compose Redis container therefore runs with `--appendonly yes`.
+**Any deployed Redis must have append-only persistence enabled too**, or
+subscriptions can be lost. Verified: a subscription survives a restart of the
+Redis container. Note the first request after a Redis restart returns `503`
+before the connection recovers; the existing forecast endpoint behaves
+identically, because they share the same Redis client.
+
 ## Phases
 
 1. **Decision logic (done).** Region model, polygon intersection, region
    assessment, escalation decision. Pure, no I/O, fully unit-tested.
-2. **Subscriptions.** A keyed API to create, list and delete subscriptions; the
-   `alerting` schema; baselining a new subscription so it is not alerted about a
-   risk that already existed when it was created.
+2. **Subscriptions (done).** A keyed API to create, list, read and delete
+   subscriptions, stored in Redis; validation including webhook safety; baselining
+   a new subscription so it is not alerted about a risk that already existed.
 3. **Wiring and delivery.** Evaluate subscriptions when a prediction is stored,
    best-effort so a failure here can never affect live forecast delivery (the
    same rule as the history write). Deliver through RabbitMQ workers with
@@ -90,6 +170,15 @@ decision. A test documents the current behaviour so the gap is explicit.
 4. **Audit.** Record each alert and its delivery outcome.
 
 ## Tests
+
+`tests/test_alert_subscriptions.py` covers webhook validation (including 25
+rejected forms), request validation, the Redis store (round trip, ordering,
+cap enforcement and rollback, dangling and corrupt entries, key prefix), baselining,
+and the API (auth, fail-closed, CRUD, 422/409/503 mapping), using an in-memory
+stand-in for Redis, plus one integration test against the real stack. It was
+checked by deliberately breaking eleven behaviours (each SSRF rule, the auth
+check, failing open, the cap, region and channel rules, the key prefix) to
+confirm each is caught.
 
 `tests/test_risk_escalation.py` needs no database, broker or running stack. It
 covers segment and polygon intersection (including concave shapes, holes,

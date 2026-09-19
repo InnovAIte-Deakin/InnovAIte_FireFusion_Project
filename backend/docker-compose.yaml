@@ -35,6 +35,10 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-tempo:4317}
       OTEL_SERVICE_NAME: firefusion-api
 
+      # Alerting subscriptions API. Disabled when no key is set; the default
+      # here matches the other services' local-development key.
+      ALERTS_API_KEY: ${ALERTS_API_KEY:-local-development-key}
+
   model-api: # api
     profiles: ["default"]
     image: firefusion/model-api
@@ -114,6 +118,10 @@ services:
   cache:
     profiles: ["default", "firefusion"]
     image: redis:8.6.2
+    # Append-only persistence: alert subscriptions live here as well as the
+    # forecast cache, and are not reproducible if lost. The default snapshot
+    # schedule can lose up to an hour of writes on a crash.
+    command: ["redis-server", "--appendonly", "yes"]
     ports:
       - 6379:6379
     healthcheck:
