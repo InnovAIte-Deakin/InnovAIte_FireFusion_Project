@@ -1,0 +1,33 @@
+table_name: fire_incident_record
+
+# Core columns (incident_id, location_id, time_id, original_latitude, original_longitude, acq_date, acq_time)
+# are always required and checked automatically.
+# Add dataset-specific columns below.
+
+columns:
+  record_type:
+    type: text
+  source:
+    type: text
+  satellite:
+    type: text
+  instrument:
+    type: text
+  brightness_ti4:
+    type: float8
+  brightness_ti5:
+    type: float8
+  frp:
+    type: float8
+  scan:
+    type: float8
+  track:
+    type: float8
+  confidence:
+    type: text
+  daynight:
+    type: text
+  version:
+    type: text
+  ingested_at:
+    type: timestamp
