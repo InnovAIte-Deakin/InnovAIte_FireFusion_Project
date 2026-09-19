@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: firefusion-api
+  namespace: firefusion
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: firefusion-api
+  template:
+    metadata:
+      labels:
+        app: firefusion-api
+    spec:
+      containers:
+        - name: firefusion-api
+          image: ghcr.io/innovaite-deakin/innovaite_firefusion_project/firefusion-api:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: firefusion-backend-config
+            - secretRef:
+                name: firefusion-backend-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: firefusion-api
+  namespace: firefusion
+spec:
+  selector:
+    app: firefusion-api
+  ports:
+    - port: 80
+      targetPort: 8080
+  # The public Backend entry point. Managed Kubernetes providers translate this
+  # into their native load balancer implementation.
+  type: LoadBalancer

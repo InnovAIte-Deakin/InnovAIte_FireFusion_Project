@@ -8,6 +8,12 @@ def test_service_is_up(ff, http):
     assert http.get(f"{ff}/openapi.json").status_code == 200
 
 
+def test_health(ff, http):
+    r = http.get(f"{ff}/health")
+    assert r.status_code == 200
+    assert r.json() == {"status": "healthy", "service": "firefusion-api"}
+
+
 def test_hello(ff, http):
     assert http.get(f"{ff}/hello/").status_code == 200
 
