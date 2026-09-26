@@ -167,7 +167,7 @@ def main() -> None:
     )
 
     use_amp = device.type == "cuda"
-    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
 
     best_f1 = -1.0
     best_state: dict[str, torch.Tensor] | None = None
@@ -180,7 +180,7 @@ def main() -> None:
         pbar = tqdm(train_loader, desc=f"train epoch {epoch + 1}/{args.epochs}")
         for step, batch in enumerate(pbar, start=1):
             batch = {k: v.to(device) for k, v in batch.items()}
-            with torch.cuda.amp.autocast(enabled=use_amp):
+            with torch.amp.autocast("cuda", enabled=use_amp):
                 out = model(**batch)
                 loss = out.loss / args.grad_accum
             scaler.scale(loss).backward()
