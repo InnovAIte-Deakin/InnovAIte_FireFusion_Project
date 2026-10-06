@@ -1,0 +1,149 @@
+# FireFusion - value validation rules
+#
+# Separate from config.yaml in this folder. validate_schema.py checks column
+# presence and Postgres types only; this file declares value-level rules:
+# numeric ranges, enum value sets, nullability, foreign key references, and
+# temporal gap and frequency expectations. No code reads it yet.
+#
+# Primitive types use the same names as validate_schema.py (float8, text,
+# date, timestamp). The enum, foreign_key and identity types have no
+# equivalent there and would need validator support.
+#
+# [PLACEHOLDER] marks values not yet confirmed. Unmarked values are grounded
+# in Dee's schema decision document or in physical/domain limits.
+
+el_nino:
+  enso_id:
+    type: identity
+    nullable: false
+    unique: true
+  time_id:
+    type: foreign_key
+    references: time_dimension.time_id   # [PLACEHOLDER] target table unconfirmed
+    nullable: false
+  datetime_record:
+    type: timestamp
+    min: "1950-01-01"                    # [PLACEHOLDER]
+    max: "now"
+    nullable: true
+  record_year_month:
+    type: text
+    pattern: "^[0-9]{4}-[0-9]{2}$"       # [PLACEHOLDER] stored format unconfirmed
+    nullable: true
+  oni_anomaly:
+    type: float8
+    min: -3.0                            # [PLACEHOLDER] pending source-defined range
+    max: 3.0
+    unit: index
+    nullable: true
+  enso_phase:
+    type: enum
+    values: [El Nino, La Nina, Neutral]  # [PLACEHOLDER] pending approved vocabulary
+    nullable: true
+  oni_lag6m:
+    type: float8
+    min: -3.0                            # [PLACEHOLDER] pending source-defined range
+    max: 3.0
+    unit: index
+    nullable: true
+  original_source:
+    type: text
+    nullable: true
+
+# [PLACEHOLDER] whole section - no IOD schema issued yet
+iod:
+  iod_index:
+    type: float8
+    min: -3.0
+    max: 3.0
+    unit: index
+    nullable: false
+  iod_phase:
+    type: enum
+    values: [Positive, Negative, Neutral]
+    nullable: false
+  datetime_record:
+    type: timestamp
+    min: "1950-01-01"                    # [PLACEHOLDER]
+    max: "now"
+    nullable: false
+
+# [PLACEHOLDER] whole section - no ERA5 schema issued yet
+era5_weather:
+  temperature:
+    type: float8
+    min: -20
+    max: 50
+    unit: Celsius                        # [PLACEHOLDER] ERA5 is natively Kelvin
+    nullable: false
+  wind_speed:
+    type: float8
+    min: 0                               # [PLACEHOLDER] 0 assumes scalar speed
+    max: 100                             # [PLACEHOLDER]
+    unit: m/s
+    nullable: false
+  relative_humidity:
+    type: float8
+    min: 0
+    max: 100
+    unit: percent
+    nullable: false
+  precipitation:
+    type: float8
+    min: 0
+    max: 500                             # [PLACEHOLDER] depends on accumulation window
+    unit: mm
+    nullable: false
+  surface_pressure:
+    type: float8
+    min: 870
+    max: 1085
+    unit: hPa
+    nullable: true
+  observation_time:
+    type: timestamp
+    min: "1940-01-01"                    # [PLACEHOLDER]
+    max: "now"
+    nullable: false
+
+# [PLACEHOLDER] whole section - no grid schema issued yet
+grid_cells:
+  grid_id:
+    type: foreign_key
+    references: grid_cells.id
+    nullable: false
+  latitude:
+    type: float8
+    min: -39.2
+    max: -33.9
+    unit: degrees
+    nullable: false
+  longitude:
+    type: float8
+    min: 140.9
+    max: 150.0
+    unit: degrees
+    nullable: false
+  crs:
+    type: enum
+    values: [EPSG:4326]                  # [PLACEHOLDER] assumes WGS84
+    nullable: false
+
+temporal:
+  no_gaps_in_monthly: true
+  expected_frequency: monthly            # [PLACEHOLDER] pre- or post-aggregation
+  allow_duplicate_periods: false
+  applies_to:
+    - el_nino
+    - iod
+    - era5_weather
+
+cross_field:
+  - name: year_month_matches_datetime
+    table: el_nino
+    rule: "record_year_month must equal datetime_record formatted as YYYY-MM"
+    applies_when: "both columns are retained"
+  - name: oni_lag_consistency
+    table: el_nino
+    rule: "oni_lag6m(t) must equal oni_anomaly(t - 6 months)"
+    applies_when: "oni_lag6m is derived internally rather than supplied by source"
