@@ -57,27 +57,37 @@ def enrich_with_enso(fires, enso):
         fires["record_year_month"] + "-01"
     )
 
-    enso["enso_match_date"] = pd.to_datetime(
+    enso["enso_source_month"] = pd.to_datetime(
         enso["record_year_month"] + "-01"
-    )
+    ).astype(fires["enso_match_date"].dtype)
 
     enso_fields = enso[
         [
-            "enso_match_date",
             "oni_anomaly",
             "enso_phase",
             "oni_lag6m",
+            "enso_source_month",
         ]
-    ].sort_values("enso_match_date")
+    ].sort_values("enso_source_month")
 
     fires = fires.sort_values("enso_match_date")
 
     enriched = pd.merge_asof(
         fires,
         enso_fields,
-        on="enso_match_date",
+        left_on="enso_match_date",
+        right_on="enso_source_month",
         direction="backward"
     )
+
+    fire_month = enriched["enso_match_date"].dt
+    source_month = enriched["enso_source_month"].dt
+    age = (fire_month.year - source_month.year) * 12 + fire_month.month - source_month.month
+    enriched["enso_age_months"] = age.astype("Int64")
+    enriched["enso_match_status"] = "prior"
+    enriched.loc[age.eq(0), "enso_match_status"] = "exact"
+    enriched.loc[age.isna(), "enso_match_status"] = "unmatched"
+    enriched["enso_source_month"] = source_month.strftime("%Y-%m")
 
     return enriched
 
