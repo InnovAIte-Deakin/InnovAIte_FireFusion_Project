@@ -55,7 +55,7 @@ Raw data is preserved unchanged in `data/raw/noaa_cpc_enso_oni_raw_<YYYYMMDD>.as
 | `record_year_month` | Year-Month string | `VARCHAR` | `YYYY-MM` | No | e.g. `'2019-12'` |
 | `oni_anomaly` | Oceanic Niño Index anomaly | `NUMERIC` | `-3.0` to `+3.0 °C` | No | Sea Surface Temp deviation |
 | `enso_phase` | Active ENSO Phase | `VARCHAR` | `'El Nino'`, `'La Nina'`, `'Neutral'` | No | Derived categorical state |
-| `oni_lag6m` | 6-Month Prior ONI Anomaly | `NUMERIC` | `-3.0` to `+3.0 °C` | Yes (first 6 rows) | Derived fuel drying pre-conditioning lag |
+| `oni_lag6m` | ONI anomaly six calendar months before this season centre | `NUMERIC` | °C | Yes, when the reference month or its anomaly is missing | Derived fuel drying pre-conditioning lag |
 | `original_source` | Data Lineage Origin | `VARCHAR` | `'NOAA_CPC_ONI'` | No | Standard lineage tracking |
 
 ---
