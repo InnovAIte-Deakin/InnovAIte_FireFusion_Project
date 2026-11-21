@@ -179,7 +179,7 @@ The ConvLSTM predicts:
 
 # Running Training Pipelines
 
-From the project root:
+Run these commands from `ai-modelling/` in the virtual environment.
 
 ## TCN Bushfire Classifier
 ```bash
@@ -187,8 +187,13 @@ python -m src.training.tcn_classifier_train
 ```
 
 ## DeBERTa Fine-Tuning
+
+Follow the [multi-task training instructions](../../README.md#train-a-multi-task-checkpoint) to produce the checkpoint used by the misinformation API. For optional `--lora` training, install `peft` into the same environment with `python -m pip install peft`.
+
+To train a binary classifier, supply an input file with `claim` and `label` columns using the binary classifier's label mapping.
+
 ```bash
-python src/training/deberta_train.py --train data/train.json --output-dir checkpoints/misinfo-deberta
+python -m src.training.deberta_train --train data/train.json --output-dir src/models/misinformation/checkpoints/misinfo-deberta
 ```
 
 ## ConvLSTM Forecasting
