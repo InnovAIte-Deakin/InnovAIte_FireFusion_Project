@@ -121,6 +121,10 @@ api/
 6. Client receives FeatureCollection with fire_probability per cell
 ```
 
+## Setup & Installation
+
+Follow the [local setup guide](../README.md#quick-start-for-misinformation) to install dependencies, place the multi-task checkpoint, and start the API on port `8080`.
+
 ## API Endpoints
 
 ### Health & Status
@@ -129,7 +133,7 @@ api/
 Liveness probe (always returns 200).
 
 ```bash
-curl http://localhost:8000/health
+curl http://127.0.0.1:8080/health
 ```
 
 **Response:**
@@ -143,7 +147,7 @@ curl http://localhost:8000/health
 Readiness probe (checks if models loaded successfully).
 
 ```bash
-curl http://localhost:8000/ready
+curl http://127.0.0.1:8080/ready
 ```
 
 **Response:**
@@ -154,7 +158,7 @@ curl http://localhost:8000/ready
 }
 ```
 
-If `ready=false` or `load_errors` is non-empty, models failed to load—check server logs.
+`ready` is true when at least one model loads. `load_errors` lists failures for individual models.
 
 ---
 
@@ -162,7 +166,7 @@ If `ready=false` or `load_errors` is non-empty, models failed to load—check se
 List all loaded models and their metadata.
 
 ```bash
-curl http://localhost:8000/predict/models
+curl http://127.0.0.1:8080/predict/models
 ```
 
 **Response:**
@@ -172,7 +176,7 @@ curl http://localhost:8000/predict/models
     {
       "model_id": "misinfo-deberta",
       "domain": "misinformation",
-      "kind": "deberta_sequence_binary",
+      "kind": "deberta_multitask",
       "checkpoint": "/path/to/deberta"
     },
     {
