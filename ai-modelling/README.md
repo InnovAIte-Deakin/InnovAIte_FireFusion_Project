@@ -133,7 +133,8 @@ Training scripts for all model types.
 |---|---|
 | `bushfire_training.py` | Training entrypoint for bushfire risk classifier models. Loads prepared climate features, runs the training loop, and saves model checkpoints. |
 | `tcn_train_classifier.py` | Training script for the TCN classifier. Handles TCN-specific configuration and dimension alignment with LSTM outputs. |
-| `train_deberta.py` | Fine-tuning script for the DeBERTa misinformation classifier. Loads labelled social media post data, fine-tunes the transformer, and saves the checkpoint and training metadata. |
+| `deberta_train.py` | Fine-tunes a binary DeBERTa misinformation classifier. |
+| `deberta_multitask_train.py` | Fine-tunes the multi-task DeBERTa checkpoint used by the API. |
 | `ts_convlstm_forecaster_train.py` | Training script for the ConvLSTM spatiotemporal forecaster. |
 | `LSTM/ts_forecaster_train.py` | Full training pipeline for the multivariate LSTM time-series forecaster. Loads ERA5 climate features, scales data, creates sliding-window sequences (60-step input → 2-step horizon), trains with early stopping, evaluates on the test set in original units (MAE, RMSE, MAPE per feature), and saves the trained model and scaler to `checkpoints/`. |
 
@@ -151,7 +152,8 @@ Training scripts for all model types.
 |---|---|
 | Geospatial | `earthengine-api >= 1.0.0` |
 | Data | `pandas >= 2.2.0`, `numpy >= 1.26.0` |
-| ML | `scikit-learn >= 1.4.0` |
+| ML | `scikit-learn >= 1.4.0`, `joblib`, `torch`, `transformers`, `sentencepiece`, `protobuf` |
+| API | `fastapi`, `uvicorn`, `pydantic >= 2.6`, `PyYAML` |
 | Visualisation | `matplotlib >= 3.8.0` |
 | Notebooks | `ipython >= 8.20.0` |
 | LLM | `openai`, `google-genai` |
@@ -163,41 +165,62 @@ Training scripts for all model types.
 
 ### 1. Set up a virtual environment
 
-```bash
+Run all commands from `ai-modelling/`.
+
+Windows PowerShell
+
+```powershell
+cd ai-modelling
 python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
 
-### 2. Run the API locally
+macOS or Linux
 
 ```bash
 cd ai-modelling
-uvicorn api.main:app --reload --host 0.0.0.0 --port 8080
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
 ```
 
-- Liveness check: `GET http://localhost:8080/health`
-- Readiness check: `GET http://localhost:8080/ready`
-- Predict: `POST http://localhost:8080/predict`
+On Windows, use `.\.venv\Scripts\python.exe` in place of `python` in the commands below to run them without activating the environment.
 
-### 3. Run training
+### 2. Set up the checkpoint and run the API
+
+Place the trained multi-task checkpoint directory from the project team at
+`src/models/misinformation/checkpoints/deberta/`, as configured in [`api/config/models.yaml`](api/config/models.yaml).
+Copy the entire directory, including `model.pt`, `tasks.json`, `config.json`, and the tokenizer files.
+Git and `pip` do not supply these weights. On first load, the API may also download the Hugging Face base model identified by `hf_model_id` in `tasks.json` if it is absent from the local cache.
 
 ```bash
-# Bushfire LSTM forecaster
-python src/training/LSTM/ts_forecaster_train.py
-
-# Misinformation DeBERTa classifier
-python src/training/train_deberta.py
-
-# TCN classifier
-python src/training/tcn_train_classifier.py
+python -m uvicorn api.main:app --reload --host 127.0.0.1 --port 8080
 ```
 
-### 4. Run tests
+- `GET /health` confirms the API is running.
+- `GET /ready` lists checkpoint errors. Missing bushfire checkpoints can appear here even when misinformation inference is available.
+- `GET /predict/models?domain=misinformation` should list `misinfo-deberta` when the model is loaded.
+- Use `POST /predict/misinformation` or open [the API docs](http://127.0.0.1:8080/docs) to try a request with `id` and `content`.
+
+For the Streamlit interface, run `python -m streamlit run demo/misinformation_app.py --server.address 127.0.0.1` in a second terminal from `ai-modelling/`. If port `8080` is busy, choose another port and set `FIREFUSION_MISINFORMATION_API_URL` as described in the [demo guide](demo/README.md#changing-the-api-address).
+
+### 3. Run misinformation tests
 
 ```bash
-pytest tests/
+python -m pytest tests/test_deberta.py tests/test_misinformation_demo.py tests/test_llm_client.py
 ```
+
+The full `tests/` collection currently fails because `test_nlp_pipeline.py` and `test_preprocessing.py` import modules absent from this branch.
+
+### Train a multi-task checkpoint
+
+If you need to train your own checkpoint, use the unified misinformation JSON (`claim` and `label`) and crisis JSON (`text`, `urgency`, and `humanitarian`). Update the two input paths if your datasets are stored elsewhere. Fine-tuning DeBERTa v3-large downloads the base model and is best run on a machine with a CUDA GPU.
+
+```bash
+python -m src.training.deberta_multitask_train --misinfo "data/Unified Datasets/misinfo_unified.json" --crisis "data/Unified Datasets/urgency_humanitarian_unified.json" --output-dir src/models/misinformation/checkpoints/deberta
+```
+
+See the [training guide](src/training/README.md) for other models and options.
 
 ---
 
