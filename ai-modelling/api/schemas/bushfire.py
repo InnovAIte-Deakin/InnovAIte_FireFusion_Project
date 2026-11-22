@@ -15,14 +15,15 @@ INPUT — GeoJSON FeatureCollection, one Feature per grid cell
                               ([n_samples, seq_len, 1, 1, n_features]) and the spatial
                               context the ConvLSTM was trained on is lost.
 
-Data variables (default channel order, 7 channels, ERA5-Land):
-    0 skin_temperature_c                      °C
-    1 soil_temperature_level_1_c              °C
-    2 surface_solar_radiation_downwards       J/m^2
-    3 surface_thermal_radiation_downwards     J/m^2
-    4 temperature_2m_c                        °C
-    5 u_component_of_wind_10m                 m/s (eastward)
-    6 v_component_of_wind_10m                 m/s (northward)
+Data variables (default channel order, 8 channels):
+    0 era5land_temperature_2m_c                       °C
+    1 era5_dewpoint_temperature_2m_c                  °C
+    2 era5_total_precipitation
+    3 era5_u_component_of_wind_10m                    m/s (eastward)
+    4 era5_v_component_of_wind_10m                    m/s (northward)
+    5 era5land_surface_solar_radiation_downwards      J/m^2
+    6 era5land_skin_temperature_c                     °C
+    7 is_burning                                      binary (0.0 or 1.0)
 
 OUTPUT — GeoJSON FeatureCollection, one Feature per input cell
     fire_probability     : [horizon] fire-occurrence probability in [0, 1]
@@ -51,7 +52,8 @@ DEFAULT_FEATURE_NAMES = [
     "era5_u_component_of_wind_10m",
     "era5_v_component_of_wind_10m",
     "era5land_surface_solar_radiation_downwards",
-    "era5land_skin_temperature_c"
+    "era5land_skin_temperature_c",
+    "is_burning",
 ]
 
 # Tensor dimensions the checkpoints were trained with. The adapters prefer the values
