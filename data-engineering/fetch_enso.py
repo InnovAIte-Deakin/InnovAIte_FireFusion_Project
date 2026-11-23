@@ -88,7 +88,7 @@ def transform_and_standardise(raw_filepath):
         else:
             return 'Neutral'
             
-    df['enso_phase'] = df['oni_anomaly'].apply(assign_phase)
+    df['enso_phase'] = df['oni_anomaly'].map(assign_phase, na_action='ignore')
     
     # Derive 6-month pre-conditioning lag feature (oni_lag6m)
     anomaly_by_month = df.set_index('datetime_record')['oni_anomaly']

@@ -52,6 +52,8 @@ def enrich_with_weather(fires, weather):
 def enrich_with_enso(fires, enso):
     fires = fires.copy()
     enso = enso.copy()
+    # Older processed snapshots can label a missing anomaly as Neutral.
+    enso["enso_phase"] = enso["enso_phase"].where(enso["oni_anomaly"].notna())
 
     fires["enso_match_date"] = pd.to_datetime(
         fires["record_year_month"] + "-01"

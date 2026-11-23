@@ -32,3 +32,15 @@ def test_no_eligible_month_preserves_the_fire(months):
     output = enrich_with_enso(fires, enso)
     assert output.enso_match_status.tolist() == ["unmatched"]
     assert output[["oni_anomaly", "enso_phase", "oni_lag6m", "enso_source_month", "enso_age_months"]].isna().all().all()
+
+
+def test_preprocessed_missing_anomaly_cannot_supply_a_neutral_phase():
+    fires = pd.DataFrame({"record_year_month": ["2026-07", "2026-08"]})
+    enso = pd.DataFrame({"record_year_month": ["2026-07"], "oni_anomaly": [float("nan")],
+                         "enso_phase": ["Neutral"], "oni_lag6m": [0.1]})
+    result = enrich_with_enso(fires, enso)
+    assert result.enso_match_status.tolist() == ["exact", "prior"]
+    assert result.enso_age_months.tolist() == [0, 1]
+    assert result.enso_source_month.tolist() == ["2026-07", "2026-07"]
+    assert result.enso_phase.isna().all()
+    assert result.oni_lag6m.tolist() == [0.1, 0.1]

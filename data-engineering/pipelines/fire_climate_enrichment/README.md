@@ -36,6 +36,8 @@ describe the selected record.
 An unmatched fire stays in the CSV with empty climate values, source month and age.
 The join has no maximum age. The status describes the month match. Individual
 features such as `oni_lag6m` can be missing even when a season matches.
+When a season exists but its anomaly is missing, its source month and age
+remain visible. The anomaly and its derived phase are both empty.
 
 For example, July's JJA reading includes August observations. A July fire can
 match JJA in a historical dataset even though that reading was unavailable
