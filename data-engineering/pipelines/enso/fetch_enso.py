@@ -93,10 +93,12 @@ def transform_and_standardise(raw_filepath):
         else:
             return 'Neutral'
             
-    df['enso_phase'] = df['oni_anomaly'].apply(assign_phase)
+    df['enso_phase'] = df['oni_anomaly'].map(assign_phase, na_action='ignore')
     
     # Derive 6-month pre-conditioning lag feature (oni_lag6m)
-    df['oni_lag6m'] = df['oni_anomaly'].shift(6)
+    anomaly_by_month = df.set_index('datetime_record')['oni_anomaly']
+    lag_month = df['datetime_record'] - pd.DateOffset(months=6)
+    df['oni_lag6m'] = lag_month.map(anomaly_by_month)
     
     # Data Lineage origin tag 
     df['original_source'] = 'NOAA_CPC_ONI'

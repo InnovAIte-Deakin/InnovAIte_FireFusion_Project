@@ -53,9 +53,9 @@ Raw data is preserved unchanged in `data/raw/noaa_cpc_enso_oni_raw_<YYYYMMDD>.as
 | `time_id` | Universal Master Calendar Key | `INTEGER` | `YYYYMMDDHH` | No | Foreign key linking to `Time_Registry` |
 | `datetime_record` | Standard month-start timestamp | `TIMESTAMP` | `YYYY-MM-01 00:00:00` | No | Month-start alignment |
 | `record_year_month` | Year-Month string | `VARCHAR` | `YYYY-MM` | No | e.g. `'2019-12'` |
-| `oni_anomaly` | Oceanic Niño Index anomaly | `NUMERIC` | `-3.0` to `+3.0 °C` | No | Sea Surface Temp deviation |
-| `enso_phase` | Active ENSO Phase | `VARCHAR` | `'El Nino'`, `'La Nina'`, `'Neutral'` | No | Derived categorical state |
-| `oni_lag6m` | 6-Month Prior ONI Anomaly | `NUMERIC` | `-3.0` to `+3.0 °C` | Yes (first 6 rows) | Derived fuel drying pre-conditioning lag |
+| `oni_anomaly` | Oceanic Niño Index anomaly | `NUMERIC` | `-3.0` to `+3.0 °C` | Yes, when the source reading is missing or nonnumeric | Sea Surface Temp deviation |
+| `enso_phase` | Active ENSO Phase | `VARCHAR` | `'El Nino'`, `'La Nina'`, `'Neutral'` | Yes, when the anomaly is missing | Derived categorical state |
+| `oni_lag6m` | ONI anomaly six calendar months before this season centre | `NUMERIC` | °C | Yes, when the reference month or its anomaly is missing | Derived fuel drying pre-conditioning lag |
 | `original_source` | Data Lineage Origin | `VARCHAR` | `'NOAA_CPC_ONI'` | No | Standard lineage tracking |
 
 ---
