@@ -12,7 +12,6 @@ class MisinformationPostIn(BaseModel):
     ts: datetime | None = None
     post_url: str = ""
 
-
 class TaskPrediction(BaseModel):
     """One task head's prediction: class, its confidence, and the full probability map."""
 
@@ -23,6 +22,14 @@ class TaskPrediction(BaseModel):
     confidence: float
     probabilities: dict[str, float]
 
+class MisinformationTaskPredictions(BaseModel):
+    """Predictions specifically only for the misinformation, urgency, and humanitarian tasks."""
+
+    model_config = ConfigDict(extra="allow")
+
+    misinfo: TaskPrediction
+    urgency: TaskPrediction | None = None
+    humanitarian: TaskPrediction | None = None
 
 class MisinformationPostOut(BaseModel):
     model_config = ConfigDict(extra="allow")
@@ -36,5 +43,5 @@ class MisinformationPostOut(BaseModel):
     share_count: int | None = None
     ts: datetime | str | None = None
     post_url: str | None = None
-    tasks: dict[str, TaskPrediction]
+    tasks: MisinformationTaskPredictions
     checkpoint: str
