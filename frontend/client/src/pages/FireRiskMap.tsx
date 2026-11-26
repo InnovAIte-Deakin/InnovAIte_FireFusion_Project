@@ -5,15 +5,20 @@ import '../components/MapPage/MapPage.layout.css'
 import FullscreenMap from '../components/MapPage/FullscreenMap'
 import MapLegend from '../components/MapPage/MapLegend'
 import SearchLocation from '../components/MapPage/SearchLocation'
+import ForecastStatusBadge from '../components/MapPage/ForecastStatusBadge'
+
+//import forecast status logic (live / stale / unavailable)
+import { getForecastStatus } from '../utils/forecastStatus'
+import type { ForecastMetadata } from '../utils/forecastStatus'
 
 //import Layout
 import Layout from "../components/Layout"
 
-//import websocket connection dependency 
+//import websocket connection dependency
 import ReconnectingWebSocket from 'reconnecting-websocket'
 
 //import Leaflet
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -21,6 +26,22 @@ export default function MapPage() {
 
   //store map
   const mapRef = useRef<L.Map | null>(null)
+
+  //forecast status: what the badge needs to know
+  const [loading, setLoading] = useState(true)
+  const [failed, setFailed] = useState(false)
+  const [empty, setEmpty] = useState(false)
+  const [metadata, setMetadata] = useState<ForecastMetadata | null>(null)
+  const [now, setNow] = useState(Date.now())
+
+  //lets the "Try again" button re-run the forecast request
+  const reloadRef = useRef<() => void>(() => {})
+
+  //re-check the time every 30 seconds so "Live" turns into "Stale" by itself
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30_000)
+    return () => clearInterval(timer)
+  }, [])
 
   //centre map from search bar
   const centerMap = (lat: number, lon: number) => {
@@ -92,18 +113,41 @@ export default function MapPage() {
       }
     }
 
+    //accept a forecast (from the first request or the WebSocket) and update the status
+    const acceptForecast = (data: any) => {
+      //a bare null or anything that is not a FeatureCollection is NOT a usable forecast
+      if (!data || !Array.isArray(data.features)) {
+        throw new Error('Forecast response was not a GeoJSON FeatureCollection')
+      }
+
+      renderGeoJSON(data)
+      setMetadata(data.metadata ?? null)
+      setEmpty(data.features.length === 0)
+      setFailed(false)
+    }
+
     //Load initial data
     const loadGeoJSON = async () => {
+      setLoading(true)
       try {
         const response = await fetch('/api/bushfire-forecast')
-        const data = await response.json()
 
-        renderGeoJSON(data)
+        //a 503 or 500 must be treated as a failure, not as map data
+        if (!response.ok) {
+          throw new Error(`Forecast request failed with status ${response.status}`)
+        }
+
+        const data = await response.json()
+        acceptForecast(data)
       } catch (error) {
         console.error('Error loading GeoJSON:', error)
+        setFailed(true)
+      } finally {
+        setLoading(false)
       }
     }
 
+    reloadRef.current = loadGeoJSON
     loadGeoJSON()
 
     //WebSocket set up for live updates
@@ -112,26 +156,7 @@ export default function MapPage() {
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data)
-
-        if (geoJsonLayer) {
-          geoJsonLayer.remove()
-        }
-
-        geoJsonLayer = L.geoJSON(data, {
-          style: (feature: any) => ({
-            color: getColor(feature.properties?.risk_factor),
-            fillColor: getColor(feature.properties?.risk_factor),
-            fillOpacity: 0.4,
-            weight: 2,
-          }),
-        }).addTo(map)
-
-        const bounds = geoJsonLayer.getBounds()
-        if (bounds.isValid()) {
-          map.fitBounds(bounds, {
-            padding: [20, 20],
-          })
-        }
+        acceptForecast(data)
       } catch (error) {
         console.error('WebSocket data error:', error)
       }
@@ -146,6 +171,9 @@ export default function MapPage() {
       map.remove()
     }
   }, [])
+
+  //work out which badge to show
+  const status = getForecastStatus({ loading, failed, empty, metadata, now })
 
   //remove topbar for now, change showTopbar to true to show
   return (
@@ -164,6 +192,14 @@ export default function MapPage() {
         />
 
         <MapLegend />
+
+        <ForecastStatusBadge
+          status={status}
+          metadata={metadata}
+          now={now}
+          empty={empty}
+          onRetry={() => reloadRef.current()}
+        />
 
         <div className="map-main">
           <div id="map"></div>
