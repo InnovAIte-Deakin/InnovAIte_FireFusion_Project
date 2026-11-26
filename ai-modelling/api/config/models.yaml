@@ -19,7 +19,7 @@ models:
     domain: misinformation
     kind: deberta_multitask
     enabled: true
-    checkpoint: src/models/misinformation/checkpoints/deberta
+    checkpoint: src/models/misinformation/checkpoints/multi-task-deberta
 
   - id: bushfire-forecaster-v1
     domain: bushfire

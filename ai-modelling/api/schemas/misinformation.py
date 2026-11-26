@@ -25,11 +25,11 @@ class TaskPrediction(BaseModel):
 class MisinformationTaskPredictions(BaseModel):
     """Predictions specifically only for the misinformation, urgency, and humanitarian tasks."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="forbid") # can input only 3 features: misinformation, urgency and humanitarian
 
     misinfo: TaskPrediction
-    urgency: TaskPrediction | None = None
-    humanitarian: TaskPrediction | None = None
+    urgency: TaskPrediction 
+    humanitarian: TaskPrediction
 
 class MisinformationPostOut(BaseModel):
     model_config = ConfigDict(extra="allow")
