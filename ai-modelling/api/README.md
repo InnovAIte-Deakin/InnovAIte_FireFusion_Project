@@ -199,6 +199,13 @@ curl http://localhost:8000/predict/models
 Classify a single social media post across three tasks using the multi-task DeBERTa
 model: **misinformation**, **urgency**, and **humanitarian category**.
 
+The request schema requires `id` and `content`; `ts`, `author_name`,
+`platform`, `share_count`, and `post_url` are optional or defaulted metadata. Unknown
+request fields are rejected. The response `tasks` object has a required `misinfo`
+prediction and optional `urgency` and `humanitarian` predictions. Both crisis tasks
+are returned by enhanced multitask checkpoints; with a legacy single-task
+misinformation checkpoint, the response schema represents them as `null`.
+
 **Request Body:**
 ```json
 {
@@ -259,6 +266,10 @@ under `tasks`.
 - `misinfo` — `TRUE` (the claim is truthful) / `FALSE` (misinformation)
 - `urgency` — `NOT_USEFUL` / `NOT_URGENT` / `URGENT`
 - `humanitarian` — `HMN_DMG`, `MAT_DMG`, `WARN`, `EVAC`, `HMN_MISS`, `VOLUNTEER`, `REQUEST`, `NOT_HUM`
+
+For each task, `label_id` and `label` identify the predicted class, `confidence` is
+the probability assigned to that class, and `probabilities` maps every class label
+to its probability.
 
 ---
 
